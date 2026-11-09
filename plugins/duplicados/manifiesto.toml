@@ -1,0 +1,76 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 hxebolax y colaboradores
+# Buscador de duplicados (diseño 2.0, 3.3 y 11.7). Dueño: bloque P3.
+
+formato = 1
+id = "zc.duplicados"
+bloque = "P3"
+nombre = "Buscador de duplicados"
+descripcion = "Encuentra archivos iguales en una o varias carpetas y ayuda a decidir qué conservar."
+version = "1.0.0"
+autor = "Proyecto zCommander"
+licencia = "GPL-3.0-or-later"
+api_minima = "1.0"
+api_probada = "1.0"
+entrada = "__init__:Complemento"
+nivel = "intermedio"
+
+[recomienda]
+complementos = ["zc.metadatos >= 1.0"]
+
+[[ordenes]]
+id = "buscar"
+etiqueta = "&Buscar duplicados..."
+ayuda = "Busca archivos iguales en las carpetas elegidas."
+ambito = "global"
+menu = "herramientas"
+teclas = ["Shift+F7"]
+nivel = "intermedio"
+argumento = ""
+
+[[paginas]]
+id = "general"
+titulo = "General"
+
+[[configuracion]]
+clave = "tamano_minimo_kb"
+tipo = "entero"
+defecto = 1
+minimo = 0
+maximo = 10000000
+etiqueta = "&Tamaño mínimo en KB:"
+ayuda = "Los archivos más pequeños no se comparan. 0 compara todos."
+pagina = "general"
+
+[[configuracion]]
+clave = "excluir"
+tipo = "texto"
+defecto = "*.tmp;Thumbs.db;desktop.ini"
+etiqueta = "&Excluir (patrones separados por punto y coma):"
+ayuda = "Archivos y carpetas que nunca se comparan."
+pagina = "general"
+
+[[configuracion]]
+clave = "incluir_ocultos"
+tipo = "bool"
+defecto = false
+etiqueta = "Incluir archivos &ocultos y de sistema"
+ayuda = "Marcado, también se comparan los archivos ocultos y los de sistema."
+pagina = "general"
+
+[[configuracion]]
+clave = "carpeta_preferida"
+tipo = "carpeta"
+defecto = ""
+etiqueta = "Carpeta pre&ferida:"
+ayuda = "Con «Conservar el de la carpeta preferida», se conserva la copia que está en esta carpeta."
+pagina = "general"
+
+[[configuracion]]
+clave = "accion"
+tipo = "opcion"
+defecto = "papelera"
+opciones = [["papelera", "Enviar a la papelera"], ["enlace_duro", "Sustituir por enlaces duros"]]
+etiqueta = "Acción predeter&minada con los marcados:"
+ayuda = "Qué botón es el predeterminado (Intro) en la lista de duplicados."
+pagina = "general"

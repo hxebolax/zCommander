@@ -1,0 +1,115 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 hxebolax y colaboradores
+# Notas, comentarios y etiquetas (diseño 2.0, 3.3 y 11.14). Dueño: bloque P3.
+
+formato = 1
+id = "zc.notas"
+bloque = "P3"
+nombre = "Notas, comentarios y etiquetas"
+descripcion = "Pone comentarios en archivos y carpetas y etiquetas con nombre y color."
+version = "1.0.0"
+autor = "Proyecto zCommander"
+licencia = "GPL-3.0-or-later"
+api_minima = "1.0"
+api_probada = "1.0"
+entrada = "__init__:Complemento"
+nivel = "novato"
+# Para decir «Esta carpeta tiene una nota» al entrar y llevar los comentarios al
+# copiar, tiene que estar activo: se activa con el primer cambio de carpeta.
+activacion = ["evento:al_cambiar_carpeta"]
+
+[[ordenes]]
+id = "comentario"
+etiqueta = "&Comentario o nota..."
+ayuda = "Edita el comentario del elemento del cursor o, en «..», la nota de la carpeta."
+ambito = "panel"
+menu = "complementos"
+teclas = ["Ctrl+N"]
+nivel = "novato"
+argumento = ""
+
+[[ordenes]]
+id = "leer_nota"
+etiqueta = "&Leer la nota de la carpeta"
+ayuda = "Lee la nota de la carpeta actual."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "novato"
+argumento = ""
+
+[[ordenes]]
+id = "etiquetas"
+etiqueta = "&Etiquetas..."
+ayuda = "Pone o quita etiquetas a los elementos de trabajo."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "buscar"
+etiqueta = "&Buscar por etiqueta o comentario..."
+ayuda = "Busca los archivos que tienen una etiqueta o un comentario."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[columnas]]
+id = "comentario"
+titulo = "Comentario"
+patrones = ["*"]
+tipo = "texto"
+lenta = false
+
+[[columnas]]
+id = "etiquetas"
+titulo = "Etiquetas"
+patrones = ["*"]
+tipo = "texto"
+lenta = false
+
+[[paginas]]
+id = "general"
+titulo = "General"
+
+[[configuracion]]
+clave = "almacen"
+tipo = "opcion"
+defecto = "descript_ion"
+opciones = [["descript_ion", "En descript.ion junto a los archivos"], ["base_central", "En la base de zCommander"]]
+etiqueta = "&Dónde se guardan los comentarios:"
+ayuda = "descript.ion es el formato de Total Commander y Double Commander; donde no se puede escribir se usa la base de zCommander."
+pagina = "general"
+
+[[configuracion]]
+clave = "anunciar_notas"
+tipo = "bool"
+defecto = true
+etiqueta = "Decir al &entrar si la carpeta tiene nota"
+ayuda = "Al entrar en una carpeta con nota se dice «Esta carpeta tiene una nota» y suena su sonido."
+pagina = "general"
+
+[[configuracion]]
+clave = "viajar"
+tipo = "bool"
+defecto = true
+etiqueta = "Llevar comentarios y etiquetas al copiar y &mover"
+ayuda = "Al copiar o mover dentro de zCommander, el comentario y las etiquetas van con el archivo."
+pagina = "general"
+
+[[configuracion]]
+clave = "etiquetas"
+tipo = "lista"
+defecto = [{ nombre = "Urgente", color = "rojo" }, { nombre = "Importante", color = "naranja" }, { nombre = "Facturas", color = "verde" }, { nombre = "Pendiente", color = "azul" }]
+interna = true
+etiqueta = "Etiquetas"
+ayuda = "Etiquetas disponibles con su nombre y color; se editan en la orden Etiquetas."
+
+[[sonidos]]
+id = "nota_carpeta"
+nombre = "Nota de carpeta"
+descripcion = "Suena al entrar en una carpeta que tiene una nota."

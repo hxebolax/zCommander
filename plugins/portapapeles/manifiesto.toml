@@ -1,0 +1,65 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 hxebolax y colaboradores
+# Historial del portapapeles (diseño 2.0, 11.16). Bloque P4.
+
+formato = 1
+id = "zc.portapapeles"
+bloque = "P4"
+nombre = "Historial del portapapeles"
+descripcion = "Recuerda lo que se copió (texto y listas de archivos) y permite volver a pegarlo."
+version = "1.0.0"
+autor = "Proyecto zCommander"
+licencia = "GPL-3.0-or-later"
+api_minima = "1.0"
+api_probada = "1.0"
+entrada = "__init__:Complemento"
+nivel = "novato"
+# Escucha el portapapeles desde el arranque (AddClipboardFormatListener en una ventana oculta propia).
+activacion = ["al_arrancar"]
+permisos = ["portapapeles", "segundo_plano"]
+
+[[ordenes]]
+id = "historial"
+etiqueta = "&Historial del portapapeles..."
+ayuda = "Abre el historial de lo copiado para volver a pegarlo."
+ambito = "panel"
+menu = "complementos"
+teclas = ["Ctrl+Shift+V"]
+nivel = "novato"
+argumento = ""
+
+[[paginas]]
+id = "general"
+titulo = "General"
+
+[[configuracion]]
+clave = "elementos"
+tipo = "entero"
+defecto = 50
+minimo = 5
+maximo = 500
+etiqueta = "&Número de elementos que se recuerdan:"
+ayuda = "Cuántas copias guarda el historial. Los elementos fijados no cuentan al borrar los más antiguos."
+pagina = "general"
+
+[[configuracion]]
+clave = "guardar_entre_sesiones"
+tipo = "bool"
+defecto = false
+etiqueta = "&Guardar el historial al cerrar zCommander"
+ayuda = "Guarda el historial en la carpeta de datos, cifrado para su usuario de Windows, y lo recupera al volver a abrir zCommander. Lo que los gestores de contraseñas marcan como privado nunca se guarda."
+pagina = "general"
+
+[[configuracion]]
+clave = "anunciar_externas"
+tipo = "bool"
+defecto = false
+etiqueta = "Anunciar lo que se copia en &otros programas"
+ayuda = "Dice lo que se acaba de copiar fuera de zCommander, con un sonido."
+pagina = "general"
+
+[[sonidos]]
+id = "copia_externa"
+nombre = "Copia en otro programa"
+descripcion = "Suena cuando otro programa copia algo al portapapeles (si está activado el anuncio de las copias externas)."
+prioridad = "media"

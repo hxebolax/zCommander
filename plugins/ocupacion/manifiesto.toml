@@ -1,0 +1,119 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 hxebolax y colaboradores
+# Ocupación del disco accesible (diseño 2.0, 3.3 y 11.8). Dueño: bloque P3.
+
+formato = 1
+id = "zc.ocupacion"
+bloque = "P3"
+nombre = "Ocupación del disco accesible"
+descripcion = "Dice qué ocupa el espacio de una unidad o carpeta, con listas que se leen."
+version = "1.0.0"
+autor = "Proyecto zCommander"
+licencia = "GPL-3.0-or-later"
+api_minima = "1.0"
+api_probada = "1.0"
+entrada = "__init__:Complemento"
+nivel = "intermedio"
+
+[[ordenes]]
+id = "analizar"
+etiqueta = "&Analizar la ocupación..."
+ayuda = "Analiza qué ocupa el espacio de una unidad o carpeta."
+ambito = "global"
+menu = "herramientas"
+teclas = ["Ctrl+Shift+F7"]
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "mayores"
+etiqueta = "Los &100 archivos más grandes"
+ayuda = "Muestra los 100 archivos más grandes del último análisis."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "extensiones"
+etiqueta = "Ocupación por &extensión"
+ayuda = "Muestra cuánto ocupa cada extensión en el último análisis."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "ir"
+etiqueta = "&Ir a esta carpeta en el disco"
+ayuda = "Lleva el otro panel a la carpeta real del elemento del análisis."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[esquemas]]
+prefijo = "ocupacion"
+nombre = "Análisis de ocupación"
+
+[[columnas]]
+id = "porcentaje_padre"
+titulo = "Porcentaje del padre"
+patrones = ["*"]
+tipo = "texto"
+lenta = false
+
+[[columnas]]
+id = "porcentaje_total"
+titulo = "Porcentaje del total"
+patrones = ["*"]
+tipo = "texto"
+lenta = false
+
+[[columnas]]
+id = "archivos"
+titulo = "Archivos"
+patrones = ["*"]
+tipo = "texto"
+lenta = false
+
+[[paginas]]
+id = "general"
+titulo = "General"
+
+[[configuracion]]
+clave = "seguir_enlaces"
+tipo = "bool"
+defecto = false
+etiqueta = "Seguir &enlaces y uniones"
+ayuda = "Cuenta también lo que hay al otro lado de los enlaces simbólicos y las uniones, sin contar dos veces lo mismo."
+pagina = "general"
+
+[[configuracion]]
+clave = "tamano_en_disco"
+tipo = "bool"
+defecto = false
+etiqueta = "Tamaño en el &disco en lugar del tamaño de los archivos"
+ayuda = "Cuenta lo que de verdad ocupa cada archivo en el disco (comprimidos, dispersos y clúster). Es más lento."
+pagina = "general"
+
+[[configuracion]]
+clave = "incluir_nube"
+tipo = "bool"
+defecto = false
+etiqueta = "Incluir archivos de la &nube sin descargar"
+ayuda = "Cuenta los archivos de OneDrive y similares que no ocupan sitio en este equipo."
+pagina = "general"
+
+[[configuracion]]
+clave = "anios_antiguedad"
+tipo = "entero"
+defecto = 2
+minimo = 1
+maximo = 50
+etiqueta = "Años sin modificar para considerar un archivo an&tiguo:"
+ayuda = "La lista de archivos antiguos muestra los que no se han modificado en más de estos años."
+pagina = "general"

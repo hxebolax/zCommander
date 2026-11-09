@@ -1,0 +1,14 @@
+NVDA Controller Client (nvdaControllerClient64.dll)
+Copyright (C) NV Access Limited y colaboradores de NVDA.
+
+Biblioteca que usa accessible_output2 para hablar con el lector de pantalla
+NVDA. Se distribuye sin modificar, como la publica accessible_output2, con la
+GNU Lesser General Public License, versión 2.1 (texto en LGPL-2.1.txt).
+
+Código fuente: https://github.com/nvaccess/nvda (carpeta nvdaHelper/client).
+zCommander ofrece además una copia de las fuentes durante tres años (véase
+OFERTA-DE-FUENTES.md).
+
+zCommander NO distribuye las demás DLL que trae el paquete accessible_output2
+(SAAPI32.dll, dolapi.dll, PCTKUSR.dll, PCTKUSR64.dll, ZDSRAPI.dll y
+ZDSRAPI_x64.dll, de licencia privativa o sin aclarar) ni nvdaControllerClient32.dll.

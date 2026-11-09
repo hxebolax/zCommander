@@ -1,0 +1,184 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 hxebolax y colaboradores
+# Imágenes: información, descripción y visor (diseño 2.0, 11.11). Bloque P1.
+
+formato = 1
+id = "zc.imagenes"
+bloque = "P1"
+nombre = "Imágenes: información, descripción y visor"
+descripcion = "Dice qué hay en una imagen (información, EXIF, texto y descripción opcional) y ofrece un visor ampliable para baja visión."
+version = "1.0.0"
+autor = "Proyecto zCommander"
+licencia = "GPL-3.0-or-later"
+api_minima = "1.0"
+api_probada = "1.0"
+entrada = "__init__:Complemento"
+nivel = "novato"
+prueba = "visor"
+permisos = ["red", "secretos"]
+
+[recomienda]
+complementos = ["zc.ocr >= 1.0"]
+
+[[ordenes]]
+id = "describir"
+etiqueta = "&Describir la imagen..."
+ayuda = "Pide la descripción de la imagen del cursor al servicio configurado."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "novato"
+argumento = ""
+
+[[ordenes]]
+id = "visor"
+etiqueta = "Ver la imagen &ampliada"
+ayuda = "Abre la imagen del cursor en el visor ampliable."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "novato"
+argumento = ""
+
+[[ordenes]]
+id = "convertir"
+etiqueta = "&Convertir o redimensionar imágenes..."
+ayuda = "Convierte, redimensiona o gira por lotes los elementos de trabajo."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "quitar_gps"
+etiqueta = "&Quitar la ubicación (GPS)..."
+ayuda = "Quita los metadatos de ubicación de las fotos JPEG elegidas sin recomprimirlas."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[columnas]]
+id = "dimensiones"
+titulo = "Dimensiones"
+patrones = ["*.jpg", "*.jpeg", "*.jpe", "*.png", "*.gif", "*.bmp", "*.tif", "*.tiff", "*.webp", "*.ico"]
+tipo = "texto"
+lenta = true
+
+[[columnas]]
+id = "fecha_toma"
+titulo = "Fecha de la toma"
+patrones = ["*.jpg", "*.jpeg", "*.jpe", "*.tif", "*.tiff"]
+tipo = "texto"
+lenta = true
+
+[[columnas]]
+id = "camara"
+titulo = "Cámara"
+patrones = ["*.jpg", "*.jpeg", "*.jpe", "*.tif", "*.tiff"]
+tipo = "texto"
+lenta = true
+
+[[info]]
+nombre = "Información de la imagen"
+patrones = ["*.jpg", "*.jpeg", "*.jpe", "*.png", "*.gif", "*.bmp", "*.tif", "*.tiff", "*.webp", "*.ico"]
+
+[[mascaras]]
+marcador = "[EXIF:fecha]"
+descripcion = "Fecha de la toma de la foto (AAAA-MM-DD)"
+
+[[mascaras]]
+marcador = "[EXIF:hora]"
+descripcion = "Hora de la toma de la foto (HH.MM.SS)"
+
+[[mascaras]]
+marcador = "[EXIF:ancho]"
+descripcion = "Ancho de la imagen en píxeles"
+
+[[mascaras]]
+marcador = "[EXIF:alto]"
+descripcion = "Alto de la imagen en píxeles"
+
+[[mascaras]]
+marcador = "[EXIF:camara]"
+descripcion = "Cámara con la que se hizo la foto"
+
+[[paginas]]
+id = "descripcion"
+titulo = "Descripción"
+
+[[paginas]]
+id = "general"
+titulo = "Conversión"
+
+[[configuracion]]
+clave = "servicio"
+tipo = "opcion"
+defecto = "ninguno"
+opciones = [["ninguno", "Ninguno (no se describe nada)"], ["ollama", "Servidor local compatible con Ollama"], ["openai", "API compatible con OpenAI"]]
+etiqueta = "&Servicio de descripción:"
+ayuda = "Quién describe las imágenes. Ninguno por defecto: la imagen solo sale del equipo si elige un servicio y pide una descripción."
+pagina = "descripcion"
+
+[[configuracion]]
+clave = "url_servicio"
+tipo = "texto"
+defecto = "http://127.0.0.1:11434"
+etiqueta = "&Dirección del servicio:"
+ayuda = "Para Ollama, como http://127.0.0.1:11434. Para una API compatible con OpenAI, la dirección base, como https://api.openai.com/v1. Solo se admite http en la propia máquina; fuera de ella, https."
+pagina = "descripcion"
+
+[[configuracion]]
+clave = "modelo"
+tipo = "texto"
+defecto = ""
+etiqueta = "&Modelo:"
+ayuda = "Nombre del modelo con visión que describe, como llava, gemma3 o gpt-4o-mini."
+pagina = "descripcion"
+
+[[configuracion]]
+clave = "idioma_descripcion"
+tipo = "texto"
+defecto = "es"
+etiqueta = "&Idioma de la descripción:"
+ayuda = "Código del idioma en el que se pide la descripción: es (español), ca, gl, eu, en, pt, fr, it o de."
+pagina = "descripcion"
+
+[[configuracion]]
+clave = "longitud"
+tipo = "opcion"
+defecto = "breve"
+opciones = [["breve", "Breve (dos o tres frases)"], ["detallada", "Detallada"]]
+etiqueta = "&Longitud:"
+ayuda = "Cuánto se pide que diga la descripción."
+pagina = "descripcion"
+
+[[configuracion]]
+clave = "calidad_jpeg"
+tipo = "entero"
+defecto = 90
+minimo = 50
+maximo = 100
+etiqueta = "Calidad de &JPEG al convertir:"
+ayuda = "De 50 a 100. Más calidad, archivos más grandes. 90 apenas se distingue del original."
+pagina = "general"
+
+[[configuracion]]
+clave = "aviso_privacidad_mostrado"
+tipo = "bool"
+defecto = false
+interna = true
+etiqueta = "Aviso de privacidad mostrado"
+ayuda = "Se pone a verdadero tras avisar la primera vez de adónde se envía la imagen."
+
+[[secretos]]
+nombre = "clave_api"
+descripcion = "Clave de la API compatible con OpenAI para describir imágenes."
+
+[[sonidos]]
+id = "descripcion"
+nombre = "Descripción recibida"
+descripcion = "Llega la descripción de una imagen."
+prioridad = "media"

@@ -1,0 +1,218 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 hxebolax y colaboradores
+# Metadatos y etiquetas de audio (diseño 2.0, 11.4). Bloque P1.
+# Usa mutagen 1.48.1 (GPL-2.0-or-later), vendorizado en lib/mutagen.
+
+formato = 1
+id = "zc.metadatos"
+bloque = "P1"
+nombre = "Metadatos y etiquetas de audio"
+descripcion = "Lee y edita las etiquetas de MP3, FLAC, M4A, OGG, Opus, WMA y WAV."
+version = "1.0.0"
+autor = "Proyecto zCommander"
+licencia = "GPL-3.0-or-later"
+api_minima = "1.0"
+api_probada = "1.0"
+entrada = "__init__:Complemento"
+nivel = "intermedio"
+permisos = ["escribir_fuera_de_paneles"]
+
+[[ordenes]]
+id = "editar"
+etiqueta = "&Editar las etiquetas..."
+ayuda = "Edita las etiquetas del archivo del cursor o de los marcados."
+ambito = "panel"
+menu = "complementos"
+teclas = ["Ctrl+Shift+F2"]
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "desde_nombre"
+etiqueta = "Etiquetas &desde el nombre..."
+ayuda = "Rellena las etiquetas a partir del nombre del archivo con una máscara."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = ""
+
+[[ordenes]]
+id = "numerar"
+etiqueta = "&Numerar las pistas"
+ayuda = "Numera las pistas marcadas en el orden del panel."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "quitar"
+etiqueta = "&Quitar las etiquetas..."
+ayuda = "Quita las etiquetas y la portada de los archivos elegidos."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "portada"
+etiqueta = "&Portada..."
+ayuda = "Añade, extrae o quita la portada de los archivos de audio."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "exportar"
+etiqueta = "E&xportar la lista de pistas..."
+ayuda = "Exporta la lista de pistas a texto o CSV."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[columnas]]
+id = "artista"
+titulo = "Artista"
+patrones = ["*.mp3", "*.flac", "*.m4a", "*.m4b", "*.mp4", "*.aac", "*.ogg", "*.oga", "*.opus", "*.wma", "*.asf", "*.wav", "*.aif", "*.aiff"]
+tipo = "texto"
+lenta = true
+
+[[columnas]]
+id = "titulo"
+titulo = "Título"
+patrones = ["*.mp3", "*.flac", "*.m4a", "*.m4b", "*.mp4", "*.aac", "*.ogg", "*.oga", "*.opus", "*.wma", "*.asf", "*.wav", "*.aif", "*.aiff"]
+tipo = "texto"
+lenta = true
+
+[[columnas]]
+id = "album"
+titulo = "Álbum"
+patrones = ["*.mp3", "*.flac", "*.m4a", "*.m4b", "*.mp4", "*.aac", "*.ogg", "*.oga", "*.opus", "*.wma", "*.asf", "*.wav", "*.aif", "*.aiff"]
+tipo = "texto"
+lenta = true
+
+[[columnas]]
+id = "pista"
+titulo = "Pista"
+patrones = ["*.mp3", "*.flac", "*.m4a", "*.m4b", "*.mp4", "*.aac", "*.ogg", "*.oga", "*.opus", "*.wma", "*.asf", "*.wav", "*.aif", "*.aiff"]
+tipo = "numero"
+lenta = true
+
+[[columnas]]
+id = "anio"
+titulo = "Año"
+patrones = ["*.mp3", "*.flac", "*.m4a", "*.m4b", "*.mp4", "*.aac", "*.ogg", "*.oga", "*.opus", "*.wma", "*.asf", "*.wav", "*.aif", "*.aiff"]
+tipo = "numero"
+lenta = true
+
+[[columnas]]
+id = "genero"
+titulo = "Género"
+patrones = ["*.mp3", "*.flac", "*.m4a", "*.m4b", "*.mp4", "*.aac", "*.ogg", "*.oga", "*.opus", "*.wma", "*.asf", "*.wav", "*.aif", "*.aiff"]
+tipo = "texto"
+lenta = true
+
+[[columnas]]
+id = "duracion"
+titulo = "Duración"
+patrones = ["*.mp3", "*.flac", "*.m4a", "*.m4b", "*.mp4", "*.aac", "*.ogg", "*.oga", "*.opus", "*.wma", "*.asf", "*.wav", "*.aif", "*.aiff"]
+tipo = "duracion"
+lenta = true
+
+[[columnas]]
+id = "bitrate"
+titulo = "Tasa de bits (kb/s)"
+patrones = ["*.mp3", "*.flac", "*.m4a", "*.m4b", "*.mp4", "*.aac", "*.ogg", "*.oga", "*.opus", "*.wma", "*.asf", "*.wav", "*.aif", "*.aiff"]
+tipo = "numero"
+lenta = true
+
+[[columnas]]
+id = "frecuencia"
+titulo = "Frecuencia (Hz)"
+patrones = ["*.mp3", "*.flac", "*.m4a", "*.m4b", "*.mp4", "*.aac", "*.ogg", "*.oga", "*.opus", "*.wma", "*.asf", "*.wav", "*.aif", "*.aiff"]
+tipo = "numero"
+lenta = true
+
+[[columnas]]
+id = "canales"
+titulo = "Canales"
+patrones = ["*.mp3", "*.flac", "*.m4a", "*.m4b", "*.mp4", "*.aac", "*.ogg", "*.oga", "*.opus", "*.wma", "*.asf", "*.wav", "*.aif", "*.aiff"]
+tipo = "numero"
+lenta = true
+
+[[columnas]]
+id = "portada"
+titulo = "Portada"
+patrones = ["*.mp3", "*.flac", "*.m4a", "*.m4b", "*.mp4", "*.aac", "*.ogg", "*.oga", "*.opus", "*.wma", "*.asf", "*.wav", "*.aif", "*.aiff"]
+tipo = "texto"
+lenta = true
+
+[[info]]
+nombre = "Etiquetas de audio"
+patrones = ["*.mp3", "*.flac", "*.m4a", "*.m4b", "*.mp4", "*.aac", "*.ogg", "*.oga", "*.opus", "*.wma", "*.asf", "*.wav", "*.aif", "*.aiff"]
+
+[[mascaras]]
+marcador = "[MP3:artista]"
+descripcion = "Artista de las etiquetas de audio"
+
+[[mascaras]]
+marcador = "[MP3:titulo]"
+descripcion = "Título de las etiquetas de audio"
+
+[[mascaras]]
+marcador = "[MP3:album]"
+descripcion = "Álbum de las etiquetas de audio"
+
+[[mascaras]]
+marcador = "[MP3:pista]"
+descripcion = "Número de pista con dos cifras (03)"
+
+[[mascaras]]
+marcador = "[MP3:anio]"
+descripcion = "Año de las etiquetas de audio"
+
+[[mascaras]]
+marcador = "[MP3:genero]"
+descripcion = "Género de las etiquetas de audio"
+
+[[paginas]]
+id = "general"
+titulo = "General"
+
+[[configuracion]]
+clave = "version_id3"
+tipo = "opcion"
+defecto = "2.3"
+opciones = [["2.3", "ID3 2.3 (la que leen todos los reproductores)"], ["2.4", "ID3 2.4"]]
+etiqueta = "Versión de &ID3 al guardar MP3:"
+ayuda = "Versión de las etiquetas ID3 que se escribe en los MP3 y WAV. La 2.3 la leen todos los reproductores, también los antiguos y los de los coches."
+pagina = "general"
+
+[[configuracion]]
+clave = "conservar_fechas"
+tipo = "bool"
+defecto = true
+etiqueta = "Conservar la &fecha de los archivos al cambiar sus etiquetas"
+ayuda = "Al guardar etiquetas, el archivo conserva su fecha de modificación: el orden por fecha del panel no cambia."
+pagina = "general"
+
+[[configuracion]]
+clave = "columnas_musica"
+tipo = "bool"
+defecto = true
+etiqueta = "Proponer el conjunto de columnas «&Música»"
+ayuda = "Al activarse el complemento, crea (si no existe) el conjunto de columnas Música (Pista, Artista, Título, Álbum y Duración) y su regla: se usa en las carpetas con mayoría de archivos de audio."
+pagina = "general"
+
+[[sonidos]]
+id = "guardado"
+nombre = "Etiquetas guardadas"
+descripcion = "Termina de guardarse un cambio de etiquetas."
+prioridad = "media"

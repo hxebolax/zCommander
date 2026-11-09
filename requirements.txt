@@ -1,0 +1,21 @@
+# Dependencias de la aplicación, con las versiones probadas en Python 3.15.
+# Interfaz.
+wxPython==4.3.2
+# Integración con Windows: portapapeles, menú contextual, unidades de red, COM.
+pywin32==312
+comtypes==1.4.17
+# Papelera de reciclaje.
+Send2Trash==2.1.0
+# SFTP (bloque D).
+paramiko==5.1.0
+# 7z (bloque C). Las versiones 1.x no se pueden compilar todavía en Python 3.15.
+py7zr==0.11.3
+# 2.0: firmas Ed25519 de complementos y actualizaciones, copias cifradas (obligatorio, 17.1).
+cryptography==50.0.2
+# Manual y ayuda en HTML.
+Markdown==3.11.3
+# Opcional: voz directa (NVDA, JAWS o SAPI). Sin él, la aplicación usa UIA.
+accessible_output2==0.17
+# Dependencias de accessible_output2 que setup_cx.py nombra para congelarlas (17.1).
+libloader==1.4.3
+platform_utils==1.6.3

@@ -1,0 +1,2 @@
+# Biblioteca de terceros vendorizada (mutagen 1.48.1, GPL-2.0-or-later): no se revisa con las reglas del proyecto.
+exclude = ["*"]

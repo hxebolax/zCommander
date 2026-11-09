@@ -1,0 +1,349 @@
+{
+	"version": 1,
+	"comentario": "Catálogo de servicios de zc.nubes (diseño 2.0, 12.5). Añadir una nube es añadir una ficha. Las etiquetas van sin letra de acceso: el asistente las asigna sin repetir.",
+	"servicios": [
+		{
+			"id": "drive",
+			"nombre": "Google Drive",
+			"tipo": "drive",
+			"autenticacion": "oauth",
+			"nivel": 1,
+			"descripcion": "Mi unidad y las unidades compartidas de Google. Necesita un identificador de cliente propio.",
+			"alias": ["google", "gdrive", "docs"],
+			"guia": "google-drive",
+			"papelera": true,
+			"ayuda_url": "https://rclone.org/drive/",
+			"avisos": [
+				"Google: necesita un identificador de cliente propio. El identificador compartido de rclone se retira en 2026 y dejará de funcionar sin previo aviso."
+			],
+			"campos": [
+				{"clave": "client_id", "etiqueta": "Identificador de cliente (client id):", "ayuda": "El identificador del cliente «App de escritorio» que creó en Google Cloud Console. Si lo deja vacío se usa el de rclone mientras funcione.", "tipo": "texto"},
+				{"clave": "client_secret", "etiqueta": "Secreto del cliente:", "ayuda": "El secreto de ese cliente. Se guarda cifrado.", "tipo": "contrasena", "secreto": true}
+			],
+			"opciones": {"scope": "drive", "export_formats": "docx,xlsx,pptx"},
+			"avanzadas": [
+				{"clave": "export_formats", "etiqueta": "Formatos de exportación de los documentos de Google:", "ayuda": "Formato con el que se bajan los Documentos, Hojas y Presentaciones de Google.", "tipo": "opcion", "defecto": "docx,xlsx,pptx", "opciones": [["docx,xlsx,pptx", "Microsoft Office (docx, xlsx, pptx)"], ["odt,ods,odp", "OpenDocument (odt, ods, odp)"], ["pdf", "PDF"]]},
+				{"clave": "skip_gdocs", "etiqueta": "Ocultar los documentos de Google", "ayuda": "No muestra los documentos nativos de Google, que no tienen bytes propios.", "tipo": "bool", "defecto": "false"},
+				{"clave": "skip_shortcuts", "etiqueta": "Ocultar los accesos directos", "ayuda": "No sigue los accesos directos de Drive.", "tipo": "bool", "defecto": "false"},
+				{"clave": "chunk_size", "etiqueta": "Tamaño de fragmento de subida:", "ayuda": "Potencia de 2 de al menos 256 KiB, por ejemplo 8M o 64M. Más grande es más rápido y gasta más memoria.", "tipo": "texto", "defecto": "8M", "validar": "potencia_2"}
+			]
+		},
+		{
+			"id": "onedrive",
+			"nombre": "OneDrive y SharePoint",
+			"tipo": "onedrive",
+			"autenticacion": "oauth",
+			"nivel": 1,
+			"descripcion": "OneDrive personal, OneDrive de empresa o una biblioteca de SharePoint (Microsoft).",
+			"alias": ["microsoft", "office", "sharepoint", "onedrive empresa"],
+			"papelera": true,
+			"ayuda_url": "https://rclone.org/onedrive/",
+			"campos": [
+				{"clave": "client_id", "etiqueta": "Identificador de cliente propio (opcional):", "ayuda": "Déjelo vacío para usar el de rclone. En empresas que exigen un editor verificado, use el de una aplicación de su organización.", "tipo": "texto"},
+				{"clave": "client_secret", "etiqueta": "Secreto del cliente propio (opcional):", "ayuda": "Solo si usa un identificador de cliente propio.", "tipo": "contrasena", "secreto": true}
+			],
+			"avanzadas": [
+				{"clave": "chunk_size", "etiqueta": "Tamaño de fragmento de subida:", "ayuda": "Múltiplo de 320 KiB, por ejemplo 10M (32 veces 320 KiB) o 5M. Menos de 60M.", "tipo": "texto", "defecto": "10M", "validar": "multiplo_320k"},
+				{"clave": "no_versions", "etiqueta": "No guardar versiones antiguas al sobrescribir", "ayuda": "Las versiones antiguas ocupan espacio de la cuenta.", "tipo": "bool", "defecto": "false"}
+			]
+		},
+		{
+			"id": "dropbox",
+			"nombre": "Dropbox",
+			"tipo": "dropbox",
+			"autenticacion": "oauth",
+			"nivel": 1,
+			"descripcion": "Cuenta personal o de equipo de Dropbox.",
+			"ayuda_url": "https://rclone.org/dropbox/",
+			"campos": [
+				{"clave": "client_id", "etiqueta": "Identificador de cliente propio (opcional):", "ayuda": "Déjelo vacío para usar el de rclone.", "tipo": "texto"},
+				{"clave": "client_secret", "etiqueta": "Secreto del cliente propio (opcional):", "ayuda": "Solo con un identificador propio.", "tipo": "contrasena", "secreto": true}
+			],
+			"avanzadas": [
+				{"clave": "chunk_size", "etiqueta": "Tamaño de fragmento de subida:", "ayuda": "Menos de 150M, por ejemplo 48M.", "tipo": "texto", "defecto": "48M"}
+			]
+		},
+		{
+			"id": "box",
+			"nombre": "Box",
+			"tipo": "box",
+			"autenticacion": "oauth",
+			"nivel": 1,
+			"descripcion": "Box personal o de empresa.",
+			"papelera": true,
+			"ayuda_url": "https://rclone.org/box/",
+			"campos": [
+				{"clave": "client_id", "etiqueta": "Identificador de cliente propio (opcional):", "ayuda": "Déjelo vacío para usar el de rclone.", "tipo": "texto"},
+				{"clave": "client_secret", "etiqueta": "Secreto del cliente propio (opcional):", "ayuda": "Solo con un identificador propio.", "tipo": "contrasena", "secreto": true}
+			]
+		},
+		{
+			"id": "pcloud",
+			"nombre": "pCloud",
+			"tipo": "pcloud",
+			"autenticacion": "oauth",
+			"nivel": 1,
+			"descripcion": "pCloud (regiones de Europa y de Estados Unidos; se detecta sola).",
+			"papelera": true,
+			"ayuda_url": "https://rclone.org/pcloud/",
+			"campos": [],
+			"avanzadas": [
+				{"clave": "hostname", "etiqueta": "Región de pCloud:", "ayuda": "Normalmente se detecta al autorizar.", "tipo": "opcion", "defecto": "api.pcloud.com", "opciones": [["api.pcloud.com", "Estados Unidos"], ["eapi.pcloud.com", "Europa"]]}
+			]
+		},
+		{
+			"id": "mega",
+			"nombre": "Mega",
+			"tipo": "mega",
+			"autenticacion": "contrasena_2fa",
+			"nivel": 2,
+			"descripcion": "Mega con correo y contraseña. Cifrado en el cliente; las cuentas gratuitas tienen cuota de transferencia.",
+			"papelera": true,
+			"ayuda_url": "https://rclone.org/mega/",
+			"avisos": ["Mega: en las cuentas gratuitas una descarga puede pararse por la cuota de transferencia."],
+			"campos": [
+				{"clave": "user", "etiqueta": "Correo de la cuenta:", "ayuda": "El correo con el que entra en Mega.", "tipo": "texto", "obligatorio": true},
+				{"clave": "pass", "etiqueta": "Contraseña:", "ayuda": "La contraseña de Mega. Se guarda cifrada.", "tipo": "contrasena", "obligatorio": true},
+				{"clave": "2fa", "etiqueta": "Código de verificación (si tiene la verificación en dos pasos):", "ayuda": "El código de 6 cifras de su aplicación de autenticación. Sin tiempo límite en zCommander, pero el código caduca en su aplicación.", "tipo": "texto"}
+			]
+		},
+		{
+			"id": "s3",
+			"nombre": "Amazon S3 y compatibles",
+			"tipo": "s3",
+			"autenticacion": "clave_acceso",
+			"nivel": 1,
+			"descripcion": "Amazon S3, Cloudflare R2, Wasabi, MEGA S4, IDrive e2, Backblaze por S3 y cualquier servicio compatible.",
+			"alias": ["aws", "r2", "wasabi", "minio", "idrive", "cubo", "bucket"],
+			"ayuda_url": "https://rclone.org/s3/",
+			"campos": [
+				{"clave": "provider", "etiqueta": "Proveedor:", "ayuda": "Quién da el servicio S3.", "tipo": "opcion", "defecto": "AWS", "obligatorio": true, "opciones": [["AWS", "Amazon Web Services"], ["Cloudflare", "Cloudflare R2"], ["Wasabi", "Wasabi"], ["Mega", "MEGA S4"], ["IDrive", "IDrive e2"], ["Scaleway", "Scaleway"], ["Ceph", "Ceph"], ["Minio", "MinIO"], ["Rclone", "rclone serve s3"], ["Other", "Otro compatible"]]},
+				{"clave": "access_key_id", "etiqueta": "Identificador de la clave de acceso:", "ayuda": "Access key id.", "tipo": "texto", "obligatorio": true},
+				{"clave": "secret_access_key", "etiqueta": "Clave secreta:", "ayuda": "Secret access key. Se guarda cifrada.", "tipo": "contrasena", "obligatorio": true},
+				{"clave": "region", "etiqueta": "Región (opcional):", "ayuda": "Por ejemplo eu-west-1. Vacía para la de por defecto.", "tipo": "texto"},
+				{"clave": "endpoint", "etiqueta": "Punto de acceso (opcional en AWS):", "ayuda": "Dirección del servicio, por ejemplo https://<cuenta>.r2.cloudflarestorage.com.", "tipo": "texto"}
+			],
+			"avanzadas": [
+				{"clave": "storage_class", "etiqueta": "Clase de almacenamiento:", "ayuda": "STANDARD, STANDARD_IA, GLACIER... Vacía para la del cubo.", "tipo": "texto", "defecto": ""},
+				{"clave": "directory_markers", "etiqueta": "Crear marcadores de carpeta", "ayuda": "S3 no tiene carpetas vacías; con esto se pueden crear.", "tipo": "bool", "defecto": "true"},
+				{"clave": "chunk_size", "etiqueta": "Tamaño de fragmento de subida:", "ayuda": "Entre 5M y 5G, por ejemplo 16M.", "tipo": "texto", "defecto": "16M"}
+			]
+		},
+		{
+			"id": "b2",
+			"nombre": "Backblaze B2",
+			"tipo": "b2",
+			"autenticacion": "clave_acceso",
+			"nivel": 1,
+			"descripcion": "Backblaze B2 con su API propia.",
+			"papelera": true,
+			"ayuda_url": "https://rclone.org/b2/",
+			"campos": [
+				{"clave": "account", "etiqueta": "Identificador de la cuenta o de la clave de aplicación:", "ayuda": "Account ID o Application Key ID.", "tipo": "texto", "obligatorio": true},
+				{"clave": "key", "etiqueta": "Clave de aplicación:", "ayuda": "Application Key. Se guarda cifrada.", "tipo": "contrasena", "obligatorio": true}
+			]
+		},
+		{
+			"id": "yandex",
+			"nombre": "Yandex Disk",
+			"tipo": "yandex",
+			"autenticacion": "oauth",
+			"nivel": 1,
+			"papelera": true,
+			"ayuda_url": "https://rclone.org/yandex/",
+			"campos": []
+		},
+		{
+			"id": "koofr",
+			"nombre": "Koofr",
+			"tipo": "koofr",
+			"autenticacion": "contrasena",
+			"nivel": 2,
+			"descripcion": "Koofr o Digi Storage con una contraseña de aplicación.",
+			"ayuda_url": "https://rclone.org/koofr/",
+			"opciones": {"provider": "koofr"},
+			"campos": [
+				{"clave": "user", "etiqueta": "Correo de la cuenta:", "ayuda": "El correo de Koofr.", "tipo": "texto", "obligatorio": true},
+				{"clave": "password", "etiqueta": "Contraseña de aplicación:", "ayuda": "Se genera en la web de Koofr, en Preferencias, Contraseñas. No es la contraseña normal.", "tipo": "contrasena", "obligatorio": true}
+			]
+		},
+		{
+			"id": "kdrive",
+			"nombre": "kDrive (Infomaniak)",
+			"tipo": "kdrive",
+			"autenticacion": "oauth",
+			"nivel": 2,
+			"papelera": true,
+			"ayuda_url": "https://rclone.org/kdrive/",
+			"campos": []
+		},
+		{
+			"id": "jottacloud",
+			"nombre": "Jottacloud",
+			"tipo": "jottacloud",
+			"autenticacion": "token_pegado",
+			"nivel": 2,
+			"descripcion": "Jottacloud y sus marcas blancas. Necesita un «Personal login token» que se genera en la web (Ajustes, Seguridad).",
+			"papelera": true,
+			"ayuda_url": "https://rclone.org/jottacloud/",
+			"campos": []
+		},
+		{
+			"id": "internxt",
+			"nombre": "Internxt",
+			"tipo": "internxt",
+			"autenticacion": "contrasena_2fa",
+			"nivel": 2,
+			"ayuda_url": "https://rclone.org/internxt/",
+			"campos": [
+				{"clave": "email", "etiqueta": "Correo de la cuenta:", "ayuda": "El correo de Internxt.", "tipo": "texto", "obligatorio": true},
+				{"clave": "pass", "etiqueta": "Contraseña:", "ayuda": "Se guarda cifrada.", "tipo": "contrasena", "obligatorio": true}
+			]
+		},
+		{
+			"id": "filen",
+			"nombre": "Filen",
+			"tipo": "filen",
+			"autenticacion": "clave_api",
+			"nivel": 1,
+			"descripcion": "Filen con correo, contraseña y una clave de API que se obtiene con la Filen CLI (export-api-key).",
+			"ayuda_url": "https://rclone.org/filen/",
+			"campos": [
+				{"clave": "email", "etiqueta": "Correo de la cuenta:", "ayuda": "El correo de Filen.", "tipo": "texto", "obligatorio": true},
+				{"clave": "password", "etiqueta": "Contraseña:", "ayuda": "Se guarda cifrada.", "tipo": "contrasena", "obligatorio": true},
+				{"clave": "api_key", "etiqueta": "Clave de API:", "ayuda": "Se obtiene con la orden «filen export-api-key» de la Filen CLI. Si cambia la contraseña, hay que volver a exportarla.", "tipo": "contrasena", "obligatorio": true}
+			]
+		},
+		{
+			"id": "mailru",
+			"nombre": "Mail.ru Cloud",
+			"tipo": "mailru",
+			"autenticacion": "contrasena",
+			"nivel": 1,
+			"ayuda_url": "https://rclone.org/mailru/",
+			"campos": [
+				{"clave": "user", "etiqueta": "Correo de la cuenta:", "ayuda": "Correo de Mail.ru.", "tipo": "texto", "obligatorio": true},
+				{"clave": "pass", "etiqueta": "Contraseña de aplicación:", "ayuda": "Una contraseña de aplicación de Mail.ru.", "tipo": "contrasena", "obligatorio": true}
+			]
+		},
+		{
+			"id": "hidrive",
+			"nombre": "HiDrive",
+			"tipo": "hidrive",
+			"autenticacion": "oauth",
+			"nivel": 1,
+			"ayuda_url": "https://rclone.org/hidrive/",
+			"campos": []
+		},
+		{
+			"id": "opendrive",
+			"nombre": "OpenDrive",
+			"tipo": "opendrive",
+			"autenticacion": "contrasena",
+			"nivel": 2,
+			"ayuda_url": "https://rclone.org/opendrive/",
+			"campos": [
+				{"clave": "username", "etiqueta": "Usuario:", "ayuda": "Usuario de OpenDrive.", "tipo": "texto", "obligatorio": true},
+				{"clave": "password", "etiqueta": "Contraseña:", "ayuda": "Se guarda cifrada.", "tipo": "contrasena", "obligatorio": true}
+			]
+		},
+		{
+			"id": "protondrive",
+			"nombre": "Proton Drive (experimental)",
+			"tipo": "protondrive",
+			"autenticacion": "contrasena_2fa",
+			"nivel": 4,
+			"descripcion": "Integración no oficial de Proton Drive, mantenida por la comunidad.",
+			"ayuda_url": "https://rclone.org/protondrive/",
+			"avisos": ["Proton: integración no oficial; Proton no la mantiene ni la garantiza y solo admite uso personal y no comercial. La contraseña real pasa por rclone."],
+			"campos": [
+				{"clave": "username", "etiqueta": "Usuario o correo de Proton:", "ayuda": "Su usuario de Proton.", "tipo": "texto", "obligatorio": true},
+				{"clave": "password", "etiqueta": "Contraseña:", "ayuda": "Se guarda cifrada.", "tipo": "contrasena", "obligatorio": true},
+				{"clave": "2fa", "etiqueta": "Código de verificación (si tiene la verificación en dos pasos):", "ayuda": "El código de 6 cifras de su aplicación de autenticación.", "tipo": "texto"}
+			]
+		},
+		{
+			"id": "iclouddrive",
+			"nombre": "iCloud Drive (experimental)",
+			"tipo": "iclouddrive",
+			"autenticacion": "contrasena_2fa",
+			"nivel": 4,
+			"descripcion": "Integración no oficial de iCloud Drive. La vía más fiable en Windows es la carpeta de iCloud para Windows.",
+			"ayuda_url": "https://rclone.org/iclouddrive/",
+			"avisos": ["iCloud: integración no oficial; el acceso caduca a los 30 días y hay que volver a autorizar. Use la contraseña normal del Apple ID, no una de aplicación."],
+			"campos": [
+				{"clave": "apple_id", "etiqueta": "Apple ID:", "ayuda": "El correo de su Apple ID.", "tipo": "texto", "obligatorio": true},
+				{"clave": "password", "etiqueta": "Contraseña del Apple ID:", "ayuda": "La contraseña normal; las de aplicación no sirven. Se guarda cifrada.", "tipo": "contrasena", "obligatorio": true}
+			]
+		},
+		{
+			"id": "nextcloud",
+			"nombre": "Nextcloud u ownCloud",
+			"tipo": "nextcloud",
+			"autenticacion": "login_flow_v2",
+			"nivel": 1,
+			"descripcion": "Servidor Nextcloud u ownCloud: se autoriza en el navegador y zCommander recibe una contraseña de aplicación.",
+			"alias": ["owncloud", "nube propia"],
+			"papelera": true,
+			"ayuda_url": "https://docs.nextcloud.com/server/latest/developer_manual/client_apis/LoginFlow/index.html",
+			"campos": [
+				{"clave": "servidor", "etiqueta": "Dirección del servidor:", "ayuda": "Por ejemplo https://nube.ejemplo.com.", "tipo": "texto", "obligatorio": true}
+			]
+		},
+		{
+			"id": "webdav_nativo",
+			"nombre": "Servidor WebDAV",
+			"tipo": "webdav_nativo",
+			"autenticacion": "contrasena",
+			"nivel": 1,
+			"descripcion": "Cualquier servidor WebDAV (Synology, Koofr, Yandex, kDrive, servidores propios) sin pasar por rclone.",
+			"alias": ["dav", "synology", "nas"],
+			"campos": [
+				{"clave": "url", "etiqueta": "Dirección WebDAV:", "ayuda": "Por ejemplo https://servidor:5006/carpeta o http://127.0.0.1:8080/.", "tipo": "texto", "obligatorio": true},
+				{"clave": "user", "etiqueta": "Usuario:", "ayuda": "Vacío si el servidor no pide usuario.", "tipo": "texto"},
+				{"clave": "pass", "etiqueta": "Contraseña:", "ayuda": "Mejor una contraseña de aplicación. Se guarda cifrada.", "tipo": "contrasena"}
+			]
+		},
+		{
+			"id": "webdav",
+			"nombre": "WebDAV por rclone (servidores raros)",
+			"tipo": "webdav",
+			"autenticacion": "contrasena",
+			"nivel": 1,
+			"descripcion": "WebDAV a través de rclone, para servidores con particularidades (SharePoint, Fastmail, ownCloud Infinite Scale) o para montar y sincronizar.",
+			"ayuda_url": "https://rclone.org/webdav/",
+			"campos": [
+				{"clave": "url", "etiqueta": "Dirección WebDAV:", "ayuda": "Dirección completa del servidor.", "tipo": "texto", "obligatorio": true},
+				{"clave": "vendor", "etiqueta": "Tipo de servidor:", "ayuda": "Ajusta detalles del protocolo.", "tipo": "opcion", "defecto": "other", "opciones": [["other", "Otro"], ["nextcloud", "Nextcloud"], ["owncloud", "ownCloud"], ["infinitescale", "ownCloud Infinite Scale"], ["sharepoint", "SharePoint en línea"], ["fastmail", "Fastmail"], ["rclone", "rclone serve webdav"]]},
+				{"clave": "user", "etiqueta": "Usuario:", "ayuda": "Vacío si no pide.", "tipo": "texto"},
+				{"clave": "pass", "etiqueta": "Contraseña:", "ayuda": "Se guarda cifrada.", "tipo": "contrasena"}
+			]
+		},
+		{
+			"id": "sftp",
+			"nombre": "SFTP por rclone",
+			"tipo": "sftp",
+			"autenticacion": "contrasena",
+			"nivel": 1,
+			"descripcion": "Un servidor SSH como cuenta de nube, para sincronizar, montar o compartir con rclone.",
+			"campos": [
+				{"clave": "host", "etiqueta": "Servidor:", "ayuda": "Nombre o dirección del servidor SSH.", "tipo": "texto", "obligatorio": true},
+				{"clave": "port", "etiqueta": "Puerto:", "ayuda": "22 normalmente.", "tipo": "texto", "defecto": "22"},
+				{"clave": "user", "etiqueta": "Usuario:", "ayuda": "Usuario del servidor.", "tipo": "texto", "obligatorio": true},
+				{"clave": "pass", "etiqueta": "Contraseña:", "ayuda": "Se guarda cifrada.", "tipo": "contrasena"}
+			]
+		},
+		{
+			"id": "otro",
+			"nombre": "Otro servicio de rclone (avanzado)",
+			"tipo": "otro",
+			"autenticacion": "ninguna",
+			"nivel": 1,
+			"descripcion": "Cualquiera de los más de 70 tipos que admite rclone; el asistente hace las preguntas de rclone una a una.",
+			"ayuda_url": "https://rclone.org/overview/",
+			"campos": [
+				{"clave": "tipo", "etiqueta": "Tipo de rclone:", "ayuda": "Por ejemplo azureblob, gcs, seafile, putio o smb.", "tipo": "texto", "obligatorio": true}
+			]
+		}
+	]
+}

@@ -1,0 +1,41 @@
+# Metadatos, ruff y pytest. La compilación NO usa este archivo: la hace setup_cx.py.
+
+[project]
+name = "zcommander"
+# Debe coincidir con APP_VERSION de app/core/version.py (lo comprueba una prueba).
+version = "2.0.0"
+description = "Gestor de archivos de doble panel para Windows, clon accesible de Norton Commander."
+# Versión mínima de Python del proyecto: ajústela a la elegida al crearlo.
+requires-python = ">=3.15"
+
+[tool.ruff]
+# La función de traducción _ puede instalarla gettext como builtin global.
+builtins = ["_"]
+line-length = 140
+# Debe coincidir con la versión mínima de requires-python.
+target-version = "py315"
+extend-exclude = ["build", "data", "adjuntos", "plugins/*/lib"]
+
+[tool.ruff.format]
+indent-style = "tab"
+
+[tool.ruff.lint]
+# Errores reales, excepciones silenciadas y llamadas de registro mal formadas.
+select = ["E9", "F", "B", "BLE", "S110", "LOG", "G"]
+# G201: las plantillas usan log.error(..., exc_info=True) a propósito (nivel ERROR con traza).
+ignore = ["G201"]
+
+[tool.ruff.lint.per-file-ignores]
+# Plantillas del agente de accesibilidad: se conservan tal cual.
+"app/ui/accesibilidad/*" = ["B008", "B905"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+norecursedirs = [".venv", "venv", "build", "data", "__pycache__"]
+addopts = "-q"
+markers = [
+	"componentes: pruebas que usan los binarios reales de data/bin (libarchive, 7za, rclone, FFmpeg)",
+	"lento: pruebas que tardan varios segundos",
+	"interfaz: pruebas que crean ventanas wx",
+]

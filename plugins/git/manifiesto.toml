@@ -1,0 +1,168 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 hxebolax y colaboradores
+# Git básico (diseño 2.0, 11.21). Bloque P4.
+
+formato = 1
+id = "zc.git"
+bloque = "P4"
+nombre = "Git básico"
+descripcion = "Muestra el estado de un repositorio Git y hace las operaciones más comunes."
+version = "1.0.0"
+autor = "Proyecto zCommander"
+licencia = "GPL-3.0-or-later"
+api_minima = "1.0"
+api_probada = "1.0"
+entrada = "__init__:Complemento"
+nivel = "avanzado"
+permisos = ["ejecutar_programas", "red"]
+# Para anunciar la rama y los cambios al entrar en un repositorio (anunciar_al_entrar).
+activacion = ["evento:al_cambiar_carpeta"]
+prueba = "estado"
+
+[[ordenes]]
+id = "estado"
+etiqueta = "&Estado de Git"
+ayuda = "Dice la rama y los cambios del repositorio actual."
+ambito = "global"
+menu = "complementos"
+teclas = ["Ctrl+Shift+F11"]
+nivel = "avanzado"
+argumento = ""
+
+[[ordenes]]
+id = "anadir"
+etiqueta = "&Añadir"
+ayuda = "Añade los elementos de trabajo al área de preparación."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = ""
+
+[[ordenes]]
+id = "confirmar"
+etiqueta = "&Confirmar..."
+ayuda = "Confirma los cambios preparados con un mensaje."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = ""
+
+[[ordenes]]
+id = "diferencias"
+etiqueta = "&Diferencias"
+ayuda = "Muestra las diferencias del archivo del cursor con la última confirmación."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = ""
+
+[[ordenes]]
+id = "historial"
+etiqueta = "&Historial..."
+ayuda = "Muestra el historial del archivo o la carpeta en una lista."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = ""
+
+[[ordenes]]
+id = "traer"
+etiqueta = "&Traer"
+ayuda = "Trae los cambios del repositorio remoto."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = ""
+
+[[ordenes]]
+id = "enviar"
+etiqueta = "E&nviar"
+ayuda = "Envía las confirmaciones al repositorio remoto."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = ""
+
+[[ordenes]]
+id = "rama"
+etiqueta = "Cambiar de &rama..."
+ayuda = "Cambia a otra rama del repositorio o crea una nueva."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = ""
+
+[[ordenes]]
+id = "clonar"
+etiqueta = "C&lonar..."
+ayuda = "Clona un repositorio en la carpeta del panel."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = "texto"
+
+[[ordenes]]
+id = "descartar"
+etiqueta = "De&scartar los cambios..."
+ayuda = "Deshace los cambios de los archivos elegidos, con confirmación."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = ""
+
+[[columnas]]
+id = "estado"
+titulo = "Git"
+patrones = []
+tipo = "texto"
+lenta = true
+
+[[internas]]
+nombre = "git"
+ayuda = "zc git <orden>: ejecuta Git en la carpeta del panel activo; la salida va a «Salida de órdenes»."
+
+[[paginas]]
+id = "general"
+titulo = "General"
+
+[[configuracion]]
+clave = "ruta_git"
+tipo = "archivo"
+defecto = ""
+ejecuta = true
+etiqueta = "Programa &git.exe (vacío: buscar el instalado):"
+ayuda = "Ruta de git.exe. Si se deja vacío, se usa el Git instalado en el equipo. Sin Git, solo se pueden ver el estado, el historial y las diferencias."
+pagina = "general"
+
+[[configuracion]]
+clave = "anunciar_al_entrar"
+tipo = "bool"
+defecto = true
+etiqueta = "Anunciar la rama y los cambios al &entrar en un repositorio"
+ayuda = "Al entrar en una carpeta de un repositorio Git, dice la rama y cuántos cambios hay, con un sonido."
+pagina = "general"
+
+[[configuracion]]
+clave = "refresco_s"
+tipo = "entero"
+defecto = 5
+minimo = 1
+maximo = 300
+etiqueta = "&Segundos que se reutiliza el estado para la columna Git:"
+ayuda = "La columna Git vuelve a preguntar el estado del repositorio como mucho cada tantos segundos."
+pagina = "general"
+
+[[sonidos]]
+id = "repositorio"
+nombre = "Repositorio Git"
+descripcion = "Suena al entrar en una carpeta de un repositorio Git."
+prioridad = "media"

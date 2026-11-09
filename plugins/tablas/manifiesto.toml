@@ -1,0 +1,85 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 hxebolax y colaboradores
+# Datos tabulares: SQLite y CSV (diseño 2.0, 11.22). Manifiesto completo del bloque P2.
+
+formato = 1
+id = "zc.tablas"
+bloque = "P2"
+nombre = "Datos tabulares: SQLite y CSV"
+descripcion = "Abre bases SQLite como carpetas y muestra CSV y tablas como tablas accesibles."
+version = "1.0.0"
+autor = "Proyecto zCommander"
+licencia = "GPL-3.0-or-later"
+api_minima = "1.0"
+api_probada = "1.0"
+entrada = "__init__:Complemento"
+nivel = "intermedio"
+ayuda = "doc/es/leeme.md"
+cambios = "doc/es/cambios.md"
+
+[[ordenes]]
+id = "ver_tabla"
+etiqueta = "Ver como &tabla"
+ayuda = "Abre el CSV o la tabla del cursor en el visor de tabla."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+disponible_si = "*.csv;*.tsv;*.tab"
+
+[[ordenes]]
+id = "consulta"
+etiqueta = "&Consulta SQL..."
+ayuda = "Ejecuta una consulta SQL sobre una base SQLite."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = ""
+
+# Intro entra en la base como en una carpeta (solo lectura); si no es SQLite, se abre con su programa.
+[[comprimidos]]
+extensiones = ["db", "sqlite", "sqlite3"]
+nombre = "Base de datos SQLite"
+escritura = false
+
+# F3 abre el visor de tabla (ventana propia); la Vista rápida sigue mostrando el texto.
+[[visores]]
+id = "tabla"
+nombre = "Visor de tabla"
+patrones = ["*.csv", "*.tsv", "*.tab"]
+ventana = true
+vista_rapida = false
+prioridad = 10
+
+[[paginas]]
+id = "general"
+titulo = "General"
+
+[[configuracion]]
+clave = "solo_lectura"
+tipo = "bool"
+defecto = true
+etiqueta = "Consultas SQL en solo &lectura"
+ayuda = "Rechaza las consultas que cambian datos (INSERT, UPDATE, DELETE, CREATE...). Desactívela solo si sabe lo que hace."
+pagina = "general"
+
+[[configuracion]]
+clave = "filas_maximas"
+tipo = "entero"
+defecto = 1000000
+minimo = 1000
+maximo = 50000000
+etiqueta = "&Filas máximas que se leen:"
+ayuda = "El visor y las consultas dejan de leer al llegar a este número de filas y lo dicen en el estado."
+pagina = "general"
+
+[[configuracion]]
+clave = "separador"
+tipo = "opcion"
+defecto = "automatico"
+opciones = [["automatico", "Automático"], [",", "Coma"], [";", "Punto y coma"], ["tabulador", "Tabulador"]]
+etiqueta = "&Separador de los CSV:"
+ayuda = "Automático lo detecta en cada archivo; los .tsv usan siempre el tabulador."
+pagina = "general"

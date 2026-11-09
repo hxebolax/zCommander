@@ -1,0 +1,79 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 hxebolax y colaboradores
+# Búsqueda instantánea (diseño 2.0, 11.5). Bloque P5.
+
+formato = 1
+id = "zc.busqueda_instantanea"
+bloque = "P5"
+nombre = "Búsqueda instantánea"
+descripcion = "Busca nombres en todo el equipo en milisegundos con Everything o con el índice de búsqueda de Windows."
+version = "1.0.0"
+autor = "Proyecto zCommander"
+licencia = "GPL-3.0-or-later"
+api_minima = "1.0"
+api_probada = "1.0"
+entrada = "__init__:Complemento"
+nivel = "novato"
+
+[[ordenes]]
+id = "abrir"
+etiqueta = "Búsqueda instantánea con E&verything..."
+ayuda = "Abre la ventana de búsqueda instantánea en todo el equipo."
+ambito = "global"
+menu = "comandos"
+teclas = ["Ctrl+Shift+F"]
+nivel = "novato"
+argumento = ""
+
+[[busqueda]]
+id = "instantanea"
+nombre = "Índice: Everything o búsqueda de Windows"
+
+[[paginas]]
+id = "general"
+titulo = "General"
+
+[[configuracion]]
+clave = "motor"
+tipo = "opcion"
+defecto = "automatico"
+opciones = [["automatico", "Automático: Everything si está abierto, si no el índice de Windows"], ["everything", "Solo Everything"], ["windows", "Solo el índice de búsqueda de Windows"]]
+etiqueta = "&Motor de búsqueda:"
+ayuda = "Qué motor usa la búsqueda instantánea. Con texto contenido siempre se usa el índice de Windows."
+pagina = "general"
+
+[[configuracion]]
+clave = "max_resultados"
+tipo = "entero"
+defecto = 1000
+minimo = 10
+maximo = 100000
+etiqueta = "Má&ximo de resultados:"
+ayuda = "Cuántos resultados se muestran como mucho en cada búsqueda."
+pagina = "general"
+
+[[configuracion]]
+clave = "incluir_ocultos"
+tipo = "bool"
+defecto = false
+etiqueta = "Incluir archivos &ocultos y de sistema"
+ayuda = "Si se marca, los resultados incluyen archivos y carpetas ocultos o de sistema."
+pagina = "general"
+
+[[configuracion]]
+clave = "carpetas_excluidas"
+tipo = "lista"
+defecto = []
+etiqueta = "Carpetas &excluidas:"
+ayuda = "Lo que esté dentro de estas carpetas no aparece en los resultados."
+pagina = "general"
+
+[[configuracion]]
+clave = "retardo_ms"
+tipo = "entero"
+defecto = 300
+minimo = 100
+maximo = 2000
+etiqueta = "Retar&do antes de buscar, en milisegundos:"
+ayuda = "Tiempo sin teclear tras el que se lanza la búsqueda y se anuncia el recuento."
+pagina = "general"

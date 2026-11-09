@@ -1,0 +1,41 @@
+# Manifiesto de un complemento de zCommander (diseño 2.0, 3.3).
+# Lo generó tools/crear_plugin.py. Todo lo que se ve (órdenes, teclas, preferencias, sonidos)
+# se declara aquí; el código se carga la primera vez que hace falta.
+formato = 1
+id = "{{id}}"
+nombre = "{{nombre}}"
+descripcion = "{{descripcion}}"
+version = "0.1.0"
+autor = "{{autor}}"
+licencia = "GPL-3.0-or-later"
+api_minima = "1.0"
+api_probada = "1.0"
+entrada = "__init__:Complemento"
+
+# Una orden: sale en el menú Complementos, en la paleta y se le puede dar tecla en el mapa de teclas.
+# La letra de acceso (&) no puede repetirse dentro de su menú.
+[[ordenes]]
+id = "saludar"
+etiqueta = "&Saludar"
+ayuda = "Anuncia un saludo con el nombre del elemento del cursor."
+ambito = "global"
+
+# Una página de Preferencias (Complementos > {{nombre}} > General) con una clave.
+[[paginas]]
+id = "general"
+titulo = "General"
+
+[[configuracion]]
+clave = "saludo"
+tipo = "texto"
+defecto = "Hola"
+etiqueta = "&Saludo:"
+ayuda = "Texto que se anuncia antes del nombre del elemento."
+pagina = "general"
+
+# Un sonido propio: su archivo por defecto es sonidos/saludo.wav.
+[[sonidos]]
+id = "saludo"
+nombre = "Saludo"
+descripcion = "Suena al saludar."
+prioridad = "baja"

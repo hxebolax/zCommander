@@ -1,0 +1,59 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 hxebolax y colaboradores
+# Organizador y renombrado por metadatos (diseño 2.0, 3.3 y 11.23). Dueño: bloque P3.
+
+formato = 1
+id = "zc.organizador"
+bloque = "P3"
+nombre = "Organizador y renombrado por metadatos"
+descripcion = "Ordena archivos en carpetas y les pone nombre según su contenido con plantillas de metadatos."
+version = "1.0.0"
+autor = "Proyecto zCommander"
+licencia = "GPL-3.0-or-later"
+api_minima = "1.0"
+api_probada = "1.0"
+entrada = "__init__:Complemento"
+nivel = "intermedio"
+
+# Sus máscaras ([EXIF:…], [MP3:…]) son de estos; las de la 1.x están siempre.
+[recomienda]
+complementos = ["zc.metadatos >= 1.0", "zc.imagenes >= 1.0", "zc.documentos >= 1.0"]
+
+[[ordenes]]
+id = "organizar"
+etiqueta = "O&rganizar por metadatos..."
+ayuda = "Mueve o copia los elementos a carpetas según una plantilla de metadatos."
+ambito = "global"
+menu = "herramientas"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[paginas]]
+id = "general"
+titulo = "General"
+
+[[configuracion]]
+clave = "sin_dato"
+tipo = "texto"
+defecto = "Sin fecha"
+etiqueta = "&Nombre de la carpeta cuando falta el dato:"
+ayuda = "Si un marcador no da nada (una foto sin fecha EXIF), la carpeta se llama así."
+pagina = "general"
+
+[[configuracion]]
+clave = "accion"
+tipo = "opcion"
+defecto = "mover"
+opciones = [["mover", "Mover"], ["copiar", "Copiar"]]
+etiqueta = "Acción por &defecto:"
+ayuda = "Lo que se elige al abrir el organizador: mover o copiar los archivos."
+pagina = "general"
+
+[[configuracion]]
+clave = "plantillas"
+tipo = "lista"
+defecto = [{ nombre = "Fotos por fecha EXIF", carpetas = "Fotos\\[EXIF:fecha:AAAA]\\[EXIF:fecha:MM]", archivo = "[N]" }, { nombre = "Música por artista y álbum", carpetas = "Música\\[MP3:artista]\\[MP3:album]", archivo = "[MP3:pista] - [MP3:titulo]" }, { nombre = "Documentos por año", carpetas = "Documentos\\[Y]", archivo = "[N]" }]
+interna = true
+etiqueta = "Plantillas"
+ayuda = "Plantillas guardadas; se guardan desde el organizador."

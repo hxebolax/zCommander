@@ -1,0 +1,12 @@
+{
+	"formato": 1,
+	"id": "clasico",
+	"nombre": "Clásico",
+	"autor": "Proyecto zCommander",
+	"licencia": "CC0-1.0",
+	"version": "1.0.0",
+	"descripcion": "Tonos de onda triangular con intervalos claros: el éxito sube una tercera mayor y el error baja una cuarta.",
+	"hereda": null,
+	"generado_por": "tools/generar_sonidos.py 1.0",
+	"archivos": {}
+}

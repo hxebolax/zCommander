@@ -1,0 +1,12 @@
+Python para Windows: componentes incorporados
+
+La compilación de zCommander lleva el intérprete de Python (python315.dll) y
+la parte de su biblioteca estándar que se usa, con las bibliotecas que la
+instalación oficial de Python para Windows incorpora: OpenSSL (libcrypto-3.dll,
+libssl-3.dll; Apache-2.0), libffi (libffi-8.dll; MIT), SQLite (sqlite3.dll;
+dominio público), expat, zlib, bzip2, xz/liblzma, zstd, mpdecimal y HACL*.
+
+LICENSE.txt es la licencia de Python (PSF-2.0) con las condiciones adicionales
+de la versión binaria de Windows. LICENCIAS-INCORPORADAS.txt es el apartado
+«Licenses and Acknowledgements for Incorporated Software» de la documentación
+de esta misma versión de Python, con el aviso de cada componente incorporado.

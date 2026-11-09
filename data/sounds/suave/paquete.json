@@ -1,0 +1,12 @@
+{
+	"formato": 1,
+	"id": "suave",
+	"nombre": "Suave",
+	"autor": "Proyecto zCommander",
+	"licencia": "CC0-1.0",
+	"version": "1.0.0",
+	"descripcion": "Senos con ataque y caída lentos, filtrados y 6 dB por debajo: para quien usa sonidos todo el día.",
+	"hereda": "clasico",
+	"generado_por": "tools/generar_sonidos.py 1.0",
+	"archivos": {}
+}

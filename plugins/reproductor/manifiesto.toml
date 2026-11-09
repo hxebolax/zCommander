@@ -1,0 +1,270 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 hxebolax y colaboradores
+# Reproductor multimedia (diseño 2.0, 11.1). Bloque P1.
+
+formato = 1
+id = "zc.reproductor"
+bloque = "P1"
+nombre = "Reproductor multimedia"
+descripcion = "Reproduce audio (y el sonido de los vídeos) del cursor, de los marcados o de una carpeta mientras se sigue navegando, y recuerda dónde se dejó cada archivo largo."
+version = "1.0.0"
+autor = "Proyecto zCommander"
+licencia = "GPL-3.0-or-later"
+api_minima = "1.0"
+api_probada = "1.0"
+entrada = "__init__:Complemento"
+nivel = "novato"
+prueba = "posicion"
+permisos = ["sonido", "segundo_plano", "ejecutar_programas"]
+
+[recomienda]
+complementos = ["zc.metadatos >= 1.0"]
+componentes = ["ffmpeg"]
+
+[[ordenes]]
+id = "reproducir"
+etiqueta = "&Reproducir"
+ayuda = "Reproduce el archivo del cursor, los marcados o la carpeta."
+ambito = "global"
+menu = "complementos"
+teclas = ["Ctrl+Shift+F5"]
+nivel = "novato"
+argumento = ""
+
+[[ordenes]]
+id = "ventana"
+etiqueta = "&Mostrar el reproductor"
+ayuda = "Abre la ventana del reproductor con la cola de reproducción."
+ambito = "global"
+menu = "complementos"
+teclas = ["Alt+Shift+F2"]
+nivel = "novato"
+argumento = ""
+
+[[ordenes]]
+id = "pausa"
+etiqueta = "&Pausa o continuar"
+ayuda = "Pausa la reproducción o la continúa donde se quedó."
+ambito = "global"
+menu = "complementos"
+teclas = ["Alt+Shift+F5"]
+nivel = "novato"
+argumento = ""
+tecla_global = true
+
+[[ordenes]]
+id = "detener"
+etiqueta = "&Detener"
+ayuda = "Detiene la reproducción."
+ambito = "global"
+menu = "complementos"
+teclas = ["Alt+Shift+F6"]
+nivel = "novato"
+argumento = ""
+tecla_global = true
+
+[[ordenes]]
+id = "retroceder"
+etiqueta = "Re&troceder"
+ayuda = "Retrocede un salto corto en la pista actual."
+ambito = "global"
+menu = "complementos"
+teclas = ["Alt+Shift+F7"]
+nivel = "novato"
+argumento = ""
+
+[[ordenes]]
+id = "avanzar"
+etiqueta = "&Avanzar"
+ayuda = "Avanza un salto corto en la pista actual."
+ambito = "global"
+menu = "complementos"
+teclas = ["Alt+Shift+F8"]
+nivel = "novato"
+argumento = ""
+
+[[ordenes]]
+id = "posicion"
+etiqueta = "Decir la p&osición"
+ayuda = "Dice la posición, la duración y el porcentaje de la pista actual."
+ambito = "global"
+menu = "complementos"
+teclas = ["Alt+Shift+F3"]
+nivel = "novato"
+argumento = ""
+
+[[ordenes]]
+id = "siguiente"
+etiqueta = "&Siguiente pista"
+ayuda = "Pasa a la siguiente pista de la cola."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "novato"
+argumento = ""
+
+[[ordenes]]
+id = "anterior"
+etiqueta = "Pista a&nterior"
+ayuda = "Vuelve al principio de la pista o a la anterior de la cola."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "novato"
+argumento = ""
+
+[[ordenes]]
+id = "anadir_cola"
+etiqueta = "Añadir a la &cola"
+ayuda = "Añade el archivo del cursor o los marcados a la cola de reproducción."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "guardar_lista"
+etiqueta = "&Guardar la cola como M3U..."
+ayuda = "Guarda la cola de reproducción como una lista M3U con rutas relativas."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "temporizador"
+etiqueta = "T&emporizador de apagado..."
+ayuda = "Detiene la reproducción cuando pasa el tiempo elegido."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[paginas]]
+id = "reproduccion"
+titulo = "Reproducción"
+
+[[paginas]]
+id = "general"
+titulo = "Posiciones y anuncios"
+
+[[configuracion]]
+clave = "salto_corto_s"
+tipo = "entero"
+defecto = 5
+minimo = 1
+maximo = 600
+etiqueta = "&Salto corto (segundos):"
+ayuda = "Segundos que avanzan o retroceden Avanzar, Retroceder y las flechas izquierda y derecha de la ventana del reproductor."
+pagina = "reproduccion"
+
+[[configuracion]]
+clave = "salto_medio_s"
+tipo = "entero"
+defecto = 30
+minimo = 1
+maximo = 3600
+etiqueta = "Salto &medio (segundos):"
+ayuda = "Segundos que saltan Control más flecha izquierda o derecha en la ventana del reproductor."
+pagina = "reproduccion"
+
+[[configuracion]]
+clave = "salto_largo_s"
+tipo = "entero"
+defecto = 300
+minimo = 1
+maximo = 7200
+etiqueta = "Salto &largo (segundos):"
+ayuda = "Segundos que saltan Re Pág y Av Pág en la ventana del reproductor."
+pagina = "reproduccion"
+
+[[configuracion]]
+clave = "volumen"
+tipo = "entero"
+defecto = 80
+minimo = 0
+maximo = 100
+etiqueta = "V&olumen:"
+ayuda = "Volumen del reproductor, de 0 a 100. Más y Menos lo cambian en la ventana del reproductor y el cambio se guarda."
+pagina = "reproduccion"
+
+[[configuracion]]
+clave = "velocidad"
+tipo = "decimal"
+defecto = 1.0
+minimo = 0.5
+maximo = 3.0
+etiqueta = "V&elocidad:"
+ayuda = "Velocidad de reproducción, de 0,5 a 3. Solo con el motor de Windows; con FFplay siempre es 1."
+pagina = "reproduccion"
+
+[[configuracion]]
+clave = "usar_ffplay"
+tipo = "bool"
+defecto = true
+etiqueta = "Usar &FFplay para los formatos que Windows no abre"
+ayuda = "Si Windows no puede abrir un archivo (Ogg, Opus, MKV...) y está el componente FFmpeg, se reproduce con FFplay. Con FFplay no se puede cambiar la velocidad."
+pagina = "reproduccion"
+
+[[configuracion]]
+clave = "recordar_posicion"
+tipo = "bool"
+defecto = true
+etiqueta = "Recordar dónde se de&jó cada archivo largo"
+ayuda = "Al volver a reproducir un archivo largo (un audiolibro, un podcast) continúa donde se dejó."
+pagina = "general"
+
+[[configuracion]]
+clave = "recordar_desde_min"
+tipo = "entero"
+defecto = 10
+minimo = 1
+maximo = 600
+etiqueta = "Recordar &desde (minutos de duración):"
+ayuda = "Solo se recuerda la posición de los archivos que duran al menos estos minutos."
+pagina = "general"
+
+[[configuracion]]
+clave = "anunciar_pista"
+tipo = "bool"
+defecto = true
+etiqueta = "A&nunciar el título al cambiar de pista"
+ayuda = "Dice el número y el título de la pista (de sus etiquetas, si está el complemento de metadatos) cada vez que cambia."
+pagina = "general"
+
+[[configuracion]]
+clave = "formatos_intro"
+tipo = "texto"
+defecto = ""
+etiqueta = "Formatos que se reproducen con &Intro:"
+ayuda = "Patrones separados por punto y coma, como *.mp3;*.m4b. Vacío: Intro abre los archivos con el programa de Windows. Una asociación Abrir propia para esos patrones (Opciones, Asociaciones) tiene preferencia."
+pagina = "general"
+
+[[configuracion]]
+clave = "posiciones"
+tipo = "diccionario"
+defecto = {}
+interna = true
+etiqueta = "Posiciones recordadas"
+ayuda = "Ruta y segundos de cada archivo largo; se guardan en datos/posiciones.json."
+
+[[sonidos]]
+id = "pista"
+nombre = "Cambio de pista"
+descripcion = "Empieza otra pista de la cola del reproductor."
+prioridad = "media"
+
+[[sonidos]]
+id = "fin_lista"
+nombre = "Fin de la cola"
+descripcion = "Termina la última pista de la cola del reproductor."
+prioridad = "media"
+
+[[sonidos]]
+id = "marcador"
+nombre = "Marcador guardado"
+descripcion = "Se guarda un marcador en la pista que suena."
+prioridad = "media"

@@ -1,0 +1,12 @@
+{
+	"formato": 1,
+	"id": "retro",
+	"nombre": "Retro 8 bits",
+	"autor": "Proyecto zCommander",
+	"licencia": "CC0-1.0",
+	"version": "1.0.0",
+	"descripcion": "Ondas cuadradas y arpegios rápidos cuantizados, al estilo de las consolas antiguas.",
+	"hereda": "clasico",
+	"generado_por": "tools/generar_sonidos.py 1.0",
+	"archivos": {}
+}

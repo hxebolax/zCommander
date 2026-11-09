@@ -1,0 +1,2 @@
+# Bibliotecas de terceros vendorizadas tal cual (diseño 2.0, 3.3): ruff no las revisa.
+exclude = ["*"]

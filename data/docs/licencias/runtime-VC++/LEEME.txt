@@ -1,0 +1,13 @@
+Runtime de Microsoft Visual C++ 2015-2022
+
+Los archivos vcruntime140*.dll, msvcp140*.dll, concrt140.dll, vcamp140.dll,
+vccorlib140.dll y vcomp140.dll que hay junto a ZCommander.exe son el «código
+distribuible» del runtime de Visual C++ de Microsoft. Los incluye cx_Freeze
+(opción include_msvcr) para que zCommander arranque en un Windows sin el
+redistribuible instalado. Se distribuyen sin modificar.
+
+Para la GPL-3.0 son «Bibliotecas del Sistema» (sección 1) del compilador: no
+forman parte de la Fuente Correspondiente de zCommander.
+
+Los términos de Microsoft están en LICENSE.txt (los copia cx_Freeze en
+share/licenses/vc_redist de la compilación).

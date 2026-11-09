@@ -1,0 +1,430 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 hxebolax y colaboradores
+# Manifiesto completo de Nubes (diseño 2.0, 3.3 y 12; bloque NU).
+
+formato = 1
+id = "zc.nubes"
+bloque = "NU"
+nombre = "Nubes"
+descripcion = "Convierte cada cuenta de nube y cada servidor WebDAV en una unidad más del panel, con copia, sincronización, enlaces, carpetas cifradas, uniones y montaje como letra mediante rclone."
+version = "1.0.0"
+autor = "Proyecto zCommander"
+licencia = "GPL-3.0-or-later"
+api_minima = "1.0"
+api_probada = "1.0"
+entrada = "__init__:Complemento"
+# Siempre al arrancar: registra el esquema nube:// para que las direcciones de la sesión se abran; con
+# arrancar = al_usar no arranca rclone hasta el primer uso de una cuenta (12.2).
+activacion = ["al_arrancar"]
+permisos = ["red", "secretos", "ejecutar_programas", "segundo_plano", "portapapeles"]
+nivel = "intermedio"
+prueba = "limites"
+ayuda = "doc/es/leeme.md"
+cambios = "doc/es/cambios.md"
+
+[requiere]
+componentes = ["rclone"]
+
+[[ordenes]]
+id = "cuentas"
+etiqueta = "Cuentas de &nube..."
+ayuda = "Abre la ventana con las cuentas de nube y su estado."
+ambito = "global"
+menu = "complementos"
+teclas = ["Alt+F11"]
+nivel = "novato"
+argumento = ""
+
+[[ordenes]]
+id = "anadir"
+etiqueta = "&Añadir una cuenta de nube..."
+ayuda = "Abre el asistente para añadir una cuenta de nube."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "novato"
+argumento = ""
+
+[[ordenes]]
+id = "nextcloud"
+etiqueta = "Conectar Ne&xtcloud u ownCloud..."
+ayuda = "Conecta un servidor Nextcloud u ownCloud con Login Flow v2."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "enlace"
+etiqueta = "Copiar un &enlace para compartir..."
+ayuda = "Crea un enlace para compartir el elemento del cursor y lo copia."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "novato"
+argumento = ""
+
+[[ordenes]]
+id = "quitar_enlace"
+etiqueta = "&Quitar el enlace compartido"
+ayuda = "Quita el enlace compartido del elemento del cursor."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "vaciar_papelera"
+etiqueta = "&Vaciar la papelera de la nube..."
+ayuda = "Vacía la papelera de la cuenta de nube, con confirmación."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "espacio"
+etiqueta = "Espac&io de la nube"
+ayuda = "Dice el espacio usado, el libre y el de la papelera de la cuenta."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "novato"
+argumento = ""
+
+[[ordenes]]
+id = "sincronizar"
+etiqueta = "&Sincronizar con la nube..."
+ayuda = "Sincroniza una carpeta con la nube tras mostrar una simulación."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "emparejar"
+etiqueta = "Emparejar carpetas (en los &dos sentidos)..."
+ayuda = "Mantiene dos carpetas iguales en los dos sentidos con un asistente."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = ""
+
+[[ordenes]]
+id = "comprobar"
+etiqueta = "Co&mprobar carpetas..."
+ayuda = "Compara dos carpetas por tamaño y suma y muestra las diferencias."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = ""
+
+[[ordenes]]
+id = "duplicados"
+etiqueta = "&Buscar nombres duplicados..."
+ayuda = "Busca y resuelve los nombres duplicados de una cuenta, con simulación."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = ""
+
+[[ordenes]]
+id = "cifrada"
+etiqueta = "Crear una carpeta &cifrada en la nube..."
+ayuda = "Crea una carpeta cifrada sobre una carpeta de una cuenta."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = ""
+
+[[ordenes]]
+id = "union"
+etiqueta = "&Unir varias cuentas en una unidad..."
+ayuda = "Une varias cuentas en una sola unidad."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = ""
+
+[[ordenes]]
+id = "montar"
+etiqueta = "Montar como le&tra de unidad..."
+ayuda = "Monta una cuenta como letra de unidad con WinFsp."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = ""
+
+[[ordenes]]
+id = "montajes"
+etiqueta = "Unidades m&ontadas..."
+ayuda = "Lista las unidades de nube montadas y permite desmontarlas."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = ""
+
+[[ordenes]]
+id = "servir"
+etiqueta = "Compartir en la &red..."
+ayuda = "Comparte una carpeta por WebDAV, SFTP, HTTP o DLNA."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = ""
+
+[[ordenes]]
+id = "servicios_activos"
+etiqueta = "Carpetas compartidas por &zCommander..."
+ayuda = "Lista las carpetas que comparte zCommander y permite dejar de compartirlas."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = ""
+
+[[ordenes]]
+id = "limites"
+etiqueta = "&Pausar o reanudar los límites de velocidad"
+ayuda = "Quita o vuelve a poner los límites de velocidad de la configuración."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "reconectar"
+etiqueta = "Vo&lver a autorizar la cuenta..."
+ayuda = "Vuelve a autorizar una cuenta cuyo acceso caducó."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "guia_google"
+etiqueta = "&Guía para conectar Google Drive"
+ayuda = "Abre la guía paso a paso para conectar Google Drive."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "novato"
+argumento = ""
+
+[[esquemas]]
+prefijo = "nube"
+nombre = "Cuentas de nube"
+
+[[esquemas]]
+prefijo = "webdav"
+nombre = "Servidor WebDAV"
+
+[[esquemas]]
+prefijo = "webdavs"
+nombre = "Servidor WebDAV seguro"
+
+[[unidades]]
+dinamicas = true
+
+[[paginas]]
+id = "general"
+titulo = "Motor de nubes"
+
+[[paginas]]
+id = "velocidad"
+titulo = "Velocidad"
+
+[[paginas]]
+id = "cuentas"
+titulo = "Cuentas"
+
+[[configuracion]]
+clave = "arrancar"
+tipo = "opcion"
+defecto = "al_usar"
+opciones = [["al_usar", "Al usar una cuenta por primera vez"], ["al_iniciar", "Al iniciar zCommander"]]
+etiqueta = "Cuándo arrancar el &motor de nubes:"
+ayuda = "El motor de nubes (rclone) puede arrancar al usar una cuenta por primera vez o al iniciar zCommander."
+pagina = "general"
+
+[[configuracion]]
+clave = "transferencias"
+tipo = "entero"
+defecto = 4
+minimo = 1
+maximo = 32
+etiqueta = "&Transferencias simultáneas:"
+ayuda = "Cuántos archivos copia rclone a la vez. En Google Drive conviene 2 a 4. Al cambiarlo se reinicia el motor si no hay transferencias."
+pagina = "general"
+
+[[configuracion]]
+clave = "reintentos"
+tipo = "entero"
+defecto = 3
+minimo = 0
+maximo = 10
+etiqueta = "Reintentos de cada &operación:"
+ayuda = "Veces que rclone repite una operación que falló por un error pasajero."
+pagina = "general"
+
+[[configuracion]]
+clave = "registro_detallado"
+tipo = "bool"
+defecto = false
+etiqueta = "Registro &detallado de rclone (nivel INFO)"
+ayuda = "Guarda en el registro de zCommander más mensajes de rclone, siempre sin contraseñas ni fichas de acceso. Nunca se vuelcan cabeceras."
+pagina = "general"
+
+[[configuracion]]
+clave = "mostrar_experimentales"
+tipo = "bool"
+defecto = false
+etiqueta = "Mostrar los servicios e&xperimentales"
+ayuda = "Muestra en el asistente los servicios que rclone marca como experimentales, como Proton Drive o iCloud Drive."
+pagina = "general"
+
+[[configuracion]]
+clave = "limite_subida_kib"
+tipo = "entero"
+defecto = 0
+minimo = 0
+maximo = 10000000
+etiqueta = "Límite de &subida en KiB/s (0 sin límite):"
+ayuda = "Velocidad máxima de subida de todas las nubes juntas."
+pagina = "velocidad"
+
+[[configuracion]]
+clave = "limite_bajada_kib"
+tipo = "entero"
+defecto = 0
+minimo = 0
+maximo = 10000000
+etiqueta = "Límite de &bajada en KiB/s (0 sin límite):"
+ayuda = "Velocidad máxima de bajada de todas las nubes juntas."
+pagina = "velocidad"
+
+[[configuracion]]
+clave = "horario_limites"
+tipo = "texto"
+defecto = ""
+etiqueta = "&Horario de límites (formato de rclone):"
+ayuda = "Por ejemplo 08:00,512k 23:00,off: de 8 a 23 limita a 512 KiB/s y después sin límite. Si hay horario, manda sobre los límites fijos. También se edita por franjas en las propiedades de cada cuenta."
+pagina = "velocidad"
+
+[[configuracion]]
+clave = "cache_listados_s"
+tipo = "entero"
+defecto = 30
+minimo = 0
+maximo = 3600
+etiqueta = "Segundos que se recuerdan los &listados:"
+ayuda = "Durante este tiempo no se vuelve a pedir a la nube el contenido de una carpeta ya listada. 0 lo pide siempre."
+pagina = "cuentas"
+
+[[configuracion]]
+clave = "papelera_por_defecto"
+tipo = "bool"
+defecto = true
+etiqueta = "Las cuentas nuevas borran a la papel&era del servicio"
+ayuda = "Lo que se borra va a la papelera de la nube, si el servicio la tiene."
+pagina = "cuentas"
+
+[[configuracion]]
+clave = "formato_docs"
+tipo = "texto"
+defecto = "docx,xlsx,pptx"
+etiqueta = "&Formato de los documentos de Google en cuentas nuevas:"
+ayuda = "Formatos con los que se bajan los Documentos, Hojas y Presentaciones de Google, separados por comas."
+pagina = "cuentas"
+
+[[configuracion]]
+clave = "copia_entre_cuentas"
+tipo = "bool"
+defecto = false
+etiqueta = "Copiar en el &servidor entre cuentas del mismo servicio"
+ayuda = "Usa ServerSideAcrossConfigs de rclone; si falla, la copia pasa por zCommander."
+pagina = "cuentas"
+
+[[configuracion]]
+clave = "servir_solo_local"
+tipo = "bool"
+defecto = true
+etiqueta = "Compartir en la red solo en este e&quipo salvo confirmación"
+ayuda = "Compartir en la red escucha solo en 127.0.0.1 si no se confirma expresamente abrirlo a la red local."
+pagina = "cuentas"
+
+[[configuracion]]
+clave = "aviso_winfsp_mostrado"
+tipo = "bool"
+defecto = false
+interna = true
+etiqueta = "Aviso de WinFsp mostrado"
+ayuda = "Interna: si ya se mostró el aviso de WinFsp de Acerca de."
+
+[[secretos]]
+nombre = "rclone_config_pass"
+descripcion = "Contraseña aleatoria con la que está cifrado rclone.conf (data/config)."
+
+[[secretos]]
+nombre = "<cuenta>:client_secret"
+descripcion = "Secreto del identificador de cliente propio de una cuenta (por ejemplo, de Google Drive)."
+
+[[secretos]]
+nombre = "webdav:<cuenta>:contrasena"
+descripcion = "Contraseña (o contraseña de aplicación) de una cuenta WebDAV o Nextcloud."
+
+[[sonidos]]
+id = "conectar"
+nombre = "Cuenta de nube conectada"
+descripcion = "Suena al añadir una cuenta de nube y comprobarla."
+prioridad = "media"
+
+[[sonidos]]
+id = "desconectar"
+nombre = "Cuenta de nube eliminada"
+descripcion = "Suena al eliminar una cuenta de nube."
+prioridad = "media"
+
+[[sonidos]]
+id = "oauth_espera"
+nombre = "Esperando la autorización"
+descripcion = "Suena al empezar a esperar la autorización en el navegador."
+prioridad = "media"
+
+[[sonidos]]
+id = "oauth_ok"
+nombre = "Autorización recibida"
+descripcion = "Suena al llegar la autorización del navegador."
+prioridad = "alta"
+
+[[sonidos]]
+id = "sincronizacion_fin"
+nombre = "Sincronización terminada"
+descripcion = "Suena al terminar de sincronizar o de emparejar carpetas."
+prioridad = "media"
+
+[[sonidos]]
+id = "montada"
+nombre = "Unidad de nube montada"
+descripcion = "Suena al montar una cuenta como letra de unidad."
+prioridad = "media"
+
+[[sonidos]]
+id = "motor_detenido"
+nombre = "Motor de nubes detenido"
+descripcion = "Suena si el motor de nubes (rclone) se detiene sin que se le pida."
+prioridad = "alta"

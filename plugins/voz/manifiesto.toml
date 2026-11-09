@@ -1,0 +1,161 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 hxebolax y colaboradores
+# Lectura en voz y audiolibros (diseño 2.0, 11.17). Bloque P1.
+
+formato = 1
+id = "zc.voz"
+bloque = "P1"
+nombre = "Lectura en voz y audiolibros"
+descripcion = "Lee archivos de texto y documentos con una voz de Windows, aparte del lector de pantalla, y los convierte en audio."
+version = "1.0.0"
+autor = "Proyecto zCommander"
+licencia = "GPL-3.0-or-later"
+api_minima = "1.0"
+api_probada = "1.0"
+entrada = "__init__:Complemento"
+nivel = "novato"
+prueba = "detener"
+dialogo_preferencias = true
+permisos = ["sonido", "segundo_plano", "ejecutar_programas"]
+
+[recomienda]
+complementos = ["zc.documentos >= 1.0"]
+componentes = ["ffmpeg"]
+
+[[ordenes]]
+id = "leer"
+etiqueta = "&Leer en voz alta o pausar"
+ayuda = "Lee en voz alta el archivo del cursor o pausa la lectura."
+ambito = "global"
+menu = "complementos"
+teclas = ["Ctrl+F9"]
+nivel = "novato"
+argumento = ""
+tecla_global = true
+
+[[ordenes]]
+id = "detener"
+etiqueta = "&Detener la lectura"
+ayuda = "Detiene la lectura en voz alta y recuerda dónde iba."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "novato"
+argumento = ""
+
+[[ordenes]]
+id = "exportar"
+etiqueta = "&Convertir a audio..."
+ayuda = "Convierte uno o varios archivos de texto o documentos en audio."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "frase_siguiente"
+etiqueta = "&Frase siguiente"
+ayuda = "Pasa a la frase siguiente de la lectura."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "frase_anterior"
+etiqueta = "Frase a&nterior"
+ayuda = "Vuelve a la frase anterior de la lectura."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "parrafo_siguiente"
+etiqueta = "&Párrafo siguiente"
+ayuda = "Pasa al párrafo siguiente de la lectura."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "parrafo_anterior"
+etiqueta = "Párr&afo anterior"
+ayuda = "Vuelve al principio del párrafo o al párrafo anterior."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[paginas]]
+id = "general"
+titulo = "Voz"
+
+[[configuracion]]
+clave = "voz"
+tipo = "texto"
+defecto = ""
+etiqueta = "Nombre de la vo&z (vacío, la predeterminada):"
+ayuda = "Nombre exacto de la voz de Windows, como Microsoft Helena Desktop - Spanish (Spain). Es más cómodo elegirla con «Abrir la configuración avanzada...», que lista las voces y deja probarlas."
+pagina = "general"
+
+[[configuracion]]
+clave = "velocidad"
+tipo = "entero"
+defecto = 0
+minimo = -10
+maximo = 10
+etiqueta = "Ve&locidad (de -10 a 10):"
+ayuda = "Velocidad de la voz: 0 es la normal de la voz; los positivos, más rápido."
+pagina = "general"
+
+[[configuracion]]
+clave = "tono"
+tipo = "entero"
+defecto = 0
+minimo = -10
+maximo = 10
+etiqueta = "&Tono (de -10 a 10):"
+ayuda = "Tono de la voz: 0 es el normal; los positivos, más agudo."
+pagina = "general"
+
+[[configuracion]]
+clave = "volumen"
+tipo = "entero"
+defecto = 100
+minimo = 0
+maximo = 100
+etiqueta = "Volu&men (de 0 a 100):"
+ayuda = "Volumen de la voz de lectura, aparte del volumen de Windows."
+pagina = "general"
+
+[[configuracion]]
+clave = "formato_salida"
+tipo = "opcion"
+defecto = "mp3"
+opciones = [["wav", "WAV (sin comprimir)"], ["mp3", "MP3"], ["opus", "Opus"]]
+etiqueta = "&Formato al convertir a audio:"
+ayuda = "Formato que se propone en Convertir a audio. MP3 y Opus necesitan el componente FFmpeg."
+pagina = "general"
+
+[[configuracion]]
+clave = "pausa_parrafo_ms"
+tipo = "entero"
+defecto = 400
+minimo = 0
+maximo = 5000
+etiqueta = "Pausa &entre párrafos (milisegundos):"
+ayuda = "Silencio entre un párrafo y el siguiente, al leer y en los audios."
+pagina = "general"
+
+[[sonidos]]
+id = "fin"
+nombre = "Fin de la lectura"
+descripcion = "Termina de leerse en voz alta un archivo."
+prioridad = "media"

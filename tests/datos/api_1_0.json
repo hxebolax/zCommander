@@ -1,0 +1,543 @@
+{
+ "API_COMPATIBLE_DESDE": {
+  "tipo": "tuple"
+ },
+ "API_VERSION": {
+  "tipo": "tuple"
+ },
+ "AccionDeshacer": {
+  "metodos": {},
+  "modulo": "app.services.operaciones.deshacer",
+  "tipo": "clase"
+ },
+ "AccionError": {
+  "metodos": {},
+  "modulo": "app.services.operaciones.modelo",
+  "tipo": "clase"
+ },
+ "Anfitrion": {
+  "metodos": {
+   "abrir_ayuda": "(self, pagina: 'str' = '') -> 'None'",
+   "abrir_programa": "(self, argumentos: 'list[str]', *, carpeta: 'str | None' = None) -> 'int'",
+   "abrir_ruta": "(self, texto: 'str', lado: 'str | None' = None) -> 'None'",
+   "anunciar": "(self, texto: 'str', nivel: 'str' = 'normal', completo: 'str' = '', interrumpir: 'bool | None' = None) -> 'None'",
+   "cache": "(self) -> 'Path'",
+   "complemento": "(self, id: 'str') -> 'SimpleNamespace | None'",
+   "complemento_futuro": "(self, id: 'str') -> 'Future[SimpleNamespace | None]'",
+   "datos": "(self) -> 'Path'",
+   "decisor": "(self) -> 'Decisor'",
+   "ejecutar_orden": "(self, id_orden: 'str', lado: 'str | None' = None, *, argumento: 'Any' = None) -> 'None'",
+   "ejecutar_orden_futuro": "(self, id_orden: 'str', lado: 'str | None' = None, *, argumento: 'Any' = None) -> 'Future[bool]'",
+   "ejecutar_programa": "(self, argumentos: 'list[str]', *, entrada: 'bytes' = b'', carpeta: 'str | None' = None, tiempo_s: 'float' = 60, cancelacion: 'Any' = None, al_leer: 'Callable[[bytes], None] | None' = None, entorno: 'dict[str, str] | None' = None) -> 'ResultadoPrograma'",
+   "escribir_en_linea": "(self, texto: 'str') -> 'None'",
+   "exportar": "(self, nombre: 'str', objeto: 'Any') -> 'None'",
+   "lanzar": "(self, operacion: 'Operacion', en_cola: 'bool' = False, al_terminar: 'Callable[[Operacion], None] | None' = None) -> 'None'",
+   "tareas": "(self) -> 'GestorTareas'"
+  },
+  "modulo": "app.plugins.api",
+  "tipo": "clase"
+ },
+ "Cancelado": {
+  "metodos": {},
+  "modulo": "app.services.vfs.base",
+  "tipo": "clase"
+ },
+ "Capacidades": {
+  "metodos": {},
+  "modulo": "app.services.vfs.base",
+  "tipo": "clase"
+ },
+ "ClienteRed": {
+  "metodos": {
+   "descargar": "(self, url: 'str', destino: 'Path', *, sha256: 'str' = '', tamano: 'int' = -1, cancelacion: 'Any' = None, al_progresar: 'Callable[[int, int], None] | None' = None) -> 'Path'",
+   "enviar": "(self, url: 'str', datos: 'bytes | dict', *, metodo: 'str' = 'POST', cabeceras: 'dict | None' = None, tiempo_s: 'float' = 30) -> 'RespuestaRed'",
+   "obtener": "(self, url: 'str', *, cabeceras: 'dict | None' = None, tiempo_s: 'float' = 30) -> 'RespuestaRed'"
+  },
+  "modulo": "app.plugins.api",
+  "tipo": "clase"
+ },
+ "Complemento": {
+  "metodos": {
+   "activar": "(self, zc: 'Anfitrion') -> 'None'",
+   "desactivar": "(self) -> 'None'",
+   "puede_cerrar": "(self) -> 'bool'",
+   "ventanas_para_revisar": "(self, padre: \"'wx.Window'\") -> \"list['wx.TopLevelWindow']\""
+  },
+  "modulo": "app.plugins.api",
+  "tipo": "clase"
+ },
+ "ComponentesComplemento": {
+  "metodos": {
+   "al_detener": "(self, id_componente: 'str', funcion: 'Callable[[], bool]') -> 'None'",
+   "disponible": "(self, id_componente: 'str') -> 'bool'",
+   "ejecutable": "(self, id_componente: 'str', nombre: 'str') -> 'Path'",
+   "ruta": "(self, id_componente: 'str') -> 'Path'"
+  },
+  "modulo": "app.plugins.api",
+  "tipo": "clase"
+ },
+ "ConfigComplemento": {
+  "metodos": {
+   "establecer": "(self, clave: 'str', valor: 'Any') -> 'bool'",
+   "establecer_varias": "(self, cambios: 'dict[str, Any]') -> 'bool'",
+   "obtener": "(self, clave: 'str', por_defecto: 'Any' = <object object>) -> 'Any'",
+   "restablecer": "(self) -> 'None'",
+   "suscribir": "(self, funcion: 'Callable[[str, Any, Any], None]', prefijo: 'str' = '') -> 'Callable[[], None]'"
+  },
+  "modulo": "app.plugins.api",
+  "tipo": "clase"
+ },
+ "ContextoComplemento": {
+  "metodos": {
+   "anunciar": "(self, texto: 'str', nivel: 'str' = 'normal', completo: 'str' = '', interrumpir: 'bool | None' = None) -> 'None'",
+   "objetivo": "(self) -> 'PanelComplemento'",
+   "sonar": "(self, evento: 'str', variante: 'str' = '', *, sustituye: 'bool' = False) -> 'bool'"
+  },
+  "modulo": "app.plugins.api",
+  "tipo": "clase"
+ },
+ "ContextoEjecucion": {
+  "metodos": {
+   "cancelado": "(self) -> 'bool'",
+   "comprobar": "(self) -> 'None'",
+   "esperando": "(self) -> 'Iterator[None]'"
+  },
+  "modulo": "app.services.operaciones.modelo",
+  "tipo": "clase"
+ },
+ "CriteriosBusqueda": {
+  "metodos": {},
+  "modulo": "app.services.busqueda",
+  "tipo": "clase"
+ },
+ "DETALLE": {
+  "tipo": "str"
+ },
+ "Decisor": {
+  "metodos": {
+   "elegir": "(self, titulo: 'str', texto: 'str', opciones: 'Sequence[str]', predeterminada: 'int' = 0, escape: 'int' = -1, operacion: 'Operacion | None' = None) -> 'int'",
+   "elegir_con_casilla": "(self, titulo: 'str', texto: 'str', opciones: 'Sequence[str]', casilla: 'str', predeterminada: 'int' = 0, escape: 'int' = -1, operacion: 'Operacion | None' = None) -> 'tuple[int, bool]'",
+   "pedir_credenciales": "(self, titulo: 'str', texto: 'str', usuario: 'str' = '', operacion: 'Operacion | None' = None) -> 'tuple[str, str, bool] | None'",
+   "pedir_texto": "(self, titulo: 'str', texto: 'str', valor: 'str' = '', oculto: 'bool' = False, operacion: 'Operacion | None' = None) -> 'str | None'",
+   "preguntar_conflicto": "(self, operacion: 'Operacion', conflicto: 'Conflicto') -> 'RespuestaConflicto'",
+   "preguntar_error": "(self, operacion: 'Operacion', pregunta: 'PreguntaError') -> 'AccionError'",
+   "resolver_conflictos": "(self, operacion: 'Operacion', conflictos: 'Sequence[Conflicto]') -> 'list[RespuestaConflicto] | None'"
+  },
+  "modulo": "app.services.operaciones.modelo",
+  "tipo": "clase"
+ },
+ "DeshacerComplemento": {
+  "metodos": {
+   "registrar": "(self, accion: 'AccionDeshacer') -> 'None'"
+  },
+  "modulo": "app.plugins.api",
+  "tipo": "clase"
+ },
+ "Documento": {
+  "metodos": {},
+  "modulo": "app.plugins.api",
+  "tipo": "clase"
+ },
+ "ESENCIAL": {
+  "tipo": "str"
+ },
+ "Entrada": {
+  "metodos": {
+   "con": "(self, **cambios) -> 'Entrada'",
+   "extension": "(self) -> 'str'",
+   "nombre_sin_extension": "(self) -> 'str'",
+   "oculto": "(self) -> 'bool'",
+   "sistema": "(self) -> 'bool'",
+   "solo_lectura": "(self) -> 'bool'"
+  },
+  "modulo": "app.services.vfs.base",
+  "tipo": "clase"
+ },
+ "ErrorAcceso": {
+  "metodos": {},
+  "modulo": "app.services.vfs.base",
+  "tipo": "clase"
+ },
+ "ErrorArchivos": {
+  "metodos": {},
+  "modulo": "app.services.vfs.base",
+  "tipo": "clase"
+ },
+ "ErrorRed": {
+  "metodos": {},
+  "modulo": "app.services.vfs.base",
+  "tipo": "clase"
+ },
+ "EspaciosTrabajo": {
+  "metodos": {
+   "abrir": "(self, nombre: 'str') -> 'None'",
+   "guardar_actual": "(self, nombre: 'str', nota: 'str' = '') -> 'None'",
+   "listar": "(self) -> 'list[str]'"
+  },
+  "modulo": "app.plugins.api",
+  "tipo": "clase"
+ },
+ "Estado": {
+  "metodos": {
+   "final": "(self) -> 'bool'",
+   "texto": "(self) -> 'str'"
+  },
+  "modulo": "app.services.operaciones.modelo",
+  "tipo": "clase"
+ },
+ "ModuloUI": {
+  "metodos": {},
+  "modulo": "app.plugins.api",
+  "tipo": "clase"
+ },
+ "NORMAL": {
+  "tipo": "str"
+ },
+ "NoAdmitido": {
+  "metodos": {},
+  "modulo": "app.services.vfs.base",
+  "tipo": "clase"
+ },
+ "NoEncontrado": {
+  "metodos": {},
+  "modulo": "app.services.vfs.base",
+  "tipo": "clase"
+ },
+ "NombreNoValido": {
+  "metodos": {},
+  "modulo": "app.services.vfs.base",
+  "tipo": "clase"
+ },
+ "OpcionesCopia": {
+  "metodos": {},
+  "modulo": "app.services.operaciones.copiar",
+  "tipo": "clase"
+ },
+ "Operacion": {
+  "metodos": {
+   "anotar_error": "(self, ruta: 'str', mensaje: 'str') -> 'None'",
+   "cambiar_estado": "(self, nuevo: 'Estado') -> 'None'",
+   "cancelar": "(self) -> 'None'",
+   "carriles": "(self) -> 'frozenset[str]'",
+   "descripcion": "(self) -> 'str'",
+   "ejecutar": "(self, ctx: 'ContextoEjecucion') -> 'None'",
+   "ejecutar_sub": "(self, sub: 'Operacion', ctx: 'ContextoEjecucion') -> 'Operacion'",
+   "estado": "(self) -> 'Estado'",
+   "instantanea": "(self) -> 'Progreso'",
+   "pausa_pedida": "(self) -> 'bool'",
+   "pausar": "(self) -> 'None'",
+   "progresar": "(self, **cambios) -> 'None'",
+   "raiz": "(self) -> 'Operacion'",
+   "reanudar": "(self) -> 'None'",
+   "resumen": "(self) -> 'str'",
+   "rutas_afectadas": "(self) -> 'list[tuple[str, str]]'",
+   "sumar": "(self, **incrementos) -> 'None'",
+   "sumar_parado": "(self, segundos: 'float') -> 'None'"
+  },
+  "modulo": "app.services.operaciones.modelo",
+  "tipo": "clase"
+ },
+ "OperacionCopiar": {
+  "metodos": {
+   "carriles": "(self) -> 'frozenset[str]'",
+   "descripcion": "(self) -> 'str'",
+   "ejecutar": "(self, ctx: 'ContextoEjecucion') -> 'None'",
+   "pares_hechos": "(self) -> 'list[tuple[str, str]]'",
+   "rutas_afectadas": "(self) -> 'list[tuple[str, str]]'"
+  },
+  "modulo": "app.services.operaciones.copiar",
+  "tipo": "clase"
+ },
+ "OperacionEliminar": {
+  "metodos": {
+   "carriles": "(self) -> 'frozenset[str]'",
+   "descripcion": "(self) -> 'str'",
+   "ejecutar": "(self, ctx: 'ContextoEjecucion') -> 'None'",
+   "rutas_afectadas": "(self) -> 'list[tuple[str, str]]'"
+  },
+  "modulo": "app.services.operaciones.eliminar",
+  "tipo": "clase"
+ },
+ "OperacionRenombrar": {
+  "metodos": {
+   "carriles": "(self) -> 'frozenset[str]'",
+   "descripcion": "(self) -> 'str'",
+   "ejecutar": "(self, ctx: 'ContextoEjecucion') -> 'None'",
+   "rutas_afectadas": "(self) -> 'list[tuple[str, str]]'"
+  },
+  "modulo": "app.services.operaciones.renombrar",
+  "tipo": "clase"
+ },
+ "PanelComplemento": {
+  "metodos": {
+   "cursor": "(self) -> 'Entrada | None'",
+   "elementos_trabajo": "(self) -> 'list[Entrada]'",
+   "marcadas": "(self) -> 'list[Entrada]'",
+   "mostrar_ruta": "(self) -> 'str'",
+   "proveedor": "(self) -> 'Proveedor'",
+   "refrescar": "(self) -> 'None'",
+   "ruta": "(self) -> 'str'"
+  },
+  "modulo": "app.plugins.api",
+  "tipo": "clase"
+ },
+ "Paso": {
+  "metodos": {},
+  "modulo": "app.services.operaciones.deshacer",
+  "tipo": "clase"
+ },
+ "Politica": {
+  "metodos": {},
+  "modulo": "app.services.operaciones.modelo",
+  "tipo": "clase"
+ },
+ "PreguntaError": {
+  "metodos": {},
+  "modulo": "app.services.operaciones.modelo",
+  "tipo": "clase"
+ },
+ "Progreso": {
+  "metodos": {
+   "duracion": "(self) -> 'float'",
+   "porcentaje": "(self) -> 'int | None'",
+   "porcentaje_actual": "(self) -> 'int | None'"
+  },
+  "modulo": "app.services.operaciones.modelo",
+  "tipo": "clase"
+ },
+ "Proveedor": {
+  "metodos": {
+   "abrir_escritura": "(self, ruta: 'str', tamano: 'int' = -1) -> 'BinaryIO'",
+   "abrir_lectura": "(self, ruta: 'str') -> 'BinaryIO'",
+   "cerrar": "(self) -> 'None'",
+   "clonar": "(self) -> 'Proveedor'",
+   "crear_carpeta": "(self, ruta: 'str') -> 'None'",
+   "descripcion": "(self) -> 'str'",
+   "eliminar": "(self, ruta: 'str', recursivo: 'bool' = False, cancelacion=None) -> 'None'",
+   "espacio_libre": "(self, ruta: 'str') -> 'tuple[int, int] | None'",
+   "existe": "(self, ruta: 'str') -> 'bool'",
+   "extraer_temporal": "(self, ruta: 'str') -> 'str'",
+   "fijar_atributos": "(self, ruta: 'str', atributos: 'int') -> 'None'",
+   "fijar_permisos": "(self, ruta: 'str', modo: 'int') -> 'None'",
+   "fijar_tiempos": "(self, ruta: 'str', modificado: 'float', creado: 'float' = 0.0) -> 'None'",
+   "info": "(self, ruta: 'str') -> 'Entrada'",
+   "listar": "(self, ruta: 'str', cancelacion=None) -> 'list[Entrada]'",
+   "mismo_volumen": "(self, ruta_a: 'str', ruta_b: 'str') -> 'bool'",
+   "mostrar": "(self, ruta: 'str') -> 'str'",
+   "nombre": "(self, ruta: 'str') -> 'str'",
+   "padre": "(self, ruta: 'str') -> 'str | None'",
+   "raiz": "(self, ruta: 'str') -> 'str'",
+   "renombrar": "(self, origen: 'str', destino: 'str') -> 'None'",
+   "ruta_local": "(self, ruta: 'str') -> 'str | None'",
+   "suma": "(self, ruta: 'str', algoritmo: 'str') -> 'str | None'",
+   "transaccion": "(self)",
+   "transferir": "(self, origen: 'Proveedor', ruta_origen: 'str', ruta_destino: 'str', progreso: 'Callable[[int, int], None]', cancelacion) -> 'bool'",
+   "transferir_lote": "(self, origen: 'Proveedor', pares: 'Sequence[tuple[str, str]]', mover: 'bool', progreso: 'Callable[[int, int], None]', cancelacion) -> 'list[ResultadoPar] | None'",
+   "unir": "(self, carpeta: 'str', nombre: 'str') -> 'str'"
+  },
+  "modulo": "app.services.vfs.base",
+  "tipo": "clase"
+ },
+ "RESULTADO": {
+  "tipo": "str"
+ },
+ "RegistroAccionesError": {
+  "metodos": {
+   "accion": "(self, id_corto: 'str', aplica: 'Callable[[PreguntaError], bool]', funcion: 'Callable[[PreguntaError], AccionError | None]') -> 'None'"
+  },
+  "modulo": "app.plugins.api",
+  "tipo": "clase"
+ },
+ "RegistroBusqueda": {
+  "metodos": {
+   "extractor": "(self, funcion: 'Callable[[Proveedor, str, Any], str | None]') -> 'None'",
+   "proveedor": "(self, id_corto: 'str', funcion: 'Callable[[CriteriosBusqueda, Callable[[str], None], Any], None]') -> 'None'"
+  },
+  "modulo": "app.plugins.api",
+  "tipo": "clase"
+ },
+ "RegistroColumnas": {
+  "metodos": {
+   "extractor": "(self, id_corto: 'str', funcion: 'Callable[[Entrada, Proveedor, Any], str | None]') -> 'None'",
+   "invalidar": "(self, rutas: 'Sequence[str] | None' = None) -> 'None'"
+  },
+  "modulo": "app.plugins.api",
+  "tipo": "clase"
+ },
+ "RegistroEventos": {
+  "metodos": {
+   "emitir": "(self, nombre: 'str', **datos: 'Any') -> 'None'",
+   "suscribir": "(self, nombre: 'str', funcion: 'Callable[..., None]') -> 'Callable[[], None]'"
+  },
+  "modulo": "app.plugins.api",
+  "tipo": "clase"
+ },
+ "RegistroInfo": {
+  "metodos": {
+   "lineas": "(self, funcion: 'Callable[[Entrada, Proveedor], list[str]]') -> 'None'"
+  },
+  "modulo": "app.plugins.api",
+  "tipo": "clase"
+ },
+ "RegistroMascaras": {
+  "metodos": {
+   "evaluar": "(self, plantilla: 'str', entrada: 'Entrada', proveedor: 'Proveedor') -> 'str'",
+   "mascara": "(self, marcador: 'str', funcion: 'Callable[[Entrada, Proveedor], str | None]') -> 'None'"
+  },
+  "modulo": "app.plugins.api",
+  "tipo": "clase"
+ },
+ "RegistroOrdenes": {
+  "metodos": {
+   "disponible": "(self, id_corto: 'str', funcion: 'Callable[[ContextoComplemento], bool]') -> 'None'",
+   "estado": "(self, id_corto: 'str', funcion: 'Callable[[ContextoComplemento], bool]') -> 'None'",
+   "interna": "(self, nombre: 'str', funcion: 'Callable[[list[str], Callable[[str], None], Any], int]') -> 'None'",
+   "manejador": "(self, id_corto: 'str', funcion: 'Callable[[ContextoComplemento], None]') -> 'None'"
+  },
+  "modulo": "app.plugins.api",
+  "tipo": "clase"
+ },
+ "RegistroPreferencias": {
+  "metodos": {
+   "abrir": "(self) -> 'None'",
+   "dialogo": "(self, funcion: \"Callable[['wx.Window'], None]\") -> 'None'"
+  },
+  "modulo": "app.plugins.api",
+  "tipo": "clase"
+ },
+ "RegistroVFS": {
+  "metodos": {
+   "comprimido": "(self, extensiones: 'tuple[str, ...]', fabrica: 'Callable[[Proveedor, str], Proveedor]') -> 'None'",
+   "esquema": "(self, prefijo: 'str', fabrica: 'Callable[[str], tuple[Proveedor, str]]') -> 'None'",
+   "resolver": "(self, direccion: 'str') -> 'tuple[Proveedor, str]'",
+   "unidades": "(self, funcion: 'Callable[[], list[UnidadVirtual]]') -> 'None'"
+  },
+  "modulo": "app.plugins.api",
+  "tipo": "clase"
+ },
+ "RegistroVisores": {
+  "metodos": {
+   "ventana": "(self, id_corto: 'str', funcion: 'Callable[[Proveedor, str], None]') -> 'None'",
+   "visor": "(self, id_corto: 'str', funcion: 'Callable[[Proveedor, str, Any], Documento]') -> 'None'"
+  },
+  "modulo": "app.plugins.api",
+  "tipo": "clase"
+ },
+ "RespuestaRed": {
+  "metodos": {
+   "json": "(self) -> 'Any'",
+   "texto": "(self) -> 'str'"
+  },
+  "modulo": "app.core.red",
+  "tipo": "clase"
+ },
+ "RespuestasAutomaticas": {
+  "metodos": {},
+  "modulo": "app.services.operaciones.modelo",
+  "tipo": "clase"
+ },
+ "ResultadoPar": {
+  "metodos": {},
+  "modulo": "app.services.vfs.base",
+  "tipo": "clase"
+ },
+ "ResultadoPrograma": {
+  "metodos": {},
+  "modulo": "app.core.procesos",
+  "tipo": "clase"
+ },
+ "Seccion": {
+  "metodos": {},
+  "modulo": "app.plugins.api",
+  "tipo": "clase"
+ },
+ "SecretosComplemento": {
+  "metodos": {
+   "borrar": "(self, nombre: 'str') -> 'None'",
+   "guardar": "(self, nombre: 'str', valor: 'str') -> 'None'",
+   "obtener": "(self, nombre: 'str') -> 'str | None'"
+  },
+  "modulo": "app.plugins.api",
+  "tipo": "clase"
+ },
+ "SinEspacio": {
+  "metodos": {},
+  "modulo": "app.services.vfs.base",
+  "tipo": "clase"
+ },
+ "SoloLectura": {
+  "metodos": {},
+  "modulo": "app.services.vfs.base",
+  "tipo": "clase"
+ },
+ "SonidosComplemento": {
+  "metodos": {
+   "sonar": "(self, evento: 'str', variante: 'str' = '', *, sustituye: 'bool' = False) -> 'bool'"
+  },
+  "modulo": "app.plugins.api",
+  "tipo": "clase"
+ },
+ "TokenCancelacion": {
+  "metodos": {
+   "al_cancelar": "(self, funcion: 'Callable[[], Any]') -> 'None'",
+   "cancelado": "(self) -> 'bool'",
+   "cancelar": "(self, motivo: 'str' = '') -> 'bool'",
+   "comprobar": "(self) -> 'None'",
+   "esperar": "(self, segundos: 'float') -> 'bool'",
+   "is_set": "(self) -> 'bool'",
+   "motivo": "(self) -> 'str'",
+   "set": "(self) -> 'None'",
+   "wait": "(self, timeout: 'float | None' = None) -> 'bool'"
+  },
+  "modulo": "app.core.tareas",
+  "tipo": "clase"
+ },
+ "Ubicacion": {
+  "metodos": {
+   "mostrar": "(self) -> 'str'"
+  },
+  "modulo": "app.services.vfs.base",
+  "tipo": "clase"
+ },
+ "UnidadVirtual": {
+  "metodos": {},
+  "modulo": "app.services.vfs.base",
+  "tipo": "clase"
+ },
+ "VistasCarpeta": {
+  "metodos": {
+   "conjuntos": "(self) -> 'list[str]'",
+   "proponer_conjunto": "(self, nombre: 'str', columnas: 'list[str]', lectura: 'list[str]', extensiones: 'Sequence[str]' = (), proporcion: 'float' = 0.6) -> 'bool'"
+  },
+  "modulo": "app.plugins.api",
+  "tipo": "clase"
+ },
+ "YaExiste": {
+  "metodos": {},
+  "modulo": "app.services.vfs.base",
+  "tipo": "clase"
+ },
+ "clave_carril": {
+  "firma": "(proveedor: 'base.Proveedor', ruta: 'str') -> 'str'",
+  "tipo": "funcion"
+ },
+ "comprobar": {
+  "firma": "(cancelacion) -> 'None'",
+  "tipo": "funcion"
+ },
+ "fijar_interfaz": {
+  "firma": "(interfaz: 'InterfazAnfitrion | None') -> 'None'",
+  "tipo": "funcion"
+ },
+ "formato": {
+  "tipo": "module"
+ },
+ "provisional": {
+  "firma": "(id_corto: 'str') -> 'Callable[[ContextoComplemento], None]'",
+  "tipo": "funcion"
+ },
+ "traduccion": {
+  "firma": "(nombre_modulo: 'str') -> 'tuple[Callable[[str], str], Callable[[str, str, int], str]]'",
+  "tipo": "funcion"
+ }
+}

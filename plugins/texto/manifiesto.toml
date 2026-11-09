@@ -1,0 +1,91 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 hxebolax y colaboradores
+# Codificaciones y fines de línea (diseño 2.0, 11.25). Manifiesto completo del bloque P2.
+
+formato = 1
+id = "zc.texto"
+bloque = "P2"
+nombre = "Codificaciones y fines de línea"
+descripcion = "Detecta y convierte la codificación y los fines de línea de archivos de texto, uno o muchos."
+version = "1.0.0"
+autor = "Proyecto zCommander"
+licencia = "GPL-3.0-or-later"
+api_minima = "1.0"
+api_probada = "1.0"
+entrada = "__init__:Complemento"
+nivel = "avanzado"
+ayuda = "doc/es/leeme.md"
+cambios = "doc/es/cambios.md"
+
+[[ordenes]]
+id = "convertir"
+etiqueta = "&Convertir la codificación y los fines de línea..."
+ayuda = "Convierte los marcados a UTF-8 y al fin de línea elegido con vista previa."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = ""
+
+[[ordenes]]
+id = "informe"
+etiqueta = "&Informe de caracteres no válidos"
+ayuda = "Informa de los caracteres no válidos de los archivos elegidos."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = ""
+
+# Columnas: leen solo los primeros 64 KB de cada archivo y solo de las extensiones de texto.
+[[columnas]]
+id = "codificacion"
+titulo = "Codificación"
+patrones = ["*.txt", "*.md", "*.csv", "*.ini", "*.bat", "*.cmd", "*.py", "*.html", "*.htm", "*.xml", "*.json", "*.log", "*.srt", "*.tsv"]
+tipo = "texto"
+lenta = true
+
+[[columnas]]
+id = "fin_linea"
+titulo = "Fin de línea"
+patrones = ["*.txt", "*.md", "*.csv", "*.ini", "*.bat", "*.cmd", "*.py", "*.html", "*.htm", "*.xml", "*.json", "*.log", "*.srt", "*.tsv"]
+tipo = "texto"
+lenta = true
+
+[[paginas]]
+id = "general"
+titulo = "General"
+
+[[configuracion]]
+clave = "destino"
+tipo = "opcion"
+defecto = "utf8"
+opciones = [["utf8", "UTF-8 sin BOM"], ["utf8_bom", "UTF-8 con BOM"]]
+etiqueta = "Codificación de &destino:"
+ayuda = "Codificación que propone el diálogo Convertir. Con BOM, los programas antiguos de Windows reconocen mejor el UTF-8."
+pagina = "general"
+
+[[configuracion]]
+clave = "fin_linea"
+tipo = "opcion"
+defecto = "sin_cambio"
+opciones = [["sin_cambio", "Sin cambio"], ["crlf", "CRLF (Windows)"], ["lf", "LF (Unix)"]]
+etiqueta = "&Fin de línea:"
+ayuda = "Fin de línea que propone el diálogo Convertir. Sin cambio deja los que tiene cada archivo."
+pagina = "general"
+
+[[configuracion]]
+clave = "extensiones"
+tipo = "texto"
+defecto = "*.txt;*.md;*.csv;*.ini;*.bat;*.py;*.html;*.xml;*.json"
+etiqueta = "&Extensiones de texto:"
+ayuda = "Patrones separados por punto y coma de los archivos en los que las columnas Codificación y Fin de línea miran el contenido."
+pagina = "general"
+
+[[configuracion]]
+clave = "copia_bak"
+tipo = "bool"
+defecto = true
+etiqueta = "&Guardar una copia .bak del original al convertir"
+ayuda = "Deja el original con la extensión .bak junto al archivo convertido. Sin ella, Deshacer recupera el original mientras zCommander siga abierto."
+pagina = "general"

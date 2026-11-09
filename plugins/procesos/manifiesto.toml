@@ -1,0 +1,80 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 hxebolax y colaboradores
+# Archivos en uso y procesos (diseño 2.0, 11.9). Bloque P4.
+
+formato = 1
+id = "zc.procesos"
+bloque = "P4"
+nombre = "Archivos en uso y procesos"
+descripcion = "Dice qué programa tiene abierto un archivo, permite cerrarlo y lista los procesos."
+version = "1.0.0"
+autor = "Proyecto zCommander"
+licencia = "GPL-3.0-or-later"
+api_minima = "1.0"
+api_probada = "1.0"
+entrada = "__init__:Complemento"
+nivel = "intermedio"
+permisos = ["portapapeles"]
+prueba = "quien_usa"
+
+[[ordenes]]
+id = "quien_usa"
+etiqueta = "¿&Quién usa este archivo?"
+ayuda = "Dice qué programa tiene abierto el archivo del cursor o los marcados."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "lista"
+etiqueta = "&Procesos..."
+ayuda = "Abre la lista de procesos con su memoria, CPU y ruta."
+ambito = "global"
+menu = "complementos"
+teclas = ["Ctrl+Shift+F12"]
+nivel = "avanzado"
+argumento = ""
+
+# Botones extra en la pregunta de error del motor: solo con archivo en uso
+# (ERROR_SHARING_VIOLATION y ERROR_LOCK_VIOLATION), sin activar el complemento.
+[[acciones_error]]
+id = "ver_quien"
+etiqueta = "Ver qué programa lo &usa"
+ayuda = "Dice qué programa tiene abierto el archivo que no se puede usar."
+codigos_windows = [32, 33]
+
+[[acciones_error]]
+id = "cerrar_reintentar"
+etiqueta = "C&errar ese programa y reintentar"
+ayuda = "Cierra, con confirmación, el programa que tiene abierto el archivo y vuelve a intentarlo."
+codigos_windows = [32, 33]
+
+[[paginas]]
+id = "general"
+titulo = "General"
+
+[[configuracion]]
+clave = "refresco_s"
+tipo = "entero"
+defecto = 3
+minimo = 1
+maximo = 60
+etiqueta = "Segundos entre actualizaciones de la &lista de procesos:"
+ayuda = "Cada cuántos segundos se vuelve a leer la lista de procesos mientras la ventana está abierta."
+pagina = "general"
+
+[[configuracion]]
+clave = "mostrar_sistema"
+tipo = "bool"
+defecto = false
+etiqueta = "Mostrar los procesos del &sistema"
+ayuda = "Incluye en la lista los procesos de Windows y de los servicios (nunca se pueden terminar desde zCommander)."
+pagina = "general"
+
+[[sonidos]]
+id = "cerrado"
+nombre = "Programa cerrado"
+descripcion = "Suena cuando un programa o proceso se cierra a petición de la persona."
+prioridad = "media"

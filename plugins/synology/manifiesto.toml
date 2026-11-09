@@ -1,0 +1,305 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 hxebolax y colaboradores
+# Complemento «NAS Synology» (bloque NS; diseño 2.0, sección 13).
+
+formato = 1
+id = "zc.synology"
+bloque = "NS"
+nombre = "NAS Synology"
+descripcion = "Administra un NAS Synology con DSM, en solo lectura por defecto: estado y salud, almacenamiento, paquetes, contenedores, usuarios, servicios, seguridad y File Station como origen del panel. Incluye un NAS de demostración para practicar sin riesgo."
+version = "1.0.0"
+autor = "Proyecto zCommander"
+licencia = "GPL-3.0-or-later"
+api_minima = "1.0"
+api_probada = "1.0"
+entrada = "__init__:Complemento"
+# Se activa al arrancar (activar() solo registra funciones) para que las direcciones synology:// de la sesión funcionen.
+activacion = ["al_arrancar"]
+permisos = ["red", "secretos"]
+nivel = "intermedio"
+prueba = "desconectar"
+dialogo_preferencias = true
+
+[[ordenes]]
+id = "estado"
+etiqueta = "&Estado del NAS"
+ayuda = "Abre la ventana del NAS en el área Estado, conectando si hace falta."
+ambito = "global"
+menu = "complementos"
+teclas = ["Ctrl+Shift+F9"]
+nivel = "novato"
+argumento = ""
+
+[[ordenes]]
+id = "conectar"
+etiqueta = "&Conectar con un NAS..."
+ayuda = "Abre la lista de NAS guardados para conectar, dar de alta uno nuevo o arrancar el NAS de demostración."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "novato"
+argumento = ""
+
+[[ordenes]]
+id = "desconectar"
+etiqueta = "&Desconectar del NAS"
+ayuda = "Cierra la sesión con el NAS (y para el NAS de demostración si es ese)."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "novato"
+argumento = ""
+
+[[ordenes]]
+id = "abrir_archivos"
+etiqueta = "Abrir File Station en el &panel"
+ayuda = "Abre las carpetas compartidas del NAS en el panel activo (dirección synology://)."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "novato"
+argumento = ""
+
+[[ordenes]]
+id = "area"
+etiqueta = "Ir a un á&rea del NAS..."
+ayuda = "Elige un área del NAS y abre la ventana en ella."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "tareas_fondo"
+etiqueta = "&Tareas en segundo plano del NAS..."
+ayuda = "Muestra las tareas en segundo plano de File Station (copiar, mover, borrar, comprimir y extraer en el NAS)."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "enlace"
+etiqueta = "Crear un en&lace compartido..."
+ayuda = "Crea un enlace compartido de los elementos elegidos en un panel del NAS y lo copia al portapapeles."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "comprimir"
+etiqueta = "Comprimir en el &NAS..."
+ayuda = "Comprime los elementos elegidos en el propio NAS, sin pasar los archivos por este equipo."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "extraer"
+etiqueta = "E&xtraer en el NAS..."
+ayuda = "Extrae el comprimido del cursor en el propio NAS."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "modo_escritura"
+etiqueta = "Permitir cam&bios en el NAS"
+ayuda = "Activa o desactiva el modo que permite cambiar cosas en el NAS; activarlo pide confirmación."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = ""
+tipo = "casilla"
+casilla_defecto = false
+
+[[ordenes]]
+id = "demostracion"
+etiqueta = "NAS de de&mostración"
+ayuda = "Arranca un NAS simulado en este equipo para practicar sin riesgo: nada sale a la red y los cambios se pierden al cerrar."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "novato"
+argumento = ""
+
+[[ordenes]]
+id = "ssh"
+etiqueta = "Herramientas avanzadas por &SSH..."
+ayuda = "S.M.A.R.T. en bruto, registros largos y estadísticas de contenedores, compose y rescate de paquetes por SSH (desactivadas de fábrica)."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = ""
+
+[[ordenes]]
+id = "reiniciar"
+etiqueta = "Re&iniciar el NAS..."
+ayuda = "Reinicia el NAS con doble confirmación: la segunda pide escribir su nombre."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = ""
+
+[[ordenes]]
+id = "apagar"
+etiqueta = "Apa&gar el NAS..."
+ayuda = "Apaga el NAS con doble confirmación: la segunda pide escribir su nombre."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = ""
+
+# ── Origen del panel, selector de unidades y búsqueda (13.7) ──────────────────
+
+[[esquemas]]
+prefijo = "synology"
+nombre = "NAS Synology (File Station)"
+
+[[unidades]]
+dinamicas = true
+
+[[busqueda]]
+id = "filestation"
+nombre = "NAS Synology (Universal Search o File Station)"
+
+# ── Secretos (13.3): plugin:zc.synology:<id del NAS>:<nombre> ─────────────────
+
+[[secretos]]
+nombre = "contrasena"
+descripcion = "Contraseña de la cuenta de DSM de cada NAS (si se marca «Recordar la contraseña»)."
+
+[[secretos]]
+nombre = "device_id"
+descripcion = "Identificador de este equipo como dispositivo de confianza de la verificación en dos pasos de DSM."
+
+# ── Configuración (13.11) ─────────────────────────────────────────────────────
+
+[[configuracion]]
+clave = "tiempo_conexion_s"
+tipo = "entero"
+defecto = 10
+minimo = 2
+maximo = 60
+etiqueta = "&Tiempo para conectar con el NAS (segundos):"
+ayuda = "Cuánto se espera a que el NAS acepte la conexión antes de dar el error «no responde»."
+
+[[configuracion]]
+clave = "tiempo_peticion_s"
+tipo = "entero"
+defecto = 30
+minimo = 5
+maximo = 300
+etiqueta = "Espera máxima de cada &orden al NAS (segundos):"
+ayuda = "Cuánto se espera la respuesta de cada petición. Las subidas y descargas no tienen límite total."
+
+[[configuracion]]
+clave = "refresco_estado_s"
+tipo = "entero"
+defecto = 10
+minimo = 2
+maximo = 300
+etiqueta = "&Intervalo de refresco de la ventana del NAS (segundos):"
+ayuda = "Cada cuánto se vuelve a leer el área visible de la ventana del NAS, sin mover el foco."
+
+[[configuracion]]
+clave = "anunciar_avisos"
+tipo = "bool"
+defecto = true
+etiqueta = "A&nunciar los avisos de salud del NAS"
+ayuda = "Dice una vez cada aviso nuevo (un disco con problemas, un contenedor que falla, un certificado que caduca)."
+
+[[configuracion]]
+clave = "aviso_temperatura_c"
+tipo = "entero"
+defecto = 55
+minimo = 40
+maximo = 80
+etiqueta = "Te&mperatura del sistema que da aviso (grados):"
+ayuda = "A partir de esta temperatura, el área Estado y salud la marca como aviso."
+
+[[configuracion]]
+clave = "ssh_activado"
+tipo = "bool"
+defecto = false
+etiqueta = "Permitir las herramientas avanzadas por &SSH"
+ayuda = "Desactivado de fábrica. Usa la clave pública del agente de OpenSSH de Windows; la contraseña de sudo se pide cada vez y nunca se guarda."
+
+[[configuracion]]
+clave = "registro_detallado"
+tipo = "bool"
+defecto = false
+etiqueta = "Re&gistro detallado de las peticiones al NAS"
+ayuda = "Anota en el registro cada petición con sus parámetros. Nunca anota contraseñas, sesiones ni códigos."
+
+[[configuracion]]
+clave = "demostracion_modo"
+tipo = "opcion"
+defecto = "escritura"
+opciones = [["escritura", "Los cambios se aplican en memoria"], ["simular", "Los cambios se simulan y no cambian nada"], ["lectura", "El NAS de demostración rechaza los cambios"]]
+etiqueta = "Mo&do del NAS de demostración:"
+ayuda = "Qué hace el NAS de demostración cuando se le pide un cambio. En los tres casos se empieza en solo lectura."
+
+[[configuracion]]
+clave = "escritura_hasta"
+tipo = "opcion"
+defecto = "sesion"
+opciones = [["sesion", "Solo durante la sesión"], ["siempre", "Hasta que lo vuelva a activar"]]
+etiqueta = "&Hasta cuándo dura el permiso de cambios (opción propuesta):"
+ayuda = "Lo que propone el diálogo «Permitir cambios en el NAS». Solo durante la sesión es lo más seguro."
+
+# ── Sonidos (13.12) ───────────────────────────────────────────────────────────
+
+[[sonidos]]
+id = "conectado"
+nombre = "NAS conectado"
+descripcion = "Se ha iniciado la sesión con un NAS Synology."
+prioridad = "media"
+
+[[sonidos]]
+id = "desconectado"
+nombre = "NAS desconectado"
+descripcion = "Se ha cerrado la sesión con un NAS Synology."
+prioridad = "media"
+
+[[sonidos]]
+id = "aviso_salud"
+nombre = "Aviso de salud del NAS"
+descripcion = "Un disco, un volumen, un contenedor o un certificado del NAS necesita atención."
+prioridad = "alta"
+
+[[sonidos]]
+id = "tarea_fin"
+nombre = "Tarea del NAS terminada"
+descripcion = "Ha terminado una tarea en segundo plano del NAS (comprimir, extraer)."
+prioridad = "media"
+
+[[sonidos]]
+id = "cambios_permitidos"
+nombre = "Cambios permitidos en el NAS"
+descripcion = "El NAS ha salido del modo solo lectura."
+prioridad = "alta"
+
+[[sonidos]]
+id = "demostracion_iniciada"
+nombre = "NAS de demostración en marcha"
+descripcion = "Se ha arrancado el NAS simulado para practicar."
+prioridad = "media"
+
+[[sonidos]]
+id = "otp"
+nombre = "Código de verificación del NAS"
+descripcion = "El NAS pide el código de la verificación en dos pasos."
+prioridad = "alta"

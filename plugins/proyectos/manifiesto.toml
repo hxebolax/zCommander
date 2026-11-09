@@ -1,0 +1,79 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 hxebolax y colaboradores
+# Proyectos y salto rápido (diseño 2.0, 11.15). Bloque P5.
+
+formato = 1
+id = "zc.proyectos"
+bloque = "P5"
+nombre = "Proyectos y salto rápido"
+descripcion = "Lleva a cualquier carpeta frecuente escribiendo parte de su nombre y gestiona proyectos sobre los espacios de trabajo."
+version = "1.0.0"
+autor = "Proyecto zCommander"
+licencia = "GPL-3.0-or-later"
+api_minima = "1.0"
+api_probada = "1.0"
+entrada = "__init__:Complemento"
+nivel = "novato"
+activacion = ["al_arrancar"]
+
+[[ordenes]]
+id = "salto"
+etiqueta = "&Salto rápido..."
+ayuda = "Lleva el panel a una carpeta frecuente escribiendo parte de su nombre."
+ambito = "global"
+menu = "complementos"
+teclas = ["Ctrl+Shift+J"]
+nivel = "novato"
+argumento = ""
+
+[[ordenes]]
+id = "proyectos"
+etiqueta = "&Proyectos..."
+ayuda = "Lista, guarda y abre los proyectos."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[paginas]]
+id = "general"
+titulo = "General"
+
+[[configuracion]]
+clave = "max_carpetas"
+tipo = "entero"
+defecto = 1000
+minimo = 10
+maximo = 100000
+etiqueta = "Má&ximo de carpetas recordadas:"
+ayuda = "Cuántas carpetas recuerda el salto rápido; al pasarse se olvidan las de menos puntuación."
+pagina = "general"
+
+[[configuracion]]
+clave = "peso_frecuencia"
+tipo = "decimal"
+defecto = 1.0
+minimo = 0.0
+maximo = 5.0
+etiqueta = "Peso de la &frecuencia:"
+ayuda = "Cuánto cuenta el número de visitas frente a lo reciente: 0 solo lo reciente; 1 por defecto; más de 1, la frecuencia manda."
+pagina = "general"
+
+[[configuracion]]
+clave = "media_vida_dias"
+tipo = "entero"
+defecto = 14
+minimo = 1
+maximo = 3650
+etiqueta = "&Media vida, en días:"
+ayuda = "Una carpeta que no se visita desde hace estos días pesa la mitad en el salto rápido."
+pagina = "general"
+
+[[configuracion]]
+clave = "excluidas"
+tipo = "lista"
+defecto = ['C:\Windows']
+etiqueta = "Carpetas &excluidas:"
+ayuda = "Estas carpetas y lo que tienen dentro nunca se proponen ni se cuentan."
+pagina = "general"

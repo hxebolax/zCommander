@@ -1,0 +1,153 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 hxebolax y colaboradores
+# Conversor multimedia con FFmpeg (diseño 2.0, 11.6). Bloque P1.
+
+formato = 1
+id = "zc.ffmpeg"
+bloque = "P1"
+nombre = "Conversor multimedia con FFmpeg"
+descripcion = "Convierte audio y vídeo, extrae el audio de un vídeo, recorta, normaliza el volumen y da la información técnica con el componente FFmpeg."
+version = "1.0.0"
+autor = "Proyecto zCommander"
+licencia = "GPL-3.0-or-later"
+api_minima = "1.0"
+api_probada = "1.0"
+entrada = "__init__:Complemento"
+nivel = "intermedio"
+prueba = "informacion"
+permisos = ["ejecutar_programas"]
+
+[requiere]
+componentes = ["ffmpeg"]
+
+[[ordenes]]
+id = "convertir"
+etiqueta = "&Convertir audio o vídeo..."
+ayuda = "Convierte los elementos de trabajo con un perfil de audio o vídeo."
+ambito = "global"
+menu = "complementos"
+teclas = ["Ctrl+Shift+F6"]
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "extraer_audio"
+etiqueta = "&Extraer el audio..."
+ayuda = "Extrae el audio de un vídeo, copiando el flujo si se puede."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "recortar"
+etiqueta = "&Recortar..."
+ayuda = "Recorta un archivo de audio o vídeo entre un inicio y un fin."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "normalizar"
+etiqueta = "&Normalizar el volumen..."
+ayuda = "Normaliza el volumen con el filtro loudnorm de dos pasadas."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = ""
+
+[[ordenes]]
+id = "informacion"
+etiqueta = "&Información técnica"
+ayuda = "Dice la duración, el contenedor y los flujos del archivo del cursor."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = ""
+
+[[ordenes]]
+id = "unir"
+etiqueta = "&Unir archivos de audio..."
+ayuda = "Une archivos de audio del mismo formato en uno solo."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+# Información técnica en Ctrl+Mayús+I para los vídeos y los formatos de audio que no lee zc.metadatos
+# (los de zc.metadatos ya dicen duración, tasa de bits y canales).
+[[info]]
+nombre = "Información técnica (FFmpeg)"
+patrones = ["*.mp4", "*.m4v", "*.mkv", "*.avi", "*.wmv", "*.mov", "*.webm", "*.mpg", "*.mpeg", "*.ts", "*.m2ts", "*.flv", "*.3gp", "*.ogv", "*.vob", "*.ac3", "*.amr", "*.ape", "*.wv", "*.mka", "*.mp2", "*.mpc", "*.tta", "*.caf"]
+
+[[paginas]]
+id = "general"
+titulo = "General"
+
+[[configuracion]]
+clave = "perfil"
+tipo = "opcion"
+defecto = "mp3_192"
+opciones = [["mp3_128", "MP3, 128 kb/s"], ["mp3_192", "MP3, 192 kb/s"], ["mp3_320", "MP3, 320 kb/s"], ["mp3_vbr", "MP3, variable de alta calidad"], ["aac_128", "AAC (M4A), 128 kb/s"], ["aac_192", "AAC (M4A), 192 kb/s"], ["aac_256", "AAC (M4A), 256 kb/s"], ["opus_64", "Opus, 64 kb/s"], ["opus_96", "Opus, 96 kb/s"], ["opus_128", "Opus, 128 kb/s"], ["opus_160", "Opus, 160 kb/s"], ["ogg_4", "OGG Vorbis, calidad 4"], ["ogg_6", "OGG Vorbis, calidad 6"], ["ogg_8", "OGG Vorbis, calidad 8"], ["flac_5", "FLAC, compresión normal"], ["flac_8", "FLAC, compresión máxima"], ["wav_16", "WAV, 16 bits"], ["wav_24", "WAV, 24 bits"], ["mp4_23", "MP4 (H.264 y AAC), calidad normal"], ["mp4_18", "MP4 (H.264 y AAC), calidad alta"], ["mp4_28", "MP4 (H.264 y AAC), tamaño reducido"], ["webm_32", "WebM (VP9 y Opus), calidad normal"], ["webm_24", "WebM (VP9 y Opus), calidad alta"], ["webm_40", "WebM (VP9 y Opus), tamaño reducido"], ["mkv_copia", "MKV, copiar los flujos"], ["personalizado", "Personalizado"]]
+etiqueta = "Perfi&l que se propone al convertir:"
+ayuda = "Perfil y calidad con los que se abre el diálogo Convertir. Cambia solo al usar otro."
+pagina = "general"
+
+[[configuracion]]
+clave = "carpeta_salida"
+tipo = "opcion"
+defecto = "otro_panel"
+opciones = [["otro_panel", "La carpeta del otro panel"], ["misma", "La carpeta del original"], ["elegida", "La carpeta elegida abajo"]]
+etiqueta = "Carpeta de &salida:"
+ayuda = "Dónde se crean los archivos convertidos, extraídos, recortados, normalizados o unidos."
+pagina = "general"
+
+[[configuracion]]
+clave = "carpeta_elegida"
+tipo = "carpeta"
+defecto = ""
+etiqueta = "Carpeta &elegida:"
+ayuda = "Carpeta de salida cuando se elige «La carpeta elegida abajo». Vacía o inexistente: la del otro panel."
+pagina = "general"
+
+[[configuracion]]
+clave = "hilos"
+tipo = "entero"
+defecto = 0
+minimo = 0
+maximo = 16
+etiqueta = "&Hilos de FFmpeg (0 es automático):"
+ayuda = "Cuántos núcleos del procesador usa FFmpeg. 0 deja que lo decida FFmpeg; un número bajo deja el equipo más libre mientras convierte."
+pagina = "general"
+
+[[configuracion]]
+clave = "normalizar_lufs"
+tipo = "decimal"
+defecto = -16.0
+minimo = -30.0
+maximo = -10.0
+etiqueta = "Volumen al &normalizar (LUFS):"
+ayuda = "Sonoridad objetivo de Normalizar el volumen, de -30 a -10. -16 es la habitual en podcasts y audiolibros; -23, la de la televisión europea (EBU R128)."
+pagina = "general"
+
+[[configuracion]]
+clave = "conservar_etiquetas"
+tipo = "bool"
+defecto = true
+etiqueta = "Conservar las e&tiquetas al convertir"
+ayuda = "Valor con el que se abre la casilla del diálogo Convertir: copia el artista, el título y las demás etiquetas al archivo convertido."
+pagina = "general"
+
+[[configuracion]]
+clave = "perfiles_propios"
+tipo = "lista"
+defecto = []
+interna = true
+etiqueta = "Perfiles propios"
+ayuda = "Argumentos personalizados guardados."

@@ -1,0 +1,11 @@
+Paquete de sonidos de zCommander: Cristal
+
+Generado por síntesis con tools/generar_sonidos.py 1.0 (Proyecto zCommander).
+
+En la medida en que lo permite la ley, el Proyecto zCommander renuncia a todos
+sus derechos de autor y derechos conexos sobre estos sonidos y los dedica al
+dominio público con la licencia Creative Commons Zero 1.0 Universal (CC0-1.0):
+puede copiarlos, modificarlos, distribuirlos y usarlos, también con fines
+comerciales, sin pedir permiso.
+
+Texto legal: https://creativecommons.org/publicdomain/zero/1.0/legalcode

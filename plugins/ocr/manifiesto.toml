@@ -1,0 +1,119 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 hxebolax y colaboradores
+# Reconocimiento de texto, OCR (diseño 2.0, 11.3). Manifiesto completo del bloque P2.
+# Vendoriza pywinrt 4.1.0 (MIT; lib/winrt, con la extensión _winrt para CPython 3.15 de 64 bits) y
+# typing_extensions 4.16.0 (PSF-2.0), que pywinrt necesita. Licencias en lib/LICENCIA-*.txt.
+
+formato = 1
+id = "zc.ocr"
+bloque = "P2"
+nombre = "Reconocimiento de texto, OCR"
+descripcion = "Reconoce el texto de imágenes y PDF escaneados con el motor OCR de Windows, sin Internet."
+version = "1.0.0"
+autor = "Proyecto zCommander"
+licencia = "GPL-3.0-or-later"
+api_minima = "1.0"
+api_probada = "1.0"
+entrada = "__init__:Complemento"
+plataforma = "win_amd64"
+python = "3.15"
+nivel = "novato"
+ayuda = "doc/es/leeme.md"
+cambios = "doc/es/cambios.md"
+permisos = ["ejecutar_programas", "portapapeles"]
+dialogo_preferencias = true
+
+[[ordenes]]
+id = "reconocer"
+etiqueta = "&Reconocer el texto"
+ayuda = "Reconoce el texto del archivo del cursor y lo muestra en el visor."
+ambito = "global"
+menu = "complementos"
+teclas = ["Ctrl+Shift+F3"]
+nivel = "novato"
+argumento = ""
+
+[[ordenes]]
+id = "lotes"
+etiqueta = "Reconocer los marcados a &archivos de texto..."
+ayuda = "Reconoce los marcados y guarda un archivo de texto junto a cada uno."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "portapapeles"
+etiqueta = "Reconocer la imagen del &portapapeles"
+ayuda = "Reconoce el texto de la imagen que hay en el portapapeles."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "ventana"
+etiqueta = "Reconocer la &ventana en primer plano"
+ayuda = "Reconoce el texto de la ventana en primer plano, útil en programas inaccesibles."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+tecla_global = true
+
+[[paginas]]
+id = "general"
+titulo = "General"
+
+# El idioma se elige entre los instalados en «Abrir la configuración avanzada...» (diálogo propio).
+[[configuracion]]
+clave = "idioma"
+tipo = "texto"
+defecto = ""
+etiqueta = "Idioma"
+ayuda = "Etiqueta del idioma de reconocimiento (es-ES); vacío es el de Windows."
+interna = true
+
+[[configuracion]]
+clave = "escala_pdf"
+tipo = "decimal"
+defecto = 2.0
+minimo = 1.0
+maximo = 4.0
+etiqueta = "&Escala de las páginas de PDF:"
+ayuda = "Cuánto se amplía cada página antes de reconocerla, de 1 a 4. Más escala reconoce mejor la letra pequeña y tarda más."
+pagina = "general"
+
+[[configuracion]]
+clave = "carpeta_salida"
+tipo = "carpeta"
+defecto = ""
+etiqueta = "Carpeta de &salida de los lotes:"
+ayuda = "Dónde se guardan los archivos de texto de «Reconocer los marcados». Vacía: junto a cada archivo."
+pagina = "general"
+
+[[configuracion]]
+clave = "sobrescribir"
+tipo = "bool"
+defecto = false
+etiqueta = "Sustituir los archivos de &texto que ya existan"
+ayuda = "Si está desactivada, un archivo de texto que ya existe no se toca y se omite."
+pagina = "general"
+
+[[configuracion]]
+clave = "motor"
+tipo = "opcion"
+defecto = "automatico"
+opciones = [["automatico", "Automático"], ["winrt", "pywinrt (en zCommander)"], ["powershell", "Windows PowerShell"]]
+etiqueta = "&Motor:"
+ayuda = "Automático usa pywinrt y, si no funciona, PowerShell. Los dos usan el mismo OCR de Windows."
+pagina = "general"
+
+[[sonidos]]
+id = "fin"
+nombre = "Reconocimiento de texto terminado"
+descripcion = "Termina un reconocimiento de texto (del archivo, del portapapeles, de la ventana o de un lote)."
+prioridad = "media"

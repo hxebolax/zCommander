@@ -1,0 +1,67 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 hxebolax y colaboradores
+# Programador de tareas (diseño 2.0, 11.24). Bloque P5.
+
+formato = 1
+id = "zc.programador"
+bloque = "P5"
+nombre = "Programador de tareas"
+descripcion = "Ejecuta tareas de zCommander a una hora o con una frecuencia, también con zCommander cerrado."
+version = "1.0.0"
+autor = "Proyecto zCommander"
+licencia = "GPL-3.0-or-later"
+api_minima = "1.0"
+api_probada = "1.0"
+entrada = "__init__:Complemento"
+nivel = "intermedio"
+activacion = ["al_arrancar"]
+permisos = ["ejecutar_programas", "segundo_plano"]
+
+[[ordenes]]
+id = "tareas"
+etiqueta = "&Programador de tareas..."
+ayuda = "Crea, edita y ejecuta las tareas programadas."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "registro"
+etiqueta = "&Registro de ejecuciones..."
+ayuda = "Muestra el resultado de las tareas programadas ejecutadas."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[eventos]]
+nombre = "comprobar"
+
+[[paginas]]
+id = "general"
+titulo = "General"
+
+[[configuracion]]
+clave = "usar_windows"
+tipo = "bool"
+defecto = true
+etiqueta = "Usar el Programador de tareas de &Windows (las tareas se ejecutan también con zCommander cerrado)"
+ayuda = "Si se desmarca, las tareas solo se ejecutan mientras zCommander está abierto."
+pagina = "general"
+
+[[configuracion]]
+clave = "notificaciones"
+tipo = "bool"
+defecto = true
+etiqueta = "Avisar del resultado con una &notificación de Windows"
+ayuda = "Además del anuncio y del registro de ejecuciones, muestra una notificación al terminar cada tarea."
+pagina = "general"
+
+[[sonidos]]
+id = "tarea_fin"
+nombre = "Tarea programada terminada"
+descripcion = "Suena al terminar una tarea programada con zCommander abierto o, al abrirlo, si se ejecutaron tareas mientras estaba cerrado."
+prioridad = "media"

@@ -1,0 +1,12 @@
+{
+	"formato": 1,
+	"id": "cristal",
+	"nombre": "Cristal",
+	"autor": "Proyecto zCommander",
+	"licencia": "CC0-1.0",
+	"version": "1.0.0",
+	"descripcion": "Campanas por síntesis FM con parciales inarmónicos y una cola corta de reverberación.",
+	"hereda": "clasico",
+	"generado_por": "tools/generar_sonidos.py 1.0",
+	"archivos": {}
+}

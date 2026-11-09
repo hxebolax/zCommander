@@ -1,0 +1,135 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 hxebolax y colaboradores
+# Seguridad de descargas e integridad (diseño 2.0, 11.19). Bloque P4.
+
+formato = 1
+id = "zc.seguridad"
+bloque = "P4"
+nombre = "Seguridad de descargas e integridad"
+descripcion = "Ayuda a decidir si un archivo es de fiar: firma digital, sumas, Defender, VirusTotal y marca de la Web."
+version = "1.0.0"
+autor = "Proyecto zCommander"
+licencia = "GPL-3.0-or-later"
+api_minima = "1.0"
+api_probada = "1.0"
+entrada = "__init__:Complemento"
+nivel = "intermedio"
+permisos = ["internet:www.virustotal.com", "ejecutar_programas", "secretos", "portapapeles"]
+# Para analizar con Defender lo copiado desde FTP, SFTP o una nube (si analizar_descargas está activa).
+activacion = ["evento:al_terminar_operacion"]
+# Diálogo propio para poner u olvidar la clave de VirusTotal (es un secreto: no va en la página declarativa).
+dialogo_preferencias = true
+prueba = "firma"
+
+[[ordenes]]
+id = "firma"
+etiqueta = "Comprobar la &firma digital"
+ayuda = "Comprueba la firma Authenticode del archivo del cursor."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "comparar_suma"
+etiqueta = "Comparar la suma con el &portapapeles"
+ayuda = "Compara la suma del archivo con la que hay en el portapapeles."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "defender"
+etiqueta = "Analizar con &Defender"
+ayuda = "Analiza los elementos de trabajo con Microsoft Defender."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "virustotal"
+etiqueta = "Buscar en &VirusTotal"
+ayuda = "Busca el hash del archivo en VirusTotal sin enviar el archivo."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = ""
+
+[[ordenes]]
+id = "quitar_marca"
+etiqueta = "Quitar la marca de la &Web..."
+ayuda = "Quita la marca de la Web de los archivos elegidos."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "avanzado"
+argumento = ""
+
+[[columnas]]
+id = "firma"
+titulo = "Firma"
+patrones = ["*.exe", "*.dll", "*.msi", "*.msix", "*.appx", "*.sys", "*.ocx", "*.cab", "*.cat", "*.ps1", "*.psm1", "*.vbs", "*.js", "*.scr", "*.cpl", "*.drv", "*.efi", "*.mui"]
+tipo = "texto"
+lenta = true
+
+[[columnas]]
+id = "marca_web"
+titulo = "Origen"
+patrones = []
+tipo = "texto"
+lenta = false
+
+[[info]]
+nombre = "Seguridad"
+patrones = []
+
+[[paginas]]
+id = "general"
+titulo = "General"
+
+[[configuracion]]
+clave = "analizar_descargas"
+tipo = "bool"
+defecto = false
+etiqueta = "Analizar con &Defender lo que se copia desde FTP, SFTP o una nube"
+ayuda = "Al terminar una copia desde un servidor o una nube al disco, analiza lo copiado con Microsoft Defender y avisa si encuentra algo."
+pagina = "general"
+
+[[configuracion]]
+clave = "algoritmo"
+tipo = "opcion"
+defecto = "sha256"
+opciones = [["sha256", "SHA-256"], ["sha1", "SHA-1"], ["md5", "MD5"]]
+etiqueta = "Suma que se calcula si el portapapeles no tiene &ninguna:"
+ayuda = "Al comparar con el portapapeles, el algoritmo se deduce de la suma copiada; este es el que se usa si no hay ninguna."
+pagina = "general"
+
+[[configuracion]]
+clave = "aviso_virustotal"
+tipo = "bool"
+defecto = false
+interna = true
+etiqueta = "Aviso de VirusTotal mostrado"
+ayuda = "Verdadero cuando ya se avisó de qué se envía a VirusTotal."
+
+[[secretos]]
+nombre = "clave_virustotal"
+descripcion = "Clave personal de la API de VirusTotal, para buscar el hash de un archivo."
+
+[[sonidos]]
+id = "sin_firma"
+nombre = "Sin firma"
+descripcion = "Suena al comprobar un ejecutable sin firma o con una firma no válida."
+prioridad = "media"
+
+[[sonidos]]
+id = "amenaza"
+nombre = "Amenaza"
+descripcion = "Suena cuando Defender o VirusTotal encuentran algo, o la suma no coincide."
+prioridad = "media"

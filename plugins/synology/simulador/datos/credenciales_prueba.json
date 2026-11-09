@@ -1,0 +1,8 @@
+{
+	"_aviso": "Cuentas INVENTADAS del simulador DSM. No son ni se parecen a las de ningún NAS real; nunca se guardan credenciales reales en el repositorio.",
+	"cuentas": {
+		"demo": {"contrasena": "demo", "administrador": true},
+		"prueba2fa": {"contrasena": "prueba2fa", "administrador": true, "otp": "123456"},
+		"lectura": {"contrasena": "lectura", "administrador": false}
+	}
+}

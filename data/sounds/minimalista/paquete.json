@@ -1,0 +1,12 @@
+{
+	"formato": 1,
+	"id": "minimalista",
+	"nombre": "Minimalista",
+	"autor": "Proyecto zCommander",
+	"licencia": "CC0-1.0",
+	"version": "1.0.0",
+	"descripcion": "Clics y golpes de 5 a 40 ms: lo mínimo para distinguir los eventos sin ocupar tiempo de voz.",
+	"hereda": "clasico",
+	"generado_por": "tools/generar_sonidos.py 1.0",
+	"archivos": {}
+}

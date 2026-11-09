@@ -1,0 +1,84 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 hxebolax y colaboradores
+# Papelera de reciclaje como panel (diseño 2.0, 3.3 y 11.20). Dueño: bloque P3.
+
+formato = 1
+id = "zc.papelera"
+bloque = "P3"
+nombre = "Papelera de reciclaje como panel"
+descripcion = "Muestra la papelera en un panel con la ruta original y la fecha de eliminación."
+version = "1.0.0"
+autor = "Proyecto zCommander"
+licencia = "GPL-3.0-or-later"
+api_minima = "1.0"
+api_probada = "1.0"
+entrada = "__init__:Complemento"
+nivel = "novato"
+
+[[ordenes]]
+id = "abrir"
+etiqueta = "Abrir la &papelera"
+ayuda = "Abre la papelera de reciclaje en el panel activo."
+ambito = "global"
+menu = "complementos"
+teclas = ["Ctrl+F8"]
+nivel = "novato"
+argumento = ""
+
+[[ordenes]]
+id = "restaurar"
+etiqueta = "&Restaurar a su sitio"
+ayuda = "Devuelve los elementos elegidos de la papelera a su ubicación original."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "novato"
+argumento = ""
+
+[[ordenes]]
+id = "vaciar"
+etiqueta = "&Vaciar la papelera..."
+ayuda = "Elimina definitivamente todo lo que hay en la papelera."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "novato"
+argumento = ""
+
+[[esquemas]]
+prefijo = "papelera"
+nombre = "Papelera de reciclaje"
+
+# «Papelera» en el selector de unidades; dinámica para añadir el resumen («312 elementos, 4,2 GB»)
+# y, de paso, activar el complemento antes de que se elija (así papelera:// ya está registrado).
+[[unidades]]
+texto = "Papelera"
+direccion = "papelera://"
+descripcion = "Lo eliminado de las unidades fijas"
+dinamicas = true
+
+[[columnas]]
+id = "ubicacion"
+titulo = "Ubicación original"
+patrones = ["*"]
+tipo = "texto"
+lenta = false
+
+[[columnas]]
+id = "eliminado"
+titulo = "Fecha de eliminación"
+patrones = ["*"]
+tipo = "texto"
+lenta = false
+
+[[paginas]]
+id = "general"
+titulo = "General"
+
+[[configuracion]]
+clave = "unidades"
+tipo = "lista"
+defecto = []
+etiqueta = "Unida&des cuya papelera se muestra (vacía, todas):"
+ayuda = "Letras de unidad como C: o D:. Sin ninguna, se muestran las papeleras de todas las unidades fijas."
+pagina = "general"

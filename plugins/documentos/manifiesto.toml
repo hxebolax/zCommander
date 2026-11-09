@@ -1,0 +1,137 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 hxebolax y colaboradores
+# Lector de documentos (diseño 2.0, 11.2). Manifiesto completo del bloque P2.
+# Vendoriza pypdf 7.0.0 (BSD-3-Clause, Python puro) en lib/pypdf; su licencia está en lib/LICENCIA-pypdf.txt.
+
+formato = 1
+id = "zc.documentos"
+bloque = "P2"
+nombre = "Lector de documentos"
+descripcion = "Convierte PDF, DOCX, ODT, EPUB, RTF, HTML y FB2 en un documento con secciones que se lee en el visor interno y en la Vista rápida."
+version = "1.0.0"
+autor = "Proyecto zCommander"
+licencia = "GPL-3.0-or-later"
+api_minima = "1.0"
+api_probada = "1.0"
+entrada = "__init__:Complemento"
+nivel = "novato"
+ayuda = "doc/es/leeme.md"
+cambios = "doc/es/cambios.md"
+prueba = "propiedades"
+
+[recomienda]
+complementos = ["zc.ocr >= 1.0"]
+
+[[ordenes]]
+id = "convertir"
+etiqueta = "&Convertir a texto..."
+ayuda = "Guarda el documento del cursor o los marcados como texto o Markdown."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "propiedades"
+etiqueta = "&Propiedades del documento"
+ayuda = "Dice el título, el autor, las páginas y la fecha del documento."
+ambito = "panel"
+menu = "complementos"
+teclas = []
+nivel = "novato"
+argumento = ""
+disponible_si = "*.pdf;*.docx;*.doc;*.odt;*.epub;*.rtf;*.html;*.htm;*.xhtml;*.fb2"
+
+# F3 y la Vista rápida: el documento con secciones en el visor interno.
+[[visores]]
+id = "documento"
+nombre = "Lector de documentos"
+patrones = ["*.pdf", "*.docx", "*.doc", "*.odt", "*.epub", "*.rtf", "*.html", "*.htm", "*.xhtml", "*.fb2"]
+vista_rapida = true
+prioridad = 10
+
+[[columnas]]
+id = "paginas"
+titulo = "Páginas"
+patrones = ["*.pdf", "*.docx", "*.odt"]
+tipo = "numero"
+lenta = true
+
+[[columnas]]
+id = "titulo"
+titulo = "Título"
+patrones = ["*.pdf", "*.docx", "*.odt", "*.epub", "*.rtf", "*.html", "*.htm", "*.xhtml", "*.fb2"]
+tipo = "texto"
+lenta = true
+
+[[columnas]]
+id = "autor"
+titulo = "Autor"
+patrones = ["*.pdf", "*.docx", "*.odt", "*.epub", "*.rtf", "*.fb2"]
+tipo = "texto"
+lenta = true
+
+[[info]]
+nombre = "Documento"
+patrones = ["*.pdf", "*.docx", "*.odt", "*.epub", "*.rtf", "*.html", "*.htm", "*.xhtml", "*.fb2"]
+
+[[extractores]]
+nombre = "Documentos (PDF, Word, OpenDocument, EPUB, RTF, HTML y FB2)"
+patrones = ["*.pdf", "*.docx", "*.odt", "*.epub", "*.rtf", "*.html", "*.htm", "*.xhtml", "*.fb2"]
+
+[[paginas]]
+id = "general"
+titulo = "General"
+
+[[configuracion]]
+clave = "formatos"
+tipo = "lista"
+defecto = ["pdf", "docx", "doc", "odt", "epub", "rtf", "html", "fb2"]
+etiqueta = "&Formatos que se leen:"
+ayuda = "Extensiones que abre el lector de documentos (pdf, docx, doc, odt, epub, rtf, html, fb2). Las que quite se ven con el visor interno."
+pagina = "general"
+
+[[configuracion]]
+clave = "tamano_maximo_mb"
+tipo = "entero"
+defecto = 100
+minimo = 1
+maximo = 2000
+etiqueta = "&Tamaño máximo de un documento (MB):"
+ayuda = "Los documentos más grandes no se convierten (el visor lo dice)."
+pagina = "general"
+
+[[configuracion]]
+clave = "marcas_pagina"
+tipo = "bool"
+defecto = true
+etiqueta = "&Marcas de página en los PDF"
+ayuda = "Cada página del PDF es una sección «Página N de M»: F6 va a la siguiente y Control+P a una página."
+pagina = "general"
+
+[[configuracion]]
+clave = "texto_alternativo"
+tipo = "bool"
+defecto = true
+etiqueta = "Leer el te&xto alternativo de las imágenes"
+ayuda = "Dice «[Imagen: descripción]» donde el documento tiene una imagen con texto alternativo."
+pagina = "general"
+
+[[configuracion]]
+clave = "formato_salida"
+tipo = "opcion"
+defecto = "txt"
+opciones = [["txt", "Texto (.txt)"], ["md", "Markdown (.md)"]]
+etiqueta = "F&ormato al convertir:"
+ayuda = "El que propone «Convertir a texto»."
+pagina = "general"
+
+[[configuracion]]
+clave = "codificacion_salida"
+tipo = "opcion"
+defecto = "utf-8"
+opciones = [["utf-8", "UTF-8"], ["utf-8-sig", "UTF-8 con BOM"]]
+etiqueta = "Co&dificación al convertir:"
+ayuda = "La que propone «Convertir a texto»."
+pagina = "general"

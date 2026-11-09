@@ -1,0 +1,7 @@
+# Herramientas de desarrollo y compilación: no viajan en el ejecutable.
+-r requirements.txt
+cx_Freeze==8.7.4
+pytest==9.2.0
+ruff==0.17.4
+# Servidor FTP local para las pruebas del bloque D.
+pyftpdlib==2.2.0

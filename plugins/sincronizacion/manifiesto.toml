@@ -1,0 +1,78 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 hxebolax y colaboradores
+# Sincronización avanzada y copias (diseño 2.0, 11.12). Bloque P5.
+
+formato = 1
+id = "zc.sincronizacion"
+bloque = "P5"
+nombre = "Sincronización avanzada y copias"
+descripcion = "Gestiona tareas de sincronización y copia con nombre, que recuerdan el estado anterior y conservan versiones."
+version = "1.0.0"
+autor = "Proyecto zCommander"
+licencia = "GPL-3.0-or-later"
+api_minima = "1.0"
+api_probada = "1.0"
+entrada = "__init__:Complemento"
+nivel = "intermedio"
+
+[[ordenes]]
+id = "perfiles"
+etiqueta = "Tareas de sincroni&zación..."
+ayuda = "Crea, edita y ejecuta las tareas de sincronización con nombre."
+ambito = "global"
+menu = "comandos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "ejecutar_todas"
+etiqueta = "&Ejecutar todas las tareas"
+ayuda = "Ejecuta todas las tareas de sincronización guardadas."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[paginas]]
+id = "general"
+titulo = "General"
+
+[[configuracion]]
+clave = "tolerancia_fecha_s"
+tipo = "entero"
+defecto = 2
+minimo = 0
+maximo = 3600
+etiqueta = "&Tolerancia de fechas, en segundos:"
+ayuda = "Diferencia de fecha que no cuenta como cambio. 2 segundos cubre las memorias USB con FAT; 3600 también los cambios de hora."
+pagina = "general"
+
+[[configuracion]]
+clave = "verificar"
+tipo = "bool"
+defecto = false
+etiqueta = "Comprobar cada archivo copiado &leyéndolo de nuevo"
+ayuda = "Tras copiar, vuelve a leer el archivo para comprobar que la copia es idéntica. Es más lento."
+pagina = "general"
+
+[[configuracion]]
+clave = "dias_versiones"
+tipo = "entero"
+defecto = 30
+minimo = 1
+maximo = 3650
+etiqueta = "&Días que se guardan las versiones:"
+ayuda = "Las versiones (lo sustituido o borrado, en la carpeta _versiones) más antiguas que estos días se borran."
+pagina = "general"
+
+[[configuracion]]
+clave = "max_versiones_mb"
+tipo = "entero"
+defecto = 1024
+minimo = 1
+maximo = 1048576
+etiqueta = "Espacio &máximo de las versiones, en MB:"
+ayuda = "Si las versiones de una tarea ocupan más, se borran los días más antiguos hasta caber."
+pagina = "general"

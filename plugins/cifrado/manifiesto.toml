@@ -1,0 +1,85 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 hxebolax y colaboradores
+# Cifrado de archivos (diseño 2.0, 11.13). Bloque P4.
+
+formato = 1
+id = "zc.cifrado"
+bloque = "P4"
+nombre = "Cifrado de archivos"
+descripcion = "Cifra y descifra archivos y carpetas con contraseña."
+version = "1.0.0"
+autor = "Proyecto zCommander"
+licencia = "GPL-3.0-or-later"
+api_minima = "1.0"
+api_probada = "1.0"
+entrada = "__init__:Complemento"
+nivel = "intermedio"
+permisos = []
+# «cifrar» abre un diálogo: la prueba de arranque usa «descifrar», que sin .zcc solo lo dice.
+prueba = "descifrar"
+
+[[ordenes]]
+id = "cifrar"
+etiqueta = "&Cifrar..."
+ayuda = "Cifra los elementos de trabajo con una contraseña."
+ambito = "global"
+menu = "complementos"
+teclas = ["Ctrl+Shift+F8"]
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "descifrar"
+etiqueta = "&Descifrar..."
+ayuda = "Descifra los archivos cifrados elegidos (.zcc)."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = "ruta"
+
+[[visores]]
+id = "ver"
+nombre = "Archivo cifrado (.zcc)"
+patrones = ["*.zcc"]
+# Pide la contraseña: nunca en la Vista rápida.
+vista_rapida = false
+prioridad = 10
+
+[[paginas]]
+id = "general"
+titulo = "General"
+
+[[configuracion]]
+clave = "formato"
+tipo = "opcion"
+defecto = "zcc"
+opciones = [["zcc", "Archivo .zcc de zCommander (AES-256-GCM)"], ["7z", "7z con AES-256, compatible con 7-Zip"]]
+etiqueta = "&Formato al cifrar:"
+ayuda = "El .zcc solo lo abre zCommander; el 7z lo abre también 7-Zip. El diálogo Cifrar recuerda el último elegido."
+pagina = "general"
+
+[[configuracion]]
+clave = "coste_scrypt"
+tipo = "opcion"
+defecto = "normal"
+opciones = [["normal", "Normal (unos 192 MB de memoria)"], ["alto", "Alto (más de medio gigabyte de memoria)"]]
+etiqueta = "C&oste de la contraseña:"
+ayuda = "Cuánto trabajo cuesta probar cada contraseña. «Alto» resiste mejor a quien intente adivinarla, pero reserva más de medio gigabyte de memoria al cifrar y al descifrar."
+pagina = "general"
+
+[[configuracion]]
+clave = "borrar_originales"
+tipo = "bool"
+defecto = false
+etiqueta = "&Enviar los originales a la papelera tras comprobar el cifrado"
+ayuda = "Después de comprobar que lo cifrado se descifra bien, los originales van a la papelera. No es un borrado seguro."
+pagina = "general"
+
+[[configuracion]]
+clave = "recordar_en_sesion"
+tipo = "bool"
+defecto = false
+etiqueta = "Recordar la contraseña &hasta cerrar zCommander"
+ayuda = "Recuerda en memoria la última contraseña que sirvió para descifrar, hasta cerrar zCommander. Nunca se guarda en disco."
+pagina = "general"

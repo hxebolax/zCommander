@@ -1,0 +1,210 @@
+{
+	"_aviso": "DATOS FICTICIOS para el simulador DSM de zCommander. Solo son reales el modelo (DS220+), la CPU (Celeron J4025), la memoria (10 GB), la versión de DSM (7.3.2-86009 Update 5), el tamaño del volumen (3,5 TB con 245 GB usados) y la lista de paquetes instalados. Números de serie, MAC, IP, nombres, discos, contenedores, usuarios, carpetas y registros son inventados.",
+	"sistema": {
+		"modelo": "DS220+",
+		"cpu_vendor": "INTEL",
+		"cpu_family": "Celeron",
+		"cpu_series": "J4025",
+		"cpu_cores": "2",
+		"cpu_clock_speed": 2000,
+		"ram_mb": 10240,
+		"version": "86009",
+		"version_string": "DSM 7.3.2-86009 Update 5",
+		"firmware_date": "2026/10/14",
+		"serie": "XXXXXXXXXXXXX",
+		"nombre": "NAS-Casa",
+		"zona": "Madrid",
+		"zona_desc": "(GMT+01:00) Bruselas, Copenhague, Madrid, París",
+		"ntp": "time.google.com",
+		"temperatura": 41,
+		"encendido_s": 1123541,
+		"ventilador": "coolfan",
+		"necesita_reinicio": false
+	},
+	"red": {
+		"hostname": "NAS-Casa",
+		"dns": ["192.168.1.1"],
+		"gateway": "192.168.1.1",
+		"workgroup": "WORKGROUP",
+		"interfaces": [
+			{"id": "eth0", "nombre": "LAN 1", "mac": "00-11-32-AA-BB-CC", "ip": "192.168.1.50", "mascara": "255.255.255.0", "velocidad": 1000, "estado": "connected", "dhcp": false},
+			{"id": "eth1", "nombre": "LAN 2", "mac": "00-11-32-AA-BB-CD", "ip": "", "mascara": "", "velocidad": 0, "estado": "disconnected", "dhcp": true}
+		],
+		"ddns": [
+			{"id": "Synology", "provider": "Synology", "hostname": "nas-casa-ficticio.synology.me", "ip": "203.0.113.25", "status": "service_ready", "enable": true, "last_updated": "2026-11-08 06:00"}
+		],
+		"quickconnect": {"enabled": true, "server_alias": "nas-casa-ficticio", "region": "eu", "status": "login_success", "relay_enabled": true}
+	},
+	"discos": [
+		{"id": "sata1", "nombre": "Unidad 1", "modelo": "ST4000VN006-3CW104", "fabricante": "Seagate", "serie": "ZW6FICT1", "firmware": "SC60", "tamano": "4000787030016", "temp": 36, "estado": "normal", "smart": "normal", "unc": 0, "horas": 21430, "grupo": "reuse_1"},
+		{"id": "sata2", "nombre": "Unidad 2", "modelo": "ST4000VN006-3CW104", "fabricante": "Seagate", "serie": "ZW6FICT2", "firmware": "SC60", "tamano": "4000787030016", "temp": 38, "estado": "normal", "smart": "normal", "unc": 0, "horas": 21428, "grupo": "reuse_1"}
+	],
+	"grupos": [
+		{"id": "reuse_1", "num_id": 1, "tipo": "shr_without_disk_protect_or_with_1", "raid": "SHR (tolerancia de 1 disco)", "discos": ["sata1", "sata2"], "estado": "normal", "total": "3995903488000", "usado": "3838417727488"}
+	],
+	"volumenes": [
+		{"id": "volume_1", "num_id": 1, "ruta": "/volume1", "grupo": "reuse_1", "fs": "btrfs", "estado": "normal", "total": "3838417727488", "usado": "263066746880", "limpieza": ""}
+	],
+	"paquetes": [
+		{"id": "AIConsole", "nombre": "AI Console", "version": "1.1.0-0123", "estado": "running", "descripcion": "Consola de IA de Synology (versión ficticia)."},
+		{"id": "ActiveInsight", "nombre": "Active Insight", "version": "3.0.4-24125", "estado": "running", "descripcion": "Supervisión en la nube de Synology."},
+		{"id": "ContainerManager", "nombre": "Container Manager", "version": "24.0.2-1543", "estado": "running", "descripcion": "Contenedores Docker y proyectos Compose.", "actualizable": "24.0.2-1606"},
+		{"id": "FileStation", "nombre": "File Station", "version": "1.4.3-1544", "estado": "running", "descripcion": "Gestor de archivos de DSM."},
+		{"id": "HybridShare", "nombre": "Hybrid Share", "version": "1.4.1-1110", "estado": "running", "descripcion": "Carpetas compartidas híbridas con C2 Storage."},
+		{"id": "Node.js_v20", "nombre": "Node.js v20", "version": "20.9.0-1036", "estado": "running", "descripcion": "Entorno de ejecución de JavaScript."},
+		{"id": "OAuthService", "nombre": "OAuth Service", "version": "1.1.4-0124", "estado": "running", "descripcion": "Servicio OAuth de DSM."},
+		{"id": "Python2", "nombre": "Python2", "version": "2.7.18-1004", "estado": "stop", "descripcion": "Intérprete de Python 2."},
+		{"id": "QuickConnect", "nombre": "QuickConnect", "version": "1.0.8-0157", "estado": "running", "descripcion": "Acceso remoto sin abrir puertos."},
+		{"id": "SMBService", "nombre": "SMB Service", "version": "4.15.13-2470", "estado": "running", "descripcion": "Servidor de archivos de Windows (SMB)."},
+		{"id": "ScsiTarget", "nombre": "SAN Manager", "version": "1.0.8-0310", "estado": "running", "descripcion": "Destinos iSCSI y LUN."},
+		{"id": "SecureSignIn", "nombre": "Secure SignIn", "version": "1.1.6-0391", "estado": "running", "descripcion": "Aprobación de inicio de sesión y verificación en dos pasos."},
+		{"id": "Spreadsheet", "nombre": "Synology Office", "version": "3.6.1-21557", "estado": "running", "descripcion": "Hojas de cálculo, documentos y presentaciones."},
+		{"id": "StorageManager", "nombre": "Storage Manager", "version": "1.0.0-0222", "estado": "running", "descripcion": "Gestor de almacenamiento."},
+		{"id": "SupportService", "nombre": "Centro de soporte", "version": "1.2.0-0418", "estado": "running", "descripcion": "Registros de soporte y conexión remota."},
+		{"id": "SynoAnalytics", "nombre": "SynoAnalytics", "version": "1.0.0-0031", "estado": "running", "descripcion": "Estadísticas de uso de Synology."},
+		{"id": "SynoFinder", "nombre": "Synology Universal Search", "version": "1.7.4-0880", "estado": "running", "descripcion": "Búsqueda indexada de archivos."},
+		{"id": "SynologyApplicationService", "nombre": "Synology Application Service", "version": "1.8.2-10130", "estado": "running", "descripcion": "Servicios comunes de las aplicaciones de Synology."},
+		{"id": "SynologyDrive", "nombre": "Synology Drive Server", "version": "3.5.2-26110", "estado": "running", "descripcion": "Sincronización y copia de equipos."},
+		{"id": "SynologyPhotos", "nombre": "Synology Photos", "version": "1.8.1-10089", "estado": "running", "descripcion": "Fotos y álbumes."},
+		{"id": "USBCopy", "nombre": "USB Copy", "version": "2.2.1-1173", "estado": "running", "descripcion": "Copias desde y hacia unidades USB."},
+		{"id": "UniversalViewer", "nombre": "Universal Viewer", "version": "1.3.2-0161", "estado": "running", "descripcion": "Vista previa de documentos."},
+		{"id": "WebDAVServer", "nombre": "WebDAV Server", "version": "2.4.2-10096", "estado": "running", "descripcion": "Acceso a carpetas por WebDAV."}
+	],
+	"carpetas": [
+		{"name": "Documentos", "desc": "Documentos de la familia", "hidden": false, "encryption": 0, "recyclebin": true, "quota_mb": 0, "snapshot": true},
+		{"name": "Multimedia", "desc": "Películas, series y música", "hidden": false, "encryption": 0, "recyclebin": true, "quota_mb": 0, "snapshot": true},
+		{"name": "photo", "desc": "Synology Photos (espacio compartido)", "hidden": false, "encryption": 0, "recyclebin": true, "quota_mb": 0, "snapshot": true},
+		{"name": "docker", "desc": "Datos de Container Manager", "hidden": false, "encryption": 0, "recyclebin": false, "quota_mb": 0, "snapshot": true},
+		{"name": "homes", "desc": "Carpetas de inicio de los usuarios", "hidden": false, "encryption": 0, "recyclebin": true, "quota_mb": 0, "snapshot": true},
+		{"name": "Copias", "desc": "Copias cifradas", "hidden": false, "encryption": 1, "recyclebin": false, "quota_mb": 512000, "snapshot": false},
+		{"name": "web_packages", "desc": "Paquetes web", "hidden": true, "encryption": 0, "recyclebin": false, "quota_mb": 0, "snapshot": false}
+	],
+	"permisos": {
+		"Documentos": [{"name": "pepe", "is_writable": true, "is_readonly": false, "is_deny": false}, {"name": "lectura", "is_writable": false, "is_readonly": true, "is_deny": false}, {"name": "invitado", "is_writable": false, "is_readonly": false, "is_deny": true}],
+		"Multimedia": [{"name": "pepe", "is_writable": true, "is_readonly": false, "is_deny": false}, {"name": "lectura", "is_writable": false, "is_readonly": true, "is_deny": false}],
+		"photo": [{"name": "pepe", "is_writable": true, "is_readonly": false, "is_deny": false}],
+		"docker": [{"name": "pepe", "is_writable": true, "is_readonly": false, "is_deny": false}],
+		"homes": [{"name": "pepe", "is_writable": true, "is_readonly": false, "is_deny": false}, {"name": "lectura", "is_writable": true, "is_readonly": false, "is_deny": false}],
+		"Copias": [{"name": "pepe", "is_writable": true, "is_readonly": false, "is_deny": false}],
+		"web_packages": []
+	},
+	"usuarios": [
+		{"name": "admin", "description": "Usuario predeterminado del sistema", "email": "", "expired": "true", "grupos": ["administrators"], "ultimo_acceso": ""},
+		{"name": "guest", "description": "Invitado", "email": "", "expired": "true", "grupos": ["users"], "ultimo_acceso": ""},
+		{"name": "pepe", "description": "Cuenta principal (ficticia)", "email": "pepe@example.org", "expired": "normal", "grupos": ["administrators", "users"], "ultimo_acceso": "2026-11-08 11:58"},
+		{"name": "demo", "description": "Cuenta del NAS de demostración", "email": "", "expired": "normal", "grupos": ["administrators", "users"], "ultimo_acceso": "2026-11-08 12:00"},
+		{"name": "lectura", "description": "Usuario sin privilegios", "email": "lectura@example.org", "expired": "normal", "grupos": ["users"], "ultimo_acceso": "2026-11-02 18:20"},
+		{"name": "invitado", "description": "Familiar con acceso limitado", "email": "", "expired": "normal", "grupos": ["users"], "ultimo_acceso": "2026-10-21 09:15"}
+	],
+	"grupos_usuarios": [
+		{"name": "administrators", "description": "Administradores del sistema"},
+		{"name": "users", "description": "Usuarios del sistema"},
+		{"name": "http", "description": "Grupo del servidor web"}
+	],
+	"contenedores": [
+		{"name": "jellyfin", "id": "d9301fc3aa92c1f04b7e5e1d1c0a7a6f2c9b8e7d6c5b4a39281706f5e4d3c2b1", "image": "jellyfin/jellyfin:latest", "status": "running", "health": "healthy", "up_dias": 3, "proyecto": "multimedia", "cpu": 1.8, "memoria": 412345678},
+		{"name": "pihole", "id": "4b2e7a1c9d8f6e5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a", "image": "pihole/pihole:latest", "status": "running", "health": "healthy", "up_dias": 12, "proyecto": "red", "cpu": 0.4, "memoria": 98765432},
+		{"name": "vaultwarden", "id": "7f6e5d4c3b2a19087f6e5d4c3b2a19087f6e5d4c3b2a19087f6e5d4c3b2a1908", "image": "vaultwarden/server:latest", "status": "stopped", "health": "", "up_dias": 0, "proyecto": "", "cpu": 0.0, "memoria": 0},
+		{"name": "homeassistant", "id": "a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90", "image": "ghcr.io/home-assistant/home-assistant:stable", "status": "running", "health": "unhealthy", "up_dias": 1, "proyecto": "domotica", "cpu": 6.2, "memoria": 734003200}
+	],
+	"proyectos": [
+		{"id": "187b2816-fd6c-4f87-b178-6d94806c7404", "name": "multimedia", "status": "RUNNING", "contenedores": ["jellyfin"]},
+		{"id": "29c4a1e0-5b3d-4e7f-9a8b-1c2d3e4f5a6b", "name": "red", "status": "RUNNING", "contenedores": ["pihole"]},
+		{"id": "3e5f7a9b-1c3d-4e5f-8a9b-0c1d2e3f4a5b", "name": "domotica", "status": "ERROR", "contenedores": ["homeassistant"]}
+	],
+	"imagenes": [
+		{"repository": "jellyfin/jellyfin", "tags": ["latest"], "size": 512345678, "upgradable": true},
+		{"repository": "pihole/pihole", "tags": ["latest"], "size": 98345678, "upgradable": false},
+		{"repository": "vaultwarden/server", "tags": ["latest"], "size": 95345678, "upgradable": false},
+		{"repository": "ghcr.io/home-assistant/home-assistant", "tags": ["stable"], "size": 1712345678, "upgradable": false}
+	],
+	"tareas": [
+		{"id": 2, "name": "Prueba S.M.A.R.T. rápida", "type": "smart_test", "enable": true, "owner": "root", "action": "Prueba S.M.A.R.T. rápida de todos los discos", "next_trigger_time": "2026-11-15 02:00", "ultimo": "2026-11-08 02:00", "resultado": "Correcto"},
+		{"id": 7, "name": "Vaciar papeleras", "type": "recycle", "enable": true, "owner": "root", "action": "Vaciar la papelera de todas las carpetas compartidas", "next_trigger_time": "2026-11-10 04:00", "ultimo": "2026-11-03 04:00", "resultado": "Correcto"},
+		{"id": 13, "name": "Copia rsync", "type": "script", "enable": false, "owner": "root", "action": "Ejecutar: rsync -aP --delete /volume1/Documentos/ /volume1/Copias/Documentos/", "next_trigger_time": "", "ultimo": "2026-09-30 03:00", "resultado": "Interrumpida"},
+		{"id": 21, "name": "Actualizar contenedores", "type": "script", "enable": true, "owner": "root", "action": "Ejecutar: docker compose -f /volume1/docker/multimedia/compose.yaml pull", "next_trigger_time": "2026-11-09 05:00", "ultimo": "2026-11-08 05:00", "resultado": "Correcto"}
+	],
+	"conexiones": [
+		{"who": "pepe", "type": "HTTP/HTTPS", "from": "192.168.1.20", "descr": "DSM", "minutos": 2},
+		{"who": "pepe", "type": "SMB", "from": "192.168.1.20", "descr": "Documentos", "minutos": 167},
+		{"who": "lectura", "type": "WebDAV", "from": "192.168.1.31", "descr": "Multimedia", "minutos": 44},
+		{"who": "pepe", "type": "Synology Drive", "from": "192.168.1.22", "descr": "Portátil de Pepe", "minutos": 610}
+	],
+	"avisos": [
+		{"id": 1, "nivel": "warning", "titulo": "Contenedor con problemas", "mensaje": "El contenedor homeassistant no supera su comprobación de salud.", "minutos": 35},
+		{"id": 2, "nivel": "info", "titulo": "Paquete actualizable", "mensaje": "Hay una versión nueva de Container Manager.", "minutos": 300},
+		{"id": 3, "nivel": "info", "titulo": "Copia de la configuración", "mensaje": "La configuración de DSM se copió en la cuenta de Synology.", "minutos": 1440}
+	],
+	"seguridad": {
+		"ip_bloqueadas": [
+			{"ip": "203.0.113.7", "type": "deny", "minutos": 2880, "location": "Desconocida"},
+			{"ip": "203.0.113.84", "type": "deny", "minutos": 320, "location": "Desconocida"}
+		],
+		"certificados": [
+			{"id": "AbCdEf", "desc": "Certificado autofirmado de fábrica", "is_default": true, "emisor": "Synology Inc. CA", "sujeto": "synology", "caduca_en_dias": 60, "servicios": ["DSM Desktop Service", "FTPS", "WebDAV Server"]}
+		],
+		"asesor": [
+			{"categoria": "malware", "nombre": "Análisis de malware", "nivel": "safe", "texto": "No se ha encontrado malware."},
+			{"categoria": "network", "nombre": "Red", "nivel": "safe", "texto": "La configuración de red es segura."},
+			{"categoria": "securitySetting", "nombre": "Ajustes de seguridad", "nivel": "warning", "texto": "La cuenta admin está desactivada, pero SSH está activado en el puerto 22: cambie el puerto o desactive SSH si no lo usa."},
+			{"categoria": "systemCheck", "nombre": "Comprobación del sistema", "nivel": "safe", "texto": "Los archivos del sistema no tienen cambios."},
+			{"categoria": "userInfo", "nombre": "Cuentas", "nivel": "safe", "texto": "Las contraseñas cumplen la política."},
+			{"categoria": "update", "nombre": "Actualizaciones", "nivel": "safe", "texto": "DSM y los paquetes están al día."}
+		],
+		"accesos": [
+			{"user": "pepe", "ip": "192.168.1.20", "minutos": 2, "resultado": "Correcto", "pais": "España"},
+			{"user": "admin", "ip": "203.0.113.7", "minutos": 2885, "resultado": "Contraseña incorrecta", "pais": "Desconocido"},
+			{"user": "lectura", "ip": "192.168.1.31", "minutos": 44, "resultado": "Correcto", "pais": "España"}
+		]
+	},
+	"servicios": {
+		"smb": {"enable_samba": true, "workgroup": "WORKGROUP", "smb_min_protocol": 2, "smb_max_protocol": 3},
+		"ssh": {"enable_ssh": true, "ssh_port": 22, "enable_telnet": false, "ssh_cipher": "medium"},
+		"webdav": {"enable_http": false, "http_port": 5005, "enable_https": true, "https_port": 5006},
+		"nfs": {"enable_nfs": false, "enable_nfs_v4": false},
+		"ftp": {"enable_ftp": false, "enable_ftps": false, "portnum": 21},
+		"sftp": {"enable": false, "portnum": 22}
+	},
+	"drive": {
+		"estado": "running",
+		"version": "3.5.2-26110",
+		"equipos": [
+			{"device_name": "Portátil de Pepe", "client_type": "Drive Client para Windows", "user": "pepe", "ip": "192.168.1.22", "status": "sincronizado", "minutos": 610},
+			{"device_name": "Móvil de Pepe", "client_type": "Drive para Android", "user": "pepe", "ip": "192.168.1.40", "status": "en espera", "minutos": 95}
+		],
+		"carpetas_equipo": ["Documentos", "homes"]
+	},
+	"photos": {"indexando": false, "fotos": 18342, "videos": 612, "ultimo_indice": "2026-11-08 03:12"},
+	"actualizacion": {"disponible": false, "version": "7.3.2-86009 Update 6", "tipo": "nano", "reinicio": "now", "auto": "security", "comprobado": "2026-11-08 04:00"},
+	"arbol": {
+		"Documentos": {
+			"Facturas": {"Factura luz enero 2026.pdf": 184320, "Factura luz febrero 2026.pdf": 181209, "Factura agua 2026-T1.pdf": 99123, "Factura internet octubre.pdf": 120500, "Seguro del coche 2026.pdf": 402110},
+			"Declaración de la renta": {"Borrador 2025.pdf": 811230, "Certificado de retenciones.pdf": 88123, "Notas para el gestor.txt": 2412},
+			"Recetas de la abuela": {"Cocido madrileño.txt": 4120, "Tortilla de patatas.txt": 2210, "Flan de huevo.txt": 1870, "Croquetas de jamón.docx": 22144},
+			"Contratos": {"Contrato de alquiler (firmado).pdf": 1203330, "Contrato de trabajo 2024.pdf": 653221},
+			"notas.txt": 12800,
+			"Presupuesto familiar 2026.xlsx": 48320,
+			"Lista de la compra.md": 932,
+			"Manual de la caldera — modelo Ñandú 3000.pdf": 6554112,
+			"un nombre de archivo bastante largo para comprobar cómo lo lee el lector de pantalla en la lista.txt": 512
+		},
+		"Multimedia": {
+			"Películas": {"El viaje de Chihiro (2001).mkv": 2147483648, "Copia de seguridad de la película casera de la boda.mkv": 5368709120, "Documental de los Pirineos.mp4": 1288490188},
+			"Series": {"Temporada 1": {"Episodio 01.mkv": 734003200, "Episodio 02.mkv": 721420288, "Episodio 03.mkv": 745537536}},
+			"Audiolibros": {"Don Quijote de la Mancha (parte 1).m4b": 512000000, "Platero y yo.mp3": 98000000}
+		},
+		"photo": {"Álbumes compartidos": {"Léeme.txt": 344}},
+		"docker": {
+			"multimedia": {"compose.yaml": 1210, "config": {"jellyfin.xml": 8812}},
+			"red": {"compose.yaml": 744, "etc-pihole": {"pihole.toml": 15320}},
+			"domotica": {"compose.yaml": 902, "configuration.yaml": 4432}
+		},
+		"homes": {
+			"pepe": {"Escritorio": {"tareas pendientes.txt": 640}, "Drive": {"Trabajo": {"informe trimestral.docx": 73214, "presentación cliente.pptx": 2341200}}, "Photos": {}},
+			"lectura": {"Léeme primero.txt": 512},
+			"invitado": {}
+		},
+		"Copias": {"Documentos": {"notas.txt": 12800}, "configuracion-dsm.dss": 245760},
+		"web_packages": {}
+	}
+}

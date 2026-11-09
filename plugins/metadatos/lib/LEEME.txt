@@ -1,0 +1,3 @@
+mutagen 1.48.1 (https://pypi.org/project/mutagen/), licencia GPL-2.0-or-later (texto en mutagen/COPYING).
+Copiado tal cual de la rueda oficial mutagen-1.48.1-py3-none-any.whl (SHA-256 4f077fe87d3fc7fba259aa63d8c026b18382ca6a42ef37c61e16f1b1b5b82fe7), sin la carpeta _tools (órdenes de consola).
+Se importa por su nombre con el MetaPathFinder del complemento (diseño 2.0, 3.4); no se toca sys.path.

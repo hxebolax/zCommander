@@ -1,0 +1,53 @@
+# Se copia como .gitignore en la raíz del proyecto (lo hace tools/crear_proyecto.py).
+
+# Entorno virtual y artefactos de Python.
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Compilación y empaquetado.
+build/
+dist/
+
+# Datos generados en data/ al usar la aplicación: personales, nunca se versionan.
+# Lo que SÍ se versiona de data/: bin/, sounds/, locales/, docs/, icons/.
+# Los complementos de serie van en plugins/ de la raíz; data/plugins es de la persona (2.0).
+data/config/
+data/logs/
+data/db/
+data/cache/
+data/temp/
+data/sessions/
+data/backups/
+data/downloads/
+data/plugins/
+data/sounds_usuario/
+data/plantillas/
+# Programas de terceros de data/bin: los descarga tools/descargar_componentes.py con sus
+# sumas de linea_base.json (alguno pasa de los 100 MB de GitHub). Sus licencias sí se versionan.
+data/bin/**/*.exe
+data/bin/**/*.dll
+data/bin/**/*.nuevo
+data/bin/**/*.parcial
+# El complemento para NVDA se construye con tools/construir_complemento.py.
+data/bin/nvda/*.nvda-addon
+data/bin/respaldo/
+data/bin/.pendiente/
+data/bin/.entrante/
+
+# Material de consulta: repositorios clonados y documentos de terceros que no
+# se pueden redistribuir (p. ej. las guías de la API de Synology).
+adjuntos/
+# Material de trabajo interno (investigación previa y borradores de revisión): contiene
+# datos del equipo y del NAS de quien desarrolla; se queda en local.
+docs/investigacion/
+docs/revision/
+# Clave privada de firma de las actualizaciones: nunca se publica.
+tools/claves/
+
+# Sumas de los complementos de serie: las genera setup_cx.py al compilar y las borra al terminar (2.0, 3.2).
+app/plugins/serie_sumas.py

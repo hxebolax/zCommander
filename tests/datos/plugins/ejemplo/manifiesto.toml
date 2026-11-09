@@ -1,0 +1,32 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 hxebolax y colaboradores
+# Complemento de ejemplo de las pruebas (diseño 2.0, 19.1).
+formato = 1
+id = "prueba.ejemplo"
+nombre = "Ejemplo de prueba"
+descripcion = "Complemento mínimo para las pruebas del cargador."
+version = "1.0.0"
+autor = "Proyecto zCommander"
+licencia = "GPL-3.0-or-later"
+api_minima = "1.0"
+api_probada = "1.0"
+entrada = "__init__:Complemento"
+
+[[ordenes]]
+id = "saludar"
+etiqueta = "&Saludar"
+ayuda = "Anuncia un saludo."
+ambito = "global"
+argumento = "texto"
+
+[[configuracion]]
+clave = "volumen"
+tipo = "entero"
+defecto = 5
+etiqueta = "&Volumen:"
+ayuda = "Volumen de prueba."
+minimo = 0
+maximo = 10
+
+[[sonidos]]
+id = "hola"

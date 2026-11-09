@@ -1,0 +1,8 @@
+# Git guarda los archivos tal cual, sin convertir finales de línea: el proyecto mezcla CRLF
+# (entorno.bat lo necesita) y LF, y las herramientas comprueban algunos archivos byte a byte.
+* -text
+# Los sonidos y los binarios de los complementos no se comparan como texto.
+*.wav binary
+*.pyd binary
+*.dll binary
+*.exe binary

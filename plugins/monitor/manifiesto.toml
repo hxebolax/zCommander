@@ -1,0 +1,106 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 hxebolax y colaboradores
+# Monitor de carpetas y reglas automáticas (diseño 2.0, 11.18). Bloque P5.
+
+formato = 1
+id = "zc.monitor"
+bloque = "P5"
+nombre = "Monitor de carpetas y reglas automáticas"
+descripcion = "Vigila carpetas y avisa o actúa con reglas cuando llega algo."
+version = "1.0.0"
+autor = "Proyecto zCommander"
+licencia = "GPL-3.0-or-later"
+api_minima = "1.0"
+api_probada = "1.0"
+entrada = "__init__:Complemento"
+nivel = "intermedio"
+activacion = ["al_arrancar"]
+permisos = ["segundo_plano", "escribir_fuera_de_paneles"]
+
+[[ordenes]]
+id = "reglas"
+etiqueta = "&Monitor de carpetas..."
+ayuda = "Elige las carpetas vigiladas y edita sus reglas."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[ordenes]]
+id = "pausar"
+etiqueta = "&Pausar o reanudar el monitor"
+ayuda = "Pausa o reanuda la vigilancia de todas las carpetas."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+tipo = "casilla"
+casilla_defecto = false
+
+[[ordenes]]
+id = "registro"
+etiqueta = "&Registro del monitor..."
+ayuda = "Muestra lo que ha hecho el monitor y permite deshacer la última acción."
+ambito = "global"
+menu = "complementos"
+teclas = []
+nivel = "intermedio"
+argumento = ""
+
+[[eventos]]
+nombre = "llegada"
+
+[[paginas]]
+id = "general"
+titulo = "General"
+
+[[configuracion]]
+clave = "carpetas"
+tipo = "lista"
+defecto = []
+etiqueta = "Carpetas vi&giladas:"
+ayuda = "Carpetas en las que se avisa de lo que llega y se aplican las reglas. También se cambian en Monitor de carpetas."
+pagina = "general"
+ejecuta = true
+
+[[configuracion]]
+clave = "reglas"
+tipo = "lista"
+defecto = []
+interna = true
+etiqueta = "Reglas"
+ayuda = "Reglas del monitor, en orden; se editan en Monitor de carpetas."
+ejecuta = true
+
+[[configuracion]]
+clave = "retraso_s"
+tipo = "entero"
+defecto = 5
+minimo = 1
+maximo = 600
+etiqueta = "&Espera antes de actuar, en segundos:"
+ayuda = "Un archivo se da por llegado cuando lleva este tiempo sin cambiar (así una descarga se anuncia al terminar)."
+pagina = "general"
+
+[[configuracion]]
+clave = "nivel_anuncio"
+tipo = "opcion"
+defecto = "resultado"
+opciones = [["normal", "Normal: solo con la verbosidad normal o más"], ["resultado", "Resultado: casi siempre"], ["ninguno", "Ninguno: solo sonidos y registro"]]
+etiqueta = "&Nivel de los anuncios:"
+ayuda = "Cuándo se dice lo que llega. Los errores de las reglas se dicen siempre."
+pagina = "general"
+
+[[sonidos]]
+id = "archivo_nuevo"
+nombre = "Archivo nuevo en una carpeta vigilada"
+descripcion = "Suena cuando termina de llegar un archivo a una carpeta vigilada."
+prioridad = "media"
+
+[[sonidos]]
+id = "regla_aplicada"
+nombre = "Regla del monitor aplicada"
+descripcion = "Suena cuando una regla mueve, copia, renombra, extrae o etiqueta un archivo."
+prioridad = "media"

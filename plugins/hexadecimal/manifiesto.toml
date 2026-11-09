@@ -1,0 +1,90 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 hxebolax y colaboradores
+# Editor hexadecimal accesible (diseño 2.0, 11.10). Manifiesto completo del bloque P2.
+
+formato = 1
+id = "zc.hexadecimal"
+bloque = "P2"
+nombre = "Editor hexadecimal accesible"
+descripcion = "Ve y edita los bytes de cualquier archivo, también muy grande, de forma accesible."
+version = "1.0.0"
+autor = "Proyecto zCommander"
+licencia = "GPL-3.0-or-later"
+api_minima = "1.0"
+api_probada = "1.0"
+entrada = "__init__:Complemento"
+nivel = "avanzado"
+ayuda = "doc/es/leeme.md"
+cambios = "doc/es/cambios.md"
+
+[[ordenes]]
+id = "editar"
+etiqueta = "Ver &y editar en hexadecimal"
+ayuda = "Abre el archivo del cursor en el editor hexadecimal."
+ambito = "global"
+menu = "archivos"
+teclas = ["Ctrl+Shift+F4"]
+nivel = "avanzado"
+argumento = ""
+
+[[paginas]]
+id = "general"
+titulo = "General"
+
+[[configuracion]]
+clave = "bytes_por_linea"
+tipo = "opcion"
+defecto = "16"
+opciones = [["8", "8"], ["16", "16"], ["32", "32"]]
+etiqueta = "&Bytes por línea:"
+ayuda = "Cuántos bytes tiene cada línea del volcado; Arriba y Abajo se mueven este número de bytes."
+pagina = "general"
+
+[[configuracion]]
+clave = "orden_bytes"
+tipo = "opcion"
+defecto = "little"
+opciones = [["little", "Little endian (Intel)"], ["big", "Big endian"]]
+etiqueta = "&Orden de bytes del inspector:"
+ayuda = "Cómo lee el inspector los enteros y las fechas. Control+E lo cambia en el editor."
+pagina = "general"
+
+[[configuracion]]
+clave = "codificacion_texto"
+tipo = "opcion"
+defecto = "cp1252"
+opciones = [["cp1252", "Windows-1252"], ["utf-8", "UTF-8"], ["utf-16-le", "UTF-16 LE"], ["utf-16-be", "UTF-16 BE"], ["latin-1", "ISO-8859-1"], ["cp850", "OEM 850"], ["cp437", "OEM 437"]]
+etiqueta = "Codificación de la columna de &texto:"
+ayuda = "Con la que se muestran, se escriben y se buscan los caracteres en la columna de texto."
+pagina = "general"
+
+[[configuracion]]
+clave = "anuncio"
+tipo = "opcion"
+defecto = "valor"
+opciones = [["valor", "Solo el valor"], ["completo", "Valor, decimal y binario"]]
+etiqueta = "&Qué se dice al mover el cursor:"
+ayuda = "«Desplazamiento 0x1A, 4F, letra O», o además el decimal y el binario del byte."
+pagina = "general"
+
+[[configuracion]]
+clave = "copia_seguridad"
+tipo = "bool"
+defecto = false
+etiqueta = "&Guardar una copia .bak antes de guardar"
+ayuda = "Copia el archivo como .bak antes de sustituirlo al guardar."
+pagina = "general"
+
+[[configuracion]]
+clave = "abrir_solo_lectura"
+tipo = "bool"
+defecto = false
+etiqueta = "Abrir siempre en &solo lectura"
+ayuda = "Abre los archivos sin poder cambiarlos (Guardar como sigue funcionando)."
+pagina = "general"
+
+[[sonidos]]
+id = "no_valido"
+nombre = "Tecla no válida en el editor hexadecimal"
+descripcion = "Se pulsó algo que no es un dígito hexadecimal en la columna hexadecimal."
+prioridad = "media"
