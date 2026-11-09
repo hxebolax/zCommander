@@ -2,7 +2,7 @@
 
 Generado con `python tools/generar_anexos.py` a partir de `app/ui/ordenes.py`. No lo edite a mano.
 
-Hay 348 órdenes. Cada una indica sus teclas de fábrica, dónde funcionan, qué bloque la programa y su manejador (`app/ui/acciones/<módulo>.py`).
+Hay 349 órdenes. Cada una indica sus teclas de fábrica, dónde funcionan, qué bloque la programa y su manejador (`app/ui/acciones/<módulo>.py`).
 
 ## Menús Izquierdo y Derecho
 
@@ -360,6 +360,12 @@ Hay 348 órdenes. Cada una indica sus teclas de fábrica, dónde funcionan, qué
 - Marca los nombres que aparecen en un archivo de texto.
 - Teclas: sin tecla; con el foco en un panel.
 - Bloque: Núcleo. Manejador: `marcas.cargar`.
+
+### Decir los elementos marcados (`decir_marcados`)
+
+- Dice cuántos elementos hay marcados, su tamaño y sus nombres.
+- Teclas: Alt+Mayús+M; en toda la ventana principal.
+- Bloque: Núcleo. Manejador: `consulta.decir_marcados`.
 
 ### Copiar al portapapeles (`portapapeles_copiar`)
 

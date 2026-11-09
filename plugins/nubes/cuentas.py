@@ -37,6 +37,16 @@ VERSION_CUENTAS = 1
 MOTORES = ("rclone", "webdav")
 AUTENTICACIONES = ("oauth", "contrasena", "contrasena_2fa", "clave_acceso", "token_pegado", "clave_api", "login_flow_v2",
 	"ninguna")
+#: Cómo se conecta cada servicio, en el orden en que se agrupan en el asistente.
+METODOS = ("navegador", "contrasena", "carpeta_local", "avanzado")
+_METODO_POR_AUTENTICACION = {"oauth": "navegador", "login_flow_v2": "navegador", "contrasena": "contrasena",
+	"contrasena_2fa": "contrasena"}
+
+
+def texto_metodo(metodo: str) -> str:
+	"""Lo que dice la columna «Cómo se conecta» del asistente."""
+	return {"navegador": _("Iniciar sesión en el navegador"), "contrasena": _("Correo y contraseña"),
+		"carpeta_local": _("Carpeta del programa oficial"), "avanzado": _("Avanzado (claves propias)")}.get(metodo, metodo)
 
 
 # ── Cuentas ──────────────────────────────────────────────────────────────────
@@ -206,10 +216,28 @@ class Servicio:
 	guia: str = ""
 	alias: tuple[str, ...] = ()
 	origen: str = "zc.nubes"
+	#: «navegador», «contrasena», «carpeta_local» o «avanzado»; vacío: se deduce de la autenticación.
+	metodo: str = ""
+	#: Página web útil para el alta (por ejemplo, la de las contraseñas de aplicación): {"url", "texto"}.
+	enlace: dict[str, str] = field(default_factory=dict)
 
 	@property
 	def experimental(self) -> bool:
 		return self.nivel >= 4
+
+	@property
+	def como_se_conecta(self) -> str:
+		"""El método de la ficha o, en las fichas aportadas sin él, el que corresponde a su autenticación."""
+		return self.metodo or _METODO_POR_AUTENTICACION.get(self.autenticacion, "avanzado")
+
+	@property
+	def es_carpeta_local(self) -> bool:
+		return self.tipo == "carpeta_local"
+
+	@property
+	def avanzadas_alta(self) -> tuple[dict[str, Any], ...]:
+		"""Opciones que el asistente ofrece en «Opciones avanzadas...» (identificadores de cliente propios)."""
+		return tuple(c for c in self.avanzadas if c.get("alta"))
 
 	@property
 	def es_oauth(self) -> bool:
@@ -217,6 +245,8 @@ class Servicio:
 
 	@property
 	def motor(self) -> str:
+		if self.es_carpeta_local:
+			return "local"
 		return "webdav" if self.tipo in ("webdav_nativo", "nextcloud") else "rclone"
 
 	def campo(self, clave: str) -> dict[str, Any] | None:
@@ -236,6 +266,10 @@ def _servicio_desde(datos: dict[str, Any], origen: str) -> Servicio:
 			raise ErrorCatalogo(f"Ficha sin «{obligatorio}»: {datos.get('id')}")
 	if datos["autenticacion"] not in AUTENTICACIONES:
 		raise ErrorCatalogo(f"Ficha {datos['id']}: autenticación «{datos['autenticacion']}» desconocida")
+	metodo = str(datos.get("metodo", "") or "")
+	if metodo and metodo not in METODOS:
+		raise ErrorCatalogo(f"Ficha {datos['id']}: método «{metodo}» desconocido")
+	enlace = datos.get("enlace") if isinstance(datos.get("enlace"), dict) else {}
 	campos = tuple(dict(c) for c in datos.get("campos", []) if isinstance(c, dict) and c.get("clave"))
 	avanzadas = tuple(dict(c) for c in datos.get("avanzadas", []) if isinstance(c, dict) and c.get("clave"))
 	return Servicio(
@@ -244,7 +278,8 @@ def _servicio_desde(datos: dict[str, Any], origen: str) -> Servicio:
 		opciones={str(k): str(v) for k, v in (datos.get("opciones") or {}).items()}, avanzadas=avanzadas,
 		papelera=bool(datos.get("papelera", False)), ayuda_url=str(datos.get("ayuda_url", "")),
 		avisos=tuple(str(a) for a in datos.get("avisos", [])), guia=str(datos.get("guia", "")),
-		alias=tuple(str(a) for a in datos.get("alias", [])), origen=origen)
+		alias=tuple(str(a) for a in datos.get("alias", [])), origen=origen, metodo=metodo,
+		enlace=_enlace_seguro(enlace))
 
 
 class Catalogo:
@@ -278,7 +313,8 @@ class Catalogo:
 
 	def lista(self, mostrar_experimentales: bool = False) -> list[Servicio]:
 		servicios = [s for s in self._servicios.values() if mostrar_experimentales or not s.experimental]
-		return sorted(servicios, key=lambda s: (s.id == "otro", s.nombre.casefold()))
+		# Agrupados por cómo se conectan (navegador, contraseña, carpeta, avanzado); «Otro servicio» al final.
+		return sorted(servicios, key=lambda s: (s.id == "otro", _orden_metodo(s.como_se_conecta), s.nombre.casefold()))
 
 	def buscar(self, texto: str, mostrar_experimentales: bool = False) -> list[Servicio]:
 		texto = _plano(texto)
@@ -290,6 +326,20 @@ class Catalogo:
 
 	def __len__(self) -> int:
 		return len(self._servicios)
+
+
+def _enlace_seguro(enlace: dict[str, Any]) -> dict[str, str]:
+	"""El enlace de una ficha solo si es https:// (las fichas de otros complementos llegan al navegador)."""
+	limpio = {str(k): str(v) for k, v in enlace.items() if k in ("url", "texto")}
+	if not limpio.get("url", "").lower().startswith("https://"):
+		if limpio.get("url"):
+			log.warning("Enlace de ficha descartado (solo se admite https://): %s", limpio["url"])
+		return {}
+	return limpio
+
+
+def _orden_metodo(metodo: str) -> int:
+	return METODOS.index(metodo) if metodo in METODOS else len(METODOS)
 
 
 def _plano(texto: str) -> str:
@@ -318,37 +368,3 @@ def aportaciones_de_complementos(carpetas: list[Path], propio: str = "zc.nubes")
 			for ficha in sorted((carpeta / "recursos" / "servicios").glob("*.json")):
 				resultado.append((str(datos.get("id", carpeta.name)), ficha))
 	return resultado
-
-
-# ── Google Drive para escritorio ─────────────────────────────────────────────
-
-
-def carpeta_drive_escritorio() -> str | None:
-	"""Unidad o carpeta que configura Google Drive para escritorio (``HKCU\\Software\\Google\\DriveFS``), si existe."""
-	try:
-		import winreg
-	except ImportError:  # pragma: no cover - fuera de Windows
-		return None
-	candidatas: list[str] = []
-	try:
-		with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Google\DriveFS") as clave:
-			for nombre in ("MountPoint", "DefaultMountPoint", "mount_point_path", "PerAccountPreferences"):
-				try:
-					valor, _tipo = winreg.QueryValueEx(clave, nombre)
-				except OSError:
-					continue
-				texto = str(valor).strip()
-				if len(texto) == 1 and texto.isalpha():
-					texto = f"{texto.upper()}:\\"
-				elif len(texto) == 2 and texto.endswith(":"):
-					texto += "\\"
-				if texto and (texto[1:3] == ":\\" or texto.startswith("\\\\")):
-					candidatas.append(texto)
-	except OSError:
-		return None
-	for candidata in candidatas:
-		for sub in ("Mi unidad", "My Drive", ""):
-			ruta = os.path.join(candidata, sub) if sub else candidata
-			if os.path.isdir(ruta):
-				return ruta
-	return None

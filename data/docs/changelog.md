@@ -2,6 +2,31 @@
 
 Cada versión tiene su apartado, de la más reciente a la más antigua. Tras actualizar, zCommander muestra una vez las novedades de la versión nueva. También puede verlas en el menú Ayuda, «Novedades de la versión».
 
+## Versión 2.0.1 - 2026-11-09
+
+Corrige el foco al volver de los diálogos, añade dos ayudas para las marcas, le deja elegir de dónde se buscan las actualizaciones y permite conectar las nubes sin crear claves. Todo lo demás sigue igual que en la 2.0.0.
+
+### Correcciones
+
+- Al cerrar un diálogo, el foco vuelve a la lista del panel en el que estaba. Antes, a veces Windows lo dejaba en el panel del otro lado y ese pasaba a ser el activo. Si una orden lleva el foco al otro panel a propósito, o hace clic en él con el ratón, se respeta.
+- La barra de título dice siempre la carpeta del panel activo, también al cambiar de panel o de pestaña (Insert+T en NVDA). Antes podía decir la del otro panel.
+
+### Marcas
+
+- Preferencias, página «Accesibilidad», opción nueva «Cómo se muestran las marcas»: «Como selección de la lista» (la de siempre, de fábrica) o «En la columna Marca». Con la columna Marca, lo marcado dice «Marcado» en una columna que puede colocar donde quiera con «Columnas» y «Orden de lectura de las columnas», y la lista no usa la selección para las marcas: ningún lector dice «seleccionado» ni lo repite. Funciona igual con NVDA, JAWS y Narrador, sin complementos. Se aplica al momento y se guarda en los perfiles.
+- Con «En la columna Marca», la columna Marca se ve siempre: también en la vista breve, en las vistas por carpeta, en las columnas de «Red» y de los complementos y en las pestañas de un espacio de trabajo, y entra en el orden de lectura aunque no la tengan. En «Columnas» no se puede quitar mientras siga elegida (se dice por qué); sí se puede mover. Las pestañas a las que zCommander añadió la Marca siguen cambiando con «Columnas por defecto» y con los perfiles.
+- Con NVDA leyendo las cabeceras de tabla y la Marca la primera, NVDA decía «Nombre:» delante de cada fila sin marcar. El complemento de zCommander para NVDA lo evita; sin él, la ayuda de la opción (Ctrl+H) y el manual explican cómo.
+- Alt+Mayús+M dice los elementos marcados: cuántos son, su tamaño y sus nombres (hasta 20). Sin marcas, dice cuál es el elemento de trabajo. También en el menú Archivos, submenú Marcas, «Decir los elementos marcados». Con carpetas cuyo tamaño no se ha calculado no dice «0 bytes»: «3 marcados (1 carpeta), 25 MB en archivos», o «2 marcados (2 carpetas)» si todo son carpetas. El recuento al marcar en grupo y el resumen del panel lo dicen igual.
+- El manual explica la opción «Bajar al siguiente al marcar con Insert o Espacio» de la página «Paneles»: si se desactiva, el cursor se queda y se anuncia «Marcado: nombre».
+
+### Actualizaciones
+
+- zCommander se publica también en GitHub (hxebolax/zCommander). Preferencias, página «Actualizaciones», opción nueva «Origen de las actualizaciones»: «Servidor de zCommander (xebolax.synology.me)» (la de siempre, de fábrica), «GitHub (hxebolax/zCommander)», «Las dos: la que tenga la versión más nueva» (si una no responde, se usa la otra sin avisar, y la descarga prueba la otra si falla) o «Una dirección personalizada», que se escribe en «Dirección personalizada del archivo version.json» (solo https). Con cualquier origen se exige la firma de zCommander: nada sin firma se instala nunca. Los mensajes de error dicen qué origen falló. Se aplica en la siguiente búsqueda, sin reiniciar. Con «Una dirección personalizada» la dirección es obligatoria y no puede llevar usuario ni contraseña. Un perfil o una copia de seguridad solo cambian el origen de las actualizaciones si usted lo marca en «Órdenes que se podrán ejecutar».
+
+### Nubes
+
+- Conectar una nube ya no pide claves: el asistente «Añadir una cuenta de nube» agrupa los servicios por cómo se conectan (iniciar sesión en el navegador, correo y contraseña, carpeta del programa oficial o avanzado). En Google Drive, OneDrive, Dropbox, Box, pCloud y los demás de navegador basta con el nombre de la cuenta y «Siguiente»; lo avanzado queda en «Opciones avanzadas...». Jottacloud se autoriza también en el navegador (antes había que pegar un código) y deja elegir sus marcas blancas, como Telia o Elgiganten. Las carpetas de OneDrive, Dropbox, Google Drive para escritorio, iCloud, Box, pCloud, Proton Drive y Synology Drive que ya hay en el equipo se ofrecen al empezar y salen en Alt+F1 y Alt+F2 como un disco más. Google Drive pregunta si usar su carpeta de escritorio, el identificador de rclone (puede dejar de funcionar en 2026) o uno propio. Las preguntas habituales de rclone salen en español, y ya no se vuelve a preguntar si hay navegador tras responder a una de ellas.
+
 ## Versión 2.0.0 - 2026-11-09
 
 La 2.0 abre zCommander a los complementos, lo mantiene al día solo, protege su configuración y añade 27 complementos de serie pensados para personas ciegas. Todo lo de la 1.0 sigue igual salvo lo que se dice aquí. El manual (F1) tiene un capítulo para cada novedad.

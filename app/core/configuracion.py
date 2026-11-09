@@ -35,6 +35,7 @@ Basado en la plantilla del agente «configuracion», con las preferencias de zCo
 
 from __future__ import annotations
 
+import builtins
 import copy
 import json
 import logging
@@ -42,6 +43,7 @@ import os
 import shutil
 import threading
 import time
+import urllib.parse
 import weakref
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
@@ -51,6 +53,13 @@ from pathlib import Path
 from typing import Any
 
 log = logging.getLogger(__name__)
+
+
+def _(texto: str) -> str:
+	"""Traduce con el ``_`` que gettext instala en ``builtins`` (se busca al llamar, no al importar)."""
+	traducir = getattr(builtins, "_", None)
+	return traducir(texto) if callable(traducir) else texto
+
 
 # Variable de entorno que redirige la carpeta data (la usan las pruebas).
 VARIABLE_DATA = "APP_DATA_DIR"
@@ -109,6 +118,9 @@ VALORES_POR_DEFECTO: dict[str, dict[str, Any]] = {
 		"seleccionar_sin_extension": True,
 		"patrones_en_carpetas": False,
 		"mover_tras_marcar": True,
+		# 2.0.1: cómo se ven y se leen las marcas: «seleccion» (la selección de la lista, como
+		# siempre) o «columna» (columna «Marca»; la lista no usa la selección para las marcas).
+		"marcas_como": "seleccion",
 		# 2.0: orden de lectura de las columnas por defecto (10.5); vacía = el de las columnas.
 		"lectura": [],
 	},
@@ -220,6 +232,8 @@ VALORES_POR_DEFECTO: dict[str, dict[str, Any]] = {
 		"componentes_comprobar": True,
 		"componentes_intervalo_dias": 7,
 		"complementos_comprobar": True,
+		"fuente": "servidor",
+		"url_personalizada": "",
 	},
 	"copia": {
 		"carpeta": "",
@@ -266,12 +280,34 @@ class Regla:
 	:param maximo: valor máximo (números).
 	:param opciones: valores admitidos (listas cerradas).
 	:param longitud_maxima: longitud máxima (textos).
+	:param comprobar: función que devuelve el motivo si el valor no vale (p. ej. una dirección https).
 	"""
 
 	minimo: float | None = None
 	maximo: float | None = None
 	opciones: tuple[Any, ...] | None = None
 	longitud_maxima: int | None = None
+	comprobar: Callable[[Any], str | None] | None = None
+	"""Comprobación propia: devuelve el mensaje del error, o ``None`` si el valor vale."""
+
+
+def comprobar_url_https(valor: Any) -> str | None:
+	"""Motivo por el que ``valor`` no es una dirección https completa, o ``None`` si vale (o está vacía)."""
+	texto = str(valor or "").strip()
+	if not texto:
+		return None
+	try:
+		partes = urllib.parse.urlsplit(texto)
+	except ValueError:
+		partes = None
+	if partes is None or partes.scheme.lower() != "https" or not partes.hostname or any(c.isspace() for c in texto):
+		return _("La dirección tiene que ser completa y empezar por https:// (por ejemplo, https://ejemplo.org/zCommander/version.json).")
+	if "@" in partes.netloc:
+		# 2.0.1: un usuario o una contraseña en la dirección quedarían a la vista en la
+		# configuración, en los registros y en las copias de seguridad.
+		return _("La dirección no puede llevar usuario ni contraseña (lo que va antes de «@»). Quítelos: "
+			"la dirección del archivo version.json tiene que ser pública.")
+	return None
 
 
 # Reglas por clave «seccion.clave». Las claves sin regla solo comprueban el tipo.
@@ -286,6 +322,7 @@ REGLAS: dict[str, Regla] = {
 	"paneles.tiempo_busqueda_rapida_ms": Regla(minimo=300, maximo=5000),
 	"paneles.retardo_arbol_ms": Regla(minimo=0, maximo=3000),
 	"paneles.orientacion": Regla(opciones=("vertical", "horizontal")),
+	"paneles.marcas_como": Regla(opciones=("seleccion", "columna")),
 	"vista.tema": Regla(opciones=("sistema", "norton", "alto_contraste")),
 	"vista.tamano_fuente": Regla(minimo=8, maximo=40),
 	"vista.vista_rapida_kb": Regla(minimo=4, maximo=65536),
@@ -314,6 +351,8 @@ REGLAS: dict[str, Regla] = {
 	"sonidos.intervalo_navegacion_ms": Regla(minimo=0, maximo=500),
 	"actualizaciones.intervalo_horas": Regla(minimo=1, maximo=720),
 	"actualizaciones.componentes_intervalo_dias": Regla(minimo=1, maximo=90),
+	"actualizaciones.fuente": Regla(opciones=("servidor", "github", "ambas", "personalizada")),
+	"actualizaciones.url_personalizada": Regla(longitud_maxima=2048, comprobar=comprobar_url_https),
 	"copia.conservar_automaticas": Regla(minimo=1, maximo=50),
 	"comprimidos.metodo_zip": Regla(opciones=("deflate", "zstd", "almacenar")),
 	"red.tiempo_descubrir_s": Regla(minimo=5, maximo=300),
@@ -486,6 +525,10 @@ def validar_valor(clave: str, valor: Any, reglas: dict[str, Regla] | None = None
 			raise ErrorValidacion(f"«{clave}» debe ser como máximo {regla.maximo}.")
 	if isinstance(valor, str) and regla.longitud_maxima is not None and len(valor) > regla.longitud_maxima:
 		raise ErrorValidacion(f"«{clave}» admite como máximo {regla.longitud_maxima} caracteres.")
+	if regla.comprobar is not None:
+		motivo = regla.comprobar(valor)
+		if motivo:
+			raise ErrorValidacion(motivo)
 
 
 def _reemplazar(origen: Path, destino: Path, intentos: int = 5) -> None:

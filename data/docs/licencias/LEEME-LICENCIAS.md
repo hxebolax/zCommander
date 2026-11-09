@@ -10,7 +10,7 @@ Todas las licencias de esta lista son compatibles con la GPL-3.0.
 
 ### zCommander (núcleo, herramientas, complementos de serie, simulador DSM y complemento de NVDA)
 
-- Versión: 2.0.0.
+- Versión: 2.0.1.
 - Licencia: GPL-3.0-or-later.
 - Obligación: Dar la Fuente Correspondiente.
 - Uso en zCommander: Todo el programa.

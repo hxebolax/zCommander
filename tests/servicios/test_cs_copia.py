@@ -724,6 +724,32 @@ def test_importar_perfil_aplica_solo_lo_marcado(origen, destino, tmp_path):
 	assert list((destino / "backups" / "automaticas").glob("*.zcbackup"))
 
 
+def test_perfil_no_cambia_el_origen_de_las_actualizaciones_sin_marcarlo(origen, destino, tmp_path):
+	"""2.0.1: ``actualizaciones.fuente`` y ``url_personalizada`` se tratan como las claves que ejecutan algo."""
+	ajustes = leer_json(origen, "config/settings.json")
+	ajustes["actualizaciones"] = {"fuente": "personalizada", "url_personalizada": "https://malo.example/version.json"}
+	escribir_json(origen, "config/settings.json", ajustes)
+	ruta = perfil.exportar(tmp_path / "curso.zcperfil", ruta_datos=origen)
+	config = Configuracion(destino / "config" / "settings.json")
+	fuente_antes = config.obtener("actualizaciones.fuente")
+	with CopiaAbierta(ruta) as copia:
+		vista = perfil.vista_previa(copia, config, destino)
+	filas = {f.id for f in vista.filas}
+	assert "valor:actualizaciones.fuente" not in filas and "valor:actualizaciones.url_personalizada" not in filas
+	ids = {e.id for e in vista.ejecutables}
+	assert {"clave:actualizaciones.fuente", "clave:actualizaciones.url_personalizada"} <= ids
+	# Sin marcarlas no se aplican, aunque se marquen todas las preferencias.
+	resultado = perfil.importar(ruta, config, [f"valor:{c}" for c in ("vista.tamano_fuente",)], [], destino)
+	assert resultado.ok, resultado.mensaje
+	assert config.obtener("actualizaciones.fuente") == fuente_antes
+	assert config.obtener("actualizaciones.url_personalizada") == ""
+	# Marcadas una a una, sí.
+	resultado = perfil.importar(ruta, config, [], ["clave:actualizaciones.fuente", "clave:actualizaciones.url_personalizada"], destino)
+	assert resultado.ok, resultado.mensaje
+	assert config.obtener("actualizaciones.fuente") == "personalizada"
+	assert config.obtener("actualizaciones.url_personalizada") == "https://malo.example/version.json"
+
+
 def test_tamanos_y_partes(origen):
 	tamanos = crear.tamano_partes(origen)
 	assert set(tamanos) == set(formato.PARTES)

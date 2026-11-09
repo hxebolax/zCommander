@@ -161,6 +161,13 @@ class VentanaPrincipal(wx.Frame):
 		self.modo_ayuda_teclado = False
 		self._saliendo = False
 		self._activo = self._datos_sesion.get("activo", "izquierdo")
+		# Lado activo al desactivarse la ventana (se abre un diálogo o se cambia de aplicación) y
+		# enfoques explícitos desde entonces: al reactivarse, el foco vuelve a ese lado si Windows
+		# lo dejó caer en la lista del otro (2.0.1).
+		self._lado_al_desactivar: str | None = None
+		self._enfoques_desde_desactivar: list[tuple[str | None, bool]] = []
+		self._restaurando_foco = False
+		self._desactivaciones = 0
 		self._elementos_menu: dict[tuple[str, str | None], wx.MenuItem] = {}
 		self._ventana_operaciones = None
 		self._procesos: list[Any] = []
@@ -541,6 +548,9 @@ class VentanaPrincipal(wx.Frame):
 			self.bus.emitir(eventos.AL_ACTIVAR_PANEL, lado=panel.lado)
 			self._actualizar_teclas_lados()
 			self._actualizar_linea()
+			self._actualizar_titulo()
+			if self._restaurando_foco:
+				return
 			extras = []
 			if panel.marcadas():
 				extras.append(panel.describir_alcance())
@@ -548,6 +558,57 @@ class VentanaPrincipal(wx.Frame):
 				extras.append(_("filtro {f}").format(f=panel.filtro))
 			if extras:
 				anuncios.anunciar(", ".join(extras), anuncios.NORMAL)
+		else:
+			# Otra pestaña del mismo lado: el título sigue a su carpeta.
+			self._actualizar_titulo()
+
+	def anotar_enfoque(self, lado: str | None, clic: bool = False) -> None:
+		"""Lo llama ``PanelArchivos.enfocar()`` (y un clic en una lista): el foco se movió a propósito.
+
+		Mientras la ventana está desactivada (un diálogo abierto), esa intención se respeta al
+		reactivarse: no se devuelve el foco al lado que estaba activo (``_restaurar_lado_activo``).
+		"""
+		if self._lado_al_desactivar is not None and not self._restaurando_foco:
+			self._enfoques_desde_desactivar.append((lado, clic))
+
+	def devolver_foco_panel(self) -> None:
+		"""Pone el foco en la lista del panel activo (tras un diálogo que no sabía adónde volver).
+
+		Si la ventana se desactivó al abrirse el diálogo, «activo» es el lado de entonces: al
+		cerrarse, Windows pudo dejar el foco (y con él el lado activo) en el otro.
+		"""
+		# 2.0.1: oculta o minimizada no se toca el foco (quitarla de la bandeja ya lo coloca).
+		if not self or self._saliendo or not self.IsEnabled() or not self.IsShown() or self.IsIconized():
+			return
+		if self._paneles_ocultos:
+			# Con los paneles ocultos (Ctrl+O) se ve la salida de órdenes, no una lista oculta.
+			try:
+				self.salida.enfocar_final()
+			except RuntimeError:
+				log.debug("No se pudo devolver el foco a la salida de órdenes", exc_info=True)
+			return
+		lado = self._lado_al_desactivar or self._activo
+		self._restaurando_foco = True
+		try:
+			panel = self.lado(lado).panel_actual()
+			panel.enfocar()
+			self.panel_enfocado(panel)
+		except RuntimeError:
+			log.debug("No se pudo devolver el foco al panel activo", exc_info=True)
+		finally:
+			self._restaurando_foco = False
+
+	def _actualizar_titulo(self) -> None:
+		"""Título de la ventana: ruta del panel ACTIVO (la lee NVDA con Insert+T)."""
+		if not self or not hasattr(self, "derecho"):
+			return
+		try:
+			texto = f"{self.activo.mostrar_ruta()} - {NOMBRE_APLICACION}"
+		except Exception:  # noqa: BLE001 - un proveedor que falla al mostrar su ruta no deja sin título
+			log.debug("No se pudo formar el título", exc_info=True)
+			texto = NOMBRE_APLICACION
+		if self.GetTitle() != texto:
+			self.SetTitle(texto)
 
 	def panel_cambio_carpeta(self, panel) -> None:
 		self.bus.emitir(eventos.AL_CAMBIAR_CARPETA, panel=panel, proveedor=panel.proveedor, ruta=panel.ruta)
@@ -603,7 +664,7 @@ class VentanaPrincipal(wx.Frame):
 	def titulo_pestana(self, panel, texto: str) -> None:
 		self.lado(panel.lado).titulo(panel, texto)
 		if panel is self.activo:
-			self.SetTitle(f"{panel.mostrar_ruta()} - {NOMBRE_APLICACION}")
+			self._actualizar_titulo()
 
 	def pestana_visible(self, panel) -> bool:
 		return self.lado(panel.lado).es_visible(panel)
@@ -1151,6 +1212,10 @@ class VentanaPrincipal(wx.Frame):
 			self.barra_teclas.actualizar(forzar=True)
 		elif clave.startswith("vista."):
 			self._aplicar_vista()
+		elif clave == "paneles.marcas_como":
+			modo = self.config.obtener(clave)
+			for panel in self.todos_los_paneles():
+				panel.aplicar_modo_marcas(modo)
 		elif clave.startswith("accesibilidad.") or clave == "sonidos.sustituir_anuncios":
 			self.aplicar_voz()
 		elif clave in ("paneles.mostrar_ocultos", "paneles.carpetas_primero", "paneles.orden_natural", "paneles.fila_superior",
@@ -1174,7 +1239,7 @@ class VentanaPrincipal(wx.Frame):
 		nuevas = list(self.config.obtener("paneles.columnas") or ["nombre"])
 		previas = list(anterior) if isinstance(anterior, (list, tuple)) else None
 		for panel in self.todos_los_paneles():
-			if previas is None or panel.columnas_carpeta() == previas:
+			if previas is None or panel.sigue_columnas(previas):
 				panel.aplicar_columnas_carpeta(nuevas)
 
 	def aplicar_voz(self) -> None:
@@ -1358,12 +1423,70 @@ class VentanaPrincipal(wx.Frame):
 
 	def _al_activar(self, evento: wx.ActivateEvent) -> None:
 		evento.Skip()
-		if evento.GetActive() and not self._saliendo:
-			if self.arranque.modo in ("tarea", "sesion") and not self._usada and not self.IsIconized():
-				# Al recibir el foco, la persona la usa: vuelven los anuncios (10.17, 11.24).
-				self._usada = True
-				self.aplicar_voz()
-			wx.CallAfter(self._tras_activar)
+		if self._saliendo:
+			return
+		if not evento.GetActive():
+			# Se abre un diálogo o se cambia de aplicación: se recuerda el lado activo.
+			# 2.0.1: si aún hay una restauración pendiente (se reactivó y se volvió a desactivar
+			# antes de que corriese su CallAfter), se conserva: el lado activo de ahora puede ser
+			# ya el que Windows puso por error al cerrar el diálogo anterior.
+			if self._lado_al_desactivar is None:
+				self._lado_al_desactivar = self._activo
+				self._enfoques_desde_desactivar = []
+			self._desactivaciones += 1
+			return
+		if self.arranque.modo in ("tarea", "sesion") and not self._usada and not self.IsIconized():
+			# Al recibir el foco, la persona la usa: vuelven los anuncios (10.17, 11.24).
+			self._usada = True
+			self.aplicar_voz()
+		wx.CallAfter(self._tras_activar)
+		wx.CallAfter(self._restaurar_lado_activo, self._desactivaciones)
+
+	@staticmethod
+	def _es_control_del_panel(foco: wx.Window, panel) -> bool:
+		"""¿Es ``foco`` la lista del panel o el control de su vista actual (árbol, información...)?"""
+		if foco is panel.lista_archivos:
+			return True
+		vista = panel.vista_actual() if hasattr(panel, "vista_actual") else None
+		if vista is None:
+			return False
+		control = vista.control_enfocable() if hasattr(vista, "control_enfocable") else vista
+		return foco is control or foco is vista
+
+	def _restaurar_lado_activo(self, desactivaciones: int | None = None) -> None:
+		"""Tras reactivarse, devuelve el foco al lado que estaba activo si Windows lo dejó en el otro.
+
+		Al cerrar un diálogo modal, Windows devuelve el foco a la ventana y a veces cae en la
+		lista del otro lado; su ``EVT_SET_FOCUS`` la convertía en activa. Se respeta un
+		``enfocar()`` explícito (una orden que mueve el foco a propósito) y un clic del ratón.
+		"""
+		if not self or (desactivaciones is not None and desactivaciones != self._desactivaciones):
+			return  # se volvió a desactivar antes de llegar aquí: decide la próxima activación
+		guardado = self._lado_al_desactivar
+		enfoques = self._enfoques_desde_desactivar
+		self._lado_al_desactivar = None
+		self._enfoques_desde_desactivar = []
+		if self._saliendo or guardado is None:
+			return
+		if any(clic for _lado, clic in enfoques):
+			self._actualizar_titulo()
+			return
+		explicitos = [lado for lado, _clic in enfoques if lado]
+		objetivo = explicitos[-1] if explicitos else guardado
+		if objetivo != self._activo:
+			foco = wx.Window.FindFocus()
+			en_lista = foco is None or any(self._es_control_del_panel(foco, p) for p in self.todos_los_paneles())
+			if en_lista and not self._paneles_ocultos:
+				panel = self.lado(objetivo).panel_actual()
+				self._restaurando_foco = True
+				try:
+					panel.enfocar()
+					self.panel_enfocado(panel)
+				except RuntimeError:
+					log.debug("No se pudo devolver el foco al lado %s", objetivo, exc_info=True)
+				finally:
+					self._restaurando_foco = False
+		self._actualizar_titulo()
 
 	def _tras_activar(self) -> None:
 		if not self:

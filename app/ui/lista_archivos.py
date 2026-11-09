@@ -23,10 +23,18 @@ Decisiones (secciones 4.3 y 5 del diseño):
   porque un elemento enfocado sin seleccionar solo lleva un recuadro punteado.
 - ``LVS_SHOWSELALWAYS`` para ver las marcas en el panel pasivo.
 - Enganches para el bloque G: iconos, arrastrar y soltar.
+- 2.0.1, ``paneles.marcas_como = "columna"``: las marcas no usan la selección
+  nativa. La lista se queda siempre en selección simple (solo la fila del cursor
+  seleccionada), así ningún lector dice «seleccionado» ni «no seleccionado» por las
+  marcas; la columna ``marca`` dice «Marcado» en las filas marcadas (vacía en las
+  demás, y los lectores se saltan las celdas vacías) y, para quien ve, las filas
+  marcadas van en negrita. Las marcas siguen en el modelo: todas las órdenes
+  funcionan igual en los dos modos.
 """
 
 from __future__ import annotations
 
+import builtins
 import ctypes
 import logging
 from typing import Any
@@ -37,6 +45,15 @@ import wx
 from app.services.vfs.base import Entrada
 
 log = logging.getLogger(__name__)
+
+
+def _(texto: str) -> str:
+	traducir = getattr(builtins, "_", None)
+	return traducir(texto) if callable(traducir) else texto
+
+
+#: Más filas cambiadas que esto: se repinta la lista entera en lugar de fila a fila.
+_MAX_FILAS_REPINTADO = 200
 
 GWL_STYLE = -16
 LVS_SHOWSELALWAYS = 0x0008
@@ -111,6 +128,11 @@ class ListaArchivos(wx.ListCtrl):
 		self._attrs_color: dict[str, wx.ItemAttr] = {}
 		#: Proveedor de lo que se muestra (lo fija el panel); lo reciben las columnas de complementos.
 		self.obtener_proveedor: Callable[[], Any] | None = None
+		#: 2.0.1: marcas en la columna «Marca» en lugar de en la selección (``fijar_marcas_en_columna``).
+		self._marcas_en_columna = False
+		self._attr_marca_columna: wx.ItemAttr | None = None
+		self._clave_attr_marca: tuple | None = None
+		self._color_marcado: wx.Colour | None = None
 		self._fijar_estilo_extra(LVS_SHOWSELALWAYS)
 		self.aplicar_colores(None)
 		self.Bind(wx.EVT_KEY_DOWN, self._al_tecla)
@@ -138,6 +160,8 @@ class ListaArchivos(wx.ListCtrl):
 		return not (self.GetWindowStyleFlag() & wx.LC_SINGLE_SEL)
 
 	def _poner_modo(self, multiple: bool) -> None:
+		# Con las marcas en la columna, la selección nativa nunca refleja las marcas.
+		multiple = multiple and not self._marcas_en_columna
 		if multiple == self.multiple:
 			return
 		estilo = self.GetWindowStyleFlag()
@@ -156,11 +180,15 @@ class ListaArchivos(wx.ListCtrl):
 			self.SetBackgroundColour(colores["fondo"])
 			self.SetForegroundColour(colores["texto"])
 			cursor = colores["cursor_fondo"]
+			self._color_marcado = colores["marcado_texto"]
 			self._attr_marcada.SetTextColour(colores["marcado_texto"])
 			self._attr_cursor_marcada.SetTextColour(colores["marcado_texto"])
 			self._attr_cursor.SetTextColour(colores.get("cursor_texto", colores["texto"]))
+		else:
+			self._color_marcado = None
 		self._attr_cursor.SetBackgroundColour(cursor)
 		self._attr_cursor_marcada.SetBackgroundColour(cursor)
+		self._clave_attr_marca = None
 		self.Refresh()
 
 	# ── Columnas ──────────────────────────────────────────────────────────────
@@ -206,6 +234,41 @@ class ListaArchivos(wx.ListCtrl):
 
 		valor = self._columnas_externas(columna, self._entradas[item], proveedor, al_listo)
 		return "…" if valor is None else str(valor)
+
+	def fijar_marcas_en_columna(self, valor: bool) -> None:
+		"""``paneles.marcas_como``: ``True`` = columna «Marca»; ``False`` = selección de la lista (como en la 2.0).
+
+		Cambiar de modo conserva las marcas: solo cambia cómo se reflejan.
+		"""
+		valor = bool(valor)
+		if valor == self._marcas_en_columna:
+			return
+		self._marcas_en_columna = valor
+		if not self._entradas:
+			return
+		cursor = max(0, self.GetFocusedItem())
+		self.Freeze()
+		try:
+			self._poner_modo(bool(self._marcas))
+			self._reaplicar(cursor)
+		finally:
+			self.Thaw()
+		self.Refresh()
+
+	@property
+	def marcas_en_columna(self) -> bool:
+		return self._marcas_en_columna
+
+	def _repintar_filas(self, indices: Sequence[int]) -> None:
+		"""Repinta las filas cuya marca cambió, para que el lector lea el texto nuevo de la columna «Marca»."""
+		if not self._marcas_en_columna and "marca" not in self._columnas:
+			return
+		filas = [i for i in indices if 0 <= i < len(self._entradas)]
+		if len(filas) > _MAX_FILAS_REPINTADO:
+			self.Refresh()
+			return
+		for fila in filas:
+			self.RefreshItem(fila)
 
 	def poner_columnas(self, columnas: Sequence[str], anchos: dict[str, int] | None = None) -> None:
 		anchos = anchos or {}
@@ -373,7 +436,10 @@ class ListaArchivos(wx.ListCtrl):
 		self.mover_cursor(nuevo)
 
 	def _al_clic(self, evento: wx.MouseEvent) -> None:
-		if not self.multiple:
+		# Con las marcas en la columna la lista es de selección simple, pero Ctrl+clic y
+		# Mayús+clic siguen marcando, como en modo selección.
+		marca_con_raton = self._marcas_en_columna and (evento.ControlDown() or evento.ShiftDown())
+		if not self.multiple and not marca_con_raton:
 			evento.Skip()
 			return
 		indice, _banderas = self.HitTest(evento.GetPosition())
@@ -423,12 +489,14 @@ class ListaArchivos(wx.ListCtrl):
 
 	def poner_marcas(self, claves: set[str]) -> None:
 		"""Sustituye las marcas (claves que no estén en la lista se ignoran)."""
+		anteriores = self._marcas
 		self._marcas = {c for c in claves if c in self._indice_por_clave}
 		self._sincronizar()
+		self._repintar_filas([self._indice_por_clave[k] for k in anteriores ^ self._marcas if k in self._indice_por_clave])
 
 	def marcar_indices(self, indices: Sequence[int], valor: bool = True) -> int:
 		"""Marca o desmarca; nunca marca «..». Devuelve cuántas cambiaron."""
-		cambios = 0
+		cambiadas: list[int] = []
 		for indice in indices:
 			entrada = self.entrada(indice)
 			if entrada is None or entrada.es_superior:
@@ -436,13 +504,14 @@ class ListaArchivos(wx.ListCtrl):
 			k = clave(entrada)
 			if valor and k not in self._marcas:
 				self._marcas.add(k)
-				cambios += 1
+				cambiadas.append(indice)
 			elif not valor and k in self._marcas:
 				self._marcas.discard(k)
-				cambios += 1
-		if cambios:
+				cambiadas.append(indice)
+		if cambiadas:
 			self._sincronizar()
-		return cambios
+			self._repintar_filas(cambiadas)
+		return len(cambiadas)
 
 	def alternar(self, indice: int) -> bool | None:
 		"""Alterna la marca de una fila; devuelve el estado nuevo (None si no se puede marcar)."""
@@ -474,8 +543,10 @@ class ListaArchivos(wx.ListCtrl):
 		"""Quita todas las marcas, también las de lo que no se ve."""
 		self._marcas_ocultas.clear()
 		if self._marcas:
+			anteriores = [self._indice_por_clave[k] for k in self._marcas if k in self._indice_por_clave]
 			self._marcas.clear()
 			self._sincronizar()
+			self._repintar_filas(anteriores)
 
 	def _sincronizar(self) -> None:
 		"""Refleja el modelo en la lista: modo y selección nativa."""
@@ -546,6 +617,9 @@ class ListaArchivos(wx.ListCtrl):
 			return ""
 		try:
 			columna = self._columnas[column]
+			if columna == "marca":
+				# Vacía en las filas sin marcar: los lectores se saltan las celdas vacías.
+				return _("Marcado") if self.esta_marcada(item) else ""
 			if ":" in columna:
 				return self._valor_externo(item, columna)
 			if columna == "regla":
@@ -561,6 +635,8 @@ class ListaArchivos(wx.ListCtrl):
 		es_cursor = self.multiple and item == self.GetFocusedItem()
 		if es_cursor:
 			return self._attr_cursor_marcada if marcada else self._attr_cursor
+		if marcada and self._marcas_en_columna:
+			return self._atributo_marca_columna()
 		if marcada and self._colores_propios:
 			return self._attr_marcada
 		if self._decorador is not None and 0 <= item < len(self._entradas):
@@ -573,6 +649,22 @@ class ListaArchivos(wx.ListCtrl):
 					self._attrs_color[color] = atributo
 				return self._attrs_color[color]
 		return None
+
+	def _atributo_marca_columna(self) -> wx.ItemAttr:
+		"""Filas marcadas en modo columna: negrita (se ve igual con cualquier tema y en alto contraste).
+
+		Con un tema propio, además el color de texto de lo marcado. Se rehace si cambia la letra.
+		"""
+		fuente = self.GetFont()
+		clave_attr = (fuente.GetPointSize(), fuente.GetFaceName(), str(self._color_marcado))
+		if self._attr_marca_columna is None or self._clave_attr_marca != clave_attr:
+			atributo = wx.ItemAttr()
+			atributo.SetFont(fuente.Bold())
+			if self._color_marcado is not None:
+				atributo.SetTextColour(self._color_marcado)
+			self._attr_marca_columna = atributo
+			self._clave_attr_marca = clave_attr
+		return self._attr_marca_columna
 
 	def OnGetItemImage(self, item: int) -> int:  # noqa: N802 - API de wx
 		if self._icono_de is None or not 0 <= item < len(self._entradas):

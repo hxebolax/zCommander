@@ -415,6 +415,18 @@ def test_componer_nombre_quita_marcas_de_direccion(modulo):
 	assert modulo.componer_nombre([(None, "\u200eabc\u200f"), ("Tamaño", "1 KB")], True) == "abc; Tamaño: 1 KB"
 
 
+def test_con_la_primera_vacia_la_segunda_va_sin_cabecera(modulo, ventana):
+	"""2.0.1: la Marca vacía de una fila sin marcar no hace decir «Nombre:» delante del nombre."""
+	assert modulo.componer_nombre([(None, ""), ("Nombre", "a.txt"), ("Tamaño", "1 KB")], True) == "a.txt; Tamaño: 1 KB"
+	assert modulo.componer_nombre([(None, "Marcado"), ("Nombre", "a.txt")], True) == "Marcado; Nombre: a.txt"
+	# Con la ventana real: la columna 2 (Tipo) está vacía y va la primera.
+	elemento = _elemento_con_orden(modulo, ventana)
+	senales_nvda.publicar_orden_lectura(ventana, [2, 0, 1])
+	assert elemento.name == "informe.txt; Tamaño: 3 KB"
+	senales_nvda.publicar_orden_lectura(ventana, [1, 2, 0])  # vacía en medio: no cambia nada
+	assert elemento.name == "3 KB; Nombre: informe.txt"
+
+
 def test_si_falla_el_orden_vuelve_al_nombre_de_nvda(modulo, ventana):
 	class Rota(_FilaFalsa):
 		def _getColumnContentRaw(self, index):  # noqa: N802 - API de NVDA

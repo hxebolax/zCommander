@@ -29,6 +29,8 @@ Qué hace (cada función tiene su comportamiento de NVDA si algo falla):
    (base 0) de 4 bits por posición, de los bits bajos a los altos, terminado
    en ``0xF`` (como mucho 15 columnas). Al moverse por las filas se leen solo
    esas columnas, en ese orden. Sin la propiedad, NVDA lee como siempre.
+   Si la primera columna está vacía (la Marca de una fila sin marcar), la
+   segunda se dice sin cabecera, como la primera.
 4. **NVDA+Mayúsculas+J** lee la fila enfocada completa, con todas las columnas
    y sus cabeceras; pulsado dos veces, la muestra en una ventana navegable.
 
@@ -258,12 +260,18 @@ def componer_nombre(celdas, con_cabeceras: bool) -> str:
 	la cabecera va delante salvo en la primera columna (y solo si NVDA está
 	configurado para leer cabeceras de columna), separadas por «; » y sin
 	marcas de dirección.
+
+	Una diferencia con NVDA (zCommander 2.0.1): si la primera columna está
+	vacía (la Marca de una fila sin marcar, con las marcas en columna), la
+	segunda tampoco lleva cabecera, como si fuera la primera; NVDA diría
+	«Nombre:» delante de cada fila sin marcar.
 	"""
 	partes = []
+	primera_vacia = bool(celdas) and not celdas[0][1]
 	for posicion, (cabecera, contenido) in enumerate(celdas):
 		if not contenido:
 			continue
-		if con_cabeceras and posicion and cabecera:
+		if con_cabeceras and cabecera and posicion and not (posicion == 1 and primera_vacia):
 			partes.append(f"{cabecera}: {contenido}")
 		else:
 			partes.append(contenido)
@@ -320,7 +328,9 @@ class ElementoListaZC(sysListView32.ListItem):
 		celdas = []
 		for posicion, indice in enumerate(orden):
 			contenido = self._getColumnContentRaw(indice)
-			cabecera = self._getColumnHeaderRaw(indice) if cabeceras and posicion and contenido else None
+			# Sin cabecera en la segunda si la primera está vacía (ver componer_nombre).
+			sin_cabecera = not posicion or (posicion == 1 and not celdas[0][1])
+			cabecera = self._getColumnHeaderRaw(indice) if cabeceras and contenido and not sin_cabecera else None
 			celdas.append((cabecera, contenido))
 		return componer_nombre(celdas, cabeceras)
 

@@ -37,8 +37,12 @@ PAGINAS = (
 #: Claves del núcleo cuyo valor es un programa o una orden que zCommander ejecuta
 #: (diseño 2.0, 7.2): una copia de seguridad no las restaura sin que la persona
 #: las marque una a una. Quien añada una clave así la añade aquí.
+#: 2.0.1: también las que deciden de dónde se descargan e instalan las actualizaciones
+#: (``actualizaciones.fuente`` y ``actualizaciones.url_personalizada``): un perfil o una
+#: copia ajenos podrían apuntar a un servidor que no es el de zCommander.
 EJECUTA: frozenset[str] = frozenset({
 	"editor.usar_externo", "editor.externo", "visor.externo", "general.diferencias_externo", "comprimidos.ruta_7zip",
+	"actualizaciones.fuente", "actualizaciones.url_personalizada",
 })
 
 DESCRIPCIONES: dict[str, tuple[str, str, str | None]] = {
@@ -93,6 +97,15 @@ DESCRIPCIONES: dict[str, tuple[str, str, str | None]] = {
 	"accesibilidad.leer_numero_fila": (N_("Lectura de columnas: decir el &número de fila"), N_("Al leer columnas con Izquierda, Derecha o Ctrl+número."), ACCESIBILIDAD),
 	"accesibilidad.leer_cabecera": (N_("Lectura de columnas: decir el nombre de la col&umna"), N_("Al leer columnas con Izquierda, Derecha o Ctrl+número."), ACCESIBILIDAD),
 	"accesibilidad.leer_contenido": (N_("Lectura de columnas: decir el c&ontenido"), N_("Si se desactivan las tres, se dice el contenido."), ACCESIBILIDAD),
+	"paneles.marcas_como": (N_("Cómo se muestran las &marcas:"), N_(
+		"Como selección de la lista: lo marcado queda seleccionado y el lector dice «seleccionado» al final de la fila "
+		"(y, con varias marcas, «no seleccionado» en las demás). En la columna Marca: lo marcado dice «Marcado» en una "
+		"columna que puede colocar donde quiera con Columnas y Orden de lectura (si la pone la primera, se oye antes "
+		"del nombre); la lista no usa la selección para las marcas, así que ningún lector lo dice dos veces. Al elegirla, "
+		"la columna Marca se añade la primera en las pestañas que no la tienen y no se puede quitar mientras siga elegida. "
+		"Con NVDA leyendo las cabeceras de tabla, si la Marca va la primera NVDA dice «Nombre:» delante de cada fila sin "
+		"marcar; para evitarlo, instale el complemento de zCommander para NVDA, ponga la Marca detrás del Nombre con "
+		"Columnas u Orden de lectura, o desactive en NVDA la lectura de cabeceras de tabla."), ACCESIBILIDAD),
 	"accesibilidad.retardo_voz_ms": (N_("&Retardo de los anuncios (milisegundos):"), N_("Espera antes de hablar para no pisar lo que el lector dice al mover el foco."), ACCESIBILIDAD),
 	"accesibilidad.salida_voz": (N_("&Salida de los anuncios:"), N_("Automática (NVDA o JAWS directamente; Narrador y otros por notificaciones de Windows), siempre por el lector, siempre por notificaciones, o ninguna."), ACCESIBILIDAD),
 	"accesibilidad.sapi_sin_lector": (N_("&Hablar con la voz de Windows si no hay lector"), N_("Sin lector de pantalla, los anuncios se dicen con SAPI."), ACCESIBILIDAD),
@@ -164,6 +177,20 @@ DESCRIPCIONES: dict[str, tuple[str, str, str | None]] = {
 	# Actualizaciones
 	"actualizaciones.comprobar": (N_("&Buscar actualizaciones de zCommander"), N_("Comprueba de vez en cuando si hay una versión nueva. Nunca instala sin preguntar."), ACTUALIZACIONES),
 	"actualizaciones.intervalo_horas": (N_("Cada cuántas &horas:"), N_("Intervalo entre comprobaciones de la aplicación."), ACTUALIZACIONES),
+	"actualizaciones.fuente": (N_("&Origen de las actualizaciones:"), N_(
+		"De dónde se busca la versión nueva de zCommander. Servidor de zCommander: xebolax.synology.me, el de siempre. "
+		"GitHub: las versiones publicadas en el repositorio hxebolax/zCommander. Las dos: se consultan ambas y se ofrece "
+		"la versión más nueva; si una no responde, se usa la otra sin avisar, y la descarga prueba la otra si falla. "
+		"Una dirección personalizada: la que escriba en el campo siguiente (por ejemplo, una copia en su red). "
+		"Con cualquier origen se exige la firma de zCommander: una versión sin firma o firmada por otro nunca se instala. "
+		"Se aplica en la siguiente búsqueda, sin reiniciar. Los componentes y los complementos tienen su propio origen."),
+		ACTUALIZACIONES),
+	"actualizaciones.url_personalizada": (N_("Dirección per&sonalizada del archivo version.json:"), N_(
+		"Solo se usa con el origen «Una dirección personalizada», y solo está disponible al elegirlo; con ese origen es "
+		"obligatoria. Escriba la dirección completa del archivo version.json, que tiene que empezar por https:// y no "
+		"puede llevar usuario ni contraseña. El archivo tiene que estar "
+		"firmado por zCommander; el paquete se descarga de la misma carpeta o de las direcciones que indique el archivo."),
+		ACTUALIZACIONES),
 	"actualizaciones.componentes_comprobar": (N_("Buscar versiones &nuevas de los componentes"), N_("rclone, libarchive, 7za y FFmpeg."), ACTUALIZACIONES),
 	"actualizaciones.componentes_intervalo_dias": (N_("Cada cuántos &días los componentes:"), N_("Intervalo entre comprobaciones de los componentes."), ACTUALIZACIONES),
 	"actualizaciones.complementos_comprobar": (N_("Buscar actualizaciones de &los complementos"), N_("Para los complementos que publican sus actualizaciones."), ACTUALIZACIONES),

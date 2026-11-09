@@ -19,7 +19,7 @@ Esta oferta vale durante tres años desde la última vez que se distribuyó la v
 
 ## Componentes con obligación de dar las fuentes
 
-- zCommander (núcleo, herramientas, complementos de serie, simulador DSM y complemento de NVDA), versión 2.0.0 (GPL-3.0-or-later): https://xebolax.synology.me/zCommander/ (archivo zCommander_v<versión>_fuentes.zip de cada versión).
+- zCommander (núcleo, herramientas, complementos de serie, simulador DSM y complemento de NVDA), versión 2.0.1 (GPL-3.0-or-later): https://xebolax.synology.me/zCommander/ (archivo zCommander_v<versión>_fuentes.zip de cada versión).
 - wxPython, versión 4.3.2 (LGPL-2.0-or-later WITH WxWindows-exception-3.1): https://pypi.org/project/wxPython/4.3.2/#files (wxpython-4.3.2.tar.gz).
 - paramiko, versión 5.1.0 (LGPL-2.1): https://pypi.org/project/paramiko/5.1.0/#files (paramiko-5.1.0.tar.gz).
 - py7zr, versión 0.11.3 (LGPL-2.1-or-later): https://pypi.org/project/py7zr/0.11.3/#files (py7zr-0.11.3.tar.gz).

@@ -29,7 +29,7 @@ from app.services import formato
 from app.services.operaciones import atributos as at
 from app.services.vfs import base
 from app.ui.accesibilidad import dialogos
-from app.ui.accesibilidad.dialogos import crear_botonera, preparar_dialogo
+from app.ui.accesibilidad.dialogos import crear_botonera, devolver_foco, preparar_dialogo
 from app.ui.accesibilidad.nombres import crear_campo
 
 log = logging.getLogger(__name__)
@@ -235,5 +235,4 @@ def pedir_atributos(padre: wx.Window | None, entradas: Sequence[base.Entrada], a
 		return dialogo.cambios() if dialogo.ShowModal() == wx.ID_OK else None
 	finally:
 		dialogo.Destroy()
-		if foco_previo:
-			foco_previo.SetFocus()
+		devolver_foco(foco_previo)

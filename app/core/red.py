@@ -172,9 +172,23 @@ def comprobar_url(url: str) -> None:
 	raise ErrorHTTP(CONEXION, _("Solo se admiten direcciones https: {u}").format(u=redactar_url(url)))
 
 
+def _es_http_local(url: str) -> bool:
+	partes = urllib.parse.urlsplit(url)
+	return partes.scheme == "http" and (partes.hostname or "") in HOSTS_LOCALES
+
+
 class _SinBajarAHttp(urllib.request.HTTPRedirectHandler):
+	"""Solo se siguen redirecciones a https.
+
+	2.0.1: a http de la propia máquina, solo si la petición ya era http local (pruebas y
+	servidores locales); un servidor remoto no puede mandar a zCommander a ``http://localhost``.
+	"""
+
 	def redirect_request(self, req, fp, code, msg, headers, newurl):  # noqa: ANN001 - firma de urllib
 		comprobar_url(newurl)
+		if _es_http_local(newurl) and not _es_http_local(req.full_url):
+			raise ErrorHTTP(CONEXION, _("El servidor redirigió a una dirección de este equipo sin cifrar; no se sigue por seguridad: {u}").format(
+				u=redactar_url(newurl)))
 		return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 

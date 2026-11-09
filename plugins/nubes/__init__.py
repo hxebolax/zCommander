@@ -7,7 +7,8 @@ que la configuración diga ``arrancar = al_iniciar``, y entonces en un hilo):
 
 - los 20 manejadores de órdenes (``ui/ordenes.py``, que se importa al usarlos);
 - los esquemas ``nube`` (cuentas), ``webdav`` y ``webdavs`` (direcciones sueltas);
-- las unidades dinámicas del selector (Alt+F1 y Alt+F2);
+- las unidades dinámicas del selector (Alt+F1 y Alt+F2), y empieza en un hilo la
+  búsqueda de las carpetas de los programas oficiales de nube;
 - ``al_detener`` del componente rclone (para que el actualizador pueda pararlo);
 - el aviso de cambios de configuración (reinicia rcd si hace falta).
 
@@ -51,6 +52,9 @@ class Complemento(api.Complemento):
 		zc.vfs.esquema("webdav", self._fabrica_webdav)
 		zc.vfs.esquema("webdavs", self._fabrica_webdav)
 		zc.vfs.unidades(self.nubes.unidades)
+		if zc.config.obtener("carpetas_programas", True):
+			# Las carpetas de los programas oficiales se buscan ya, en su hilo: así el primer Alt+F1 no espera.
+			self.nubes.asegurar_deteccion()
 		zc.componentes.al_detener("rclone", self._detener_para_actualizar)
 		self._cancelar_suscripcion = zc.config.suscribir(self._al_cambiar_configuracion)
 		if zc.config.obtener("arrancar", "al_usar") == "al_iniciar":
@@ -146,6 +150,7 @@ class Complemento(api.Complemento):
 	def ventanas_para_revisar(self, padre: Any) -> list[Any]:
 		"""Todas las ventanas del complemento, construidas sin mostrarlas, para ``revisar_teclado``."""
 		from .cuentas import Cuenta
+		from .locales import CarpetaNube
 		from .servicio import Paso
 		from .ui import asistente, cifrada, cuentas, emparejar, franjas, montar, oauth, propiedades, servir, sincronizar, union
 		from .ui.ordenes import Ordenes
@@ -158,7 +163,7 @@ class Complemento(api.Complemento):
 		ventanas = [
 			cuentas.DialogoCuentas(zc, padre, ordenes),
 			asistente.DialogoServicio(zc, padre, catalogo, True),
-			oauth.DialogoEspera(zc, padre, "Autorizar", "Explicación", url="http://127.0.0.1:53682/auth", otro_equipo=True),
+			oauth.DialogoEspera(zc, padre, "Autorizar", "Explicación", url="http://127.0.0.1:53682/auth"),
 			oauth.DialogoEspera(zc, padre, "Esperar", "Explicación"),
 			oauth.DialogoToken(zc, padre, 'rclone authorize "drive"'),
 			propiedades.DialogoPropiedades(zc, padre, ejemplo, catalogo.servicio("drive")),
@@ -176,14 +181,21 @@ class Complemento(api.Complemento):
 			servir.DialogoServicios(zc, padre, lambda: [], lambda _i: None),
 			franjas.DialogoFranjas(zc, padre, "08:00,512k 23:00,off"),
 		]
+		carpetas = [CarpetaNube("OneDrive - Personal", "OneDrive", r"C:\Users\ana\OneDrive", "prueba"),
+			CarpetaNube("iCloud Drive", "iCloud Drive", r"C:\Users\ana\iCloudDrive", "prueba")]
+		ventanas.append(asistente.DialogoCarpetas(zc, padre, carpetas, [True, False]))
 		for servicio in catalogo.lista(True):
-			ventanas.append(asistente.DialogoDatos(zc, padre, servicio, guia=lambda: None))
+			ventanas.append(asistente.DialogoDatos(zc, padre, servicio, guia=lambda: None, abrir_enlace=lambda _url: None))
+			if servicio.avanzadas_alta or servicio.es_oauth:
+				ventanas.append(asistente.DialogoAvanzadas(zc, padre, servicio, guia=lambda: None))
 		ejemplos_pasos = [
 			Paso("pregunta", opcion={"Name": "config_change_team_drive", "Help": "¿Unidad compartida?", "Type": "bool", "Default": False}),
 			Paso("pregunta", opcion={"Name": "region", "Help": "Región", "Exclusive": True,
 				"Examples": [{"Value": "global", "Help": "Global"}, {"Value": "cn", "Help": "China"}]}),
 			Paso("pregunta", opcion={"Name": "pass", "Help": "Contraseña", "IsPassword": True}),
 			Paso("pregunta", opcion={"Name": "config_token", "Help": "rclone authorize \"drive\""}),
+			Paso("pregunta", opcion={"Name": "config_type", "Help": "Type of connection", "Exclusive": True,
+				"Examples": [{"Value": "onedrive", "Help": "OneDrive Personal or Business"}, {"Value": "sharepoint", "Help": "Root Sharepoint site"}]}),
 		]
 		for paso in ejemplos_pasos:
 			ventanas.append(asistente.DialogoPregunta(zc, padre, paso, "Google Drive"))

@@ -11,6 +11,6 @@ Para publicar una versión nueva solo se cambia ``APP_VERSION`` aquí.
 NOMBRE_APLICACION = "zCommander"
 # Identificador sin espacios: ejecutable, instancia única, carpeta de compilación.
 ID_APLICACION = "ZCommander"
-APP_VERSION = "2.0.0"
+APP_VERSION = "2.0.1"
 # Titular del copyright de la cabecera SPDX de cada archivo y de «Acerca de» (diseño 2.0, 2.1 y 21.2.1).
 TITULAR = "hxebolax y colaboradores"

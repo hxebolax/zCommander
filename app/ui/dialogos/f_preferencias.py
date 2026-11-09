@@ -65,6 +65,10 @@ NOMBRES_OPCIONES: dict[str, dict[Any, str]] = {
 	"paneles.formato_fecha": {"corta": N_("Corta (8/11/2026 14:05)"), "larga": N_("Larga, con segundos"), "iso": N_("ISO (2026-11-08 14:05)")},
 	"paneles.formato_tamano": {"legible": N_("Legible (1,2 MB)"), "bytes": N_("En bytes (1.234.567)"), "mixto": N_("Mixto (bytes hasta 1 MB)")},
 	"paneles.orientacion": {"vertical": N_("Lado a lado"), "horizontal": N_("Uno encima de otro")},
+	"paneles.marcas_como": {
+		"seleccion": N_("Como selección de la lista (el lector dice «seleccionado»)"),
+		"columna": N_("En la columna Marca (el lector solo lo dice una vez)"),
+	},
 	"vista.tema": {"sistema": N_("Sistema (colores de Windows)"), "norton": N_("Norton clásico"), "alto_contraste": N_("Alto contraste")},
 	"accesibilidad.detalle": {"breve": N_("Breve"), "normal": N_("Normal"), "detallado": N_("Detallado")},
 	"accesibilidad.progreso_voz": {"hitos": N_("Cada 25 %"), "inicio_fin": N_("Al empezar y al terminar"), "final": N_("Solo al terminar")},
@@ -88,6 +92,16 @@ NOMBRES_OPCIONES: dict[str, dict[Any, str]] = {
 		"explorador": N_("Explorador de Windows")},
 	"sonidos.progreso": {"no": N_("No"), "cada_25": N_("Cada 25 %"), "cada_10": N_("Cada 10 %")},
 	"comprimidos.metodo_zip": {"deflate": N_("Deflate (el de siempre)"), "zstd": N_("Zstandard (más rápido)"), "almacenar": N_("Sin comprimir")},
+	"actualizaciones.fuente": {
+		"servidor": N_("Servidor de zCommander (xebolax.synology.me)"), "github": N_("GitHub (hxebolax/zCommander)"),
+		"ambas": N_("Las dos: la que tenga la versión más nueva"), "personalizada": N_("Una dirección personalizada"),
+	},
+}
+
+#: Opciones que solo se pueden cambiar con cierto valor de otra: ``{dependiente: (clave que manda, valores que la habilitan)}``.
+#: Deshabilitada, el lector la anuncia «no disponible» y Tab la salta; su ayuda (Ctrl+H) explica cuándo se usa.
+DEPENDENCIAS: dict[str, tuple[str, tuple[Any, ...]]] = {
+	"actualizaciones.url_personalizada": ("actualizaciones.fuente", ("personalizada",)),
 }
 
 ETIQUETA_FABRICA = N_("&Valores de fábrica de esta página")
@@ -215,6 +229,7 @@ class DialogoPreferenciasZ(plantilla.DialogoPreferencias):
 		self.libro = wx.Treebook(self)
 		self._construir_paginas()
 		self._letras_del_buscador()
+		self._enlazar_dependencias()
 		sizer.Add(self.libro, 1, wx.EXPAND | wx.ALL, 8)
 
 		botones = wx.BoxSizer(wx.HORIZONTAL)
@@ -383,6 +398,56 @@ class DialogoPreferenciasZ(plantilla.DialogoPreferencias):
 				if not id_pagina:
 					self._nodos_complementos[nodo.id] = indice
 
+	# ── Opciones que dependen de otra ─────────────────────────────────────────
+
+	def _enlazar_dependencias(self) -> None:
+		"""Cada opción de ``DEPENDENCIAS`` se habilita solo con los valores que la usan (y al momento al cambiarlos)."""
+		for clave, (maestra, _valores) in DEPENDENCIAS.items():
+			if clave not in self._controles or maestra not in self._controles:
+				continue
+			control = self._controles[maestra][1]
+			evento = wx.EVT_CHOICE if isinstance(control, wx.Choice) else wx.EVT_CHECKBOX
+			control.Bind(evento, self._al_cambiar_maestra)
+		self.actualizar_dependencias()
+
+	def _al_cambiar_maestra(self, evento: wx.CommandEvent) -> None:
+		self.actualizar_dependencias()
+		evento.Skip()
+
+	def actualizar_dependencias(self) -> None:
+		"""Habilita o deshabilita las opciones dependientes según el valor que tienen ahora los controles."""
+		for clave, (maestra, valores) in DEPENDENCIAS.items():
+			if clave not in self._controles or maestra not in self._controles:
+				continue
+			opcion, control, _pagina = self._controles[maestra]
+			habilitar = self._leer_control(opcion, control) in valores
+			dependiente = self._controles[clave][1]
+			if dependiente.IsEnabled() != habilitar:
+				dependiente.Enable(habilitar)
+
+	def _validar_cruzado(self) -> tuple[str, str] | None:
+		"""Comprobaciones entre opciones: ``(clave del control que hay que corregir, motivo)`` o ``None``.
+
+		2.0.1: con «Una dirección personalizada» la dirección es obligatoria; vacía, la
+		comprobación de actualizaciones fallaría siempre sin que nadie lo notase.
+		"""
+		if "actualizaciones.fuente" in self._controles and "actualizaciones.url_personalizada" in self._controles:
+			opcion, control, _pagina = self._controles["actualizaciones.fuente"]
+			opcion_url, control_url, _pagina_url = self._controles["actualizaciones.url_personalizada"]
+			if (self._leer_control(opcion, control) == "personalizada"
+					and not str(self._leer_control(opcion_url, control_url) or "").strip()):
+				return "actualizaciones.url_personalizada", _(
+					"Con «Una dirección personalizada» hay que escribir la dirección del archivo version.json, "
+					"completa y empezando por https://. Si no tiene una, elija otro origen de las actualizaciones.")
+		return None
+
+	def _senalar(self, clave: str, mensaje: str) -> None:
+		# Un valor no válido en una opción deshabilitada se tiene que poder corregir.
+		control = self._controles[clave][1]
+		if not control.IsEnabled():
+			control.Enable(True)
+		super()._senalar(clave, mensaje)
+
 	# ── Páginas y búsqueda ────────────────────────────────────────────────────
 
 	def indice_de(self, pagina: str) -> int | None:
@@ -439,7 +504,11 @@ class DialogoPreferenciasZ(plantilla.DialogoPreferencias):
 		clave, pagina = self._resultados[indice]
 		self.libro.SetSelection(pagina)
 		if clave:
-			self._controles[clave][1].SetFocus()
+			control = self._controles[clave][1]
+			if not control.IsEnabled() and clave in DEPENDENCIAS:
+				# Deshabilitada: el foco va a la opción que la habilita (su ayuda lo explica).
+				control = self._controles.get(DEPENDENCIAS[clave][0], (None, control))[1]
+			control.SetFocus()
 		else:
 			self._enfocar_pagina(pagina)
 		return True
@@ -509,6 +578,10 @@ class DialogoPreferenciasZ(plantilla.DialogoPreferencias):
 			except ErrorValidacion as error:
 				self._senalar(clave, str(error))
 				return False
+		error = self._validar_cruzado()
+		if error is not None:
+			self._senalar(*error)
+			return False
 		for indice, info in enumerate(self._info):
 			if info.tipo != "propia":
 				continue
@@ -544,6 +617,7 @@ class DialogoPreferenciasZ(plantilla.DialogoPreferencias):
 		for clave in self.opciones_de_pagina(indice):
 			opcion, control, _pagina = self._controles[clave]
 			self._escribir_control(opcion, control, self._config.valor_por_defecto(clave))
+		self.actualizar_dependencias()
 
 	def _al_restablecer(self, _evento: wx.CommandEvent | None) -> None:
 		indice = self.libro.GetSelection()

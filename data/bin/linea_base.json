@@ -1,6 +1,6 @@
 {
 	"formato": 1,
-	"aplicacion": "2.0.0",
+	"aplicacion": "2.0.1",
 	"componentes": [
 		{
 			"id": "rclone",
@@ -496,7 +496,7 @@
 		{
 			"id": "nvda",
 			"nombre": "Complemento de zCommander para NVDA",
-			"version": "2.0.0",
+			"version": "2.0.1",
 			"licencia": "GPL-3.0-or-later",
 			"dueno": "nucleo",
 			"carpeta": "nvda",

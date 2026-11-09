@@ -130,12 +130,8 @@ def mostrar(dialogo: wx.Dialog, al_aceptar: Callable[[Any], T] | None = None, ac
 		return None
 	finally:
 		dialogo.Destroy()
-		if foco_previo:
-			try:
-				foco_previo.SetFocus()
-			except RuntimeError:
-				# El control desapareció mientras el diálogo estaba abierto (pestaña cerrada).
-				log.debug("No se pudo devolver el foco", exc_info=True)
+		# Si el control desapareció (pestaña cerrada) o no había, vuelve a la lista del panel activo.
+		dialogos.devolver_foco(foco_previo)
 
 
 # ── Letras de acceso ─────────────────────────────────────────────────────────

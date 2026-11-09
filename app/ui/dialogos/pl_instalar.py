@@ -20,7 +20,7 @@ from typing import Any
 import wx
 
 from app.plugins import estado
-from app.ui.accesibilidad.dialogos import preparar_dialogo
+from app.ui.accesibilidad.dialogos import devolver_foco, preparar_dialogo
 from app.ui.accesibilidad.nombres import crear_campo
 
 log = logging.getLogger(__name__)
@@ -78,8 +78,4 @@ def confirmar_instalacion(padre: wx.Window | None, resumen: Any) -> bool:
 			return dialogo.ShowModal() == wx.ID_OK and resumen.instalable
 	finally:
 		dialogo.Destroy()
-		if foco:
-			try:
-				foco.SetFocus()
-			except RuntimeError:
-				log.debug("El control que tenía el foco ya no existe", exc_info=True)
+		devolver_foco(foco)

@@ -44,6 +44,7 @@ Se guardan en `data/config/settings.json`. El formato de cada clave es `seccion.
 - `paneles.seleccionar_sin_extension`: bool, por defecto `True`. En Renombrar en el sitio, solo queda seleccionado el nombre. Página «Paneles» de Preferencias.
 - `paneles.patrones_en_carpetas`: bool, por defecto `False`. Marcar por patrón y filtros incluyen carpetas. Página «Paneles» de Preferencias.
 - `paneles.mover_tras_marcar`: bool, por defecto `True`. Como en Norton Commander. Página «Paneles» de Preferencias.
+- `paneles.marcas_como`: str, por defecto `'seleccion'`; admite: seleccion, columna. Como selección de la lista: lo marcado queda seleccionado y el lector dice «seleccionado» al final de la fila (y, con varias marcas, «no seleccionado» en las demás). En la columna Marca: lo marcado dice «Marcado» en una columna que puede colocar donde quiera con Columnas y Orden de lectura (si la pone la primera, se oye antes del nombre); la lista no usa la selección para las marcas, así que ningún lector lo dice dos veces. Al elegirla, la columna Marca se añade la primera en las pestañas que no la tienen y no se puede quitar mientras siga elegida. Con NVDA leyendo las cabeceras de tabla, si la Marca va la primera NVDA dice «Nombre:» delante de cada fila sin marcar; para evitarlo, instale el complemento de zCommander para NVDA, ponga la Marca detrás del Nombre con Columnas u Orden de lectura, o desactive en NVDA la lectura de cabeceras de tabla. Página «Accesibilidad» de Preferencias.
 - `paneles.lectura`: list, por defecto `[]`. Se elige en Opciones, Personalización, Orden de lectura de las columnas. No aparece en Preferencias.
 
 ## Sección vista
@@ -164,6 +165,8 @@ Se guardan en `data/config/settings.json`. El formato de cada clave es `seccion.
 - `actualizaciones.componentes_comprobar`: bool, por defecto `True`. rclone, libarchive, 7za y FFmpeg. Página «Actualizaciones» de Preferencias.
 - `actualizaciones.componentes_intervalo_dias`: int, por defecto `7`; de 1 a 90. Intervalo entre comprobaciones de los componentes. Página «Actualizaciones» de Preferencias.
 - `actualizaciones.complementos_comprobar`: bool, por defecto `True`. Para los complementos que publican sus actualizaciones. Página «Actualizaciones» de Preferencias.
+- `actualizaciones.fuente`: str, por defecto `'servidor'`; admite: servidor, github, ambas, personalizada. De dónde se busca la versión nueva de zCommander. Servidor de zCommander: xebolax.synology.me, el de siempre. GitHub: las versiones publicadas en el repositorio hxebolax/zCommander. Las dos: se consultan ambas y se ofrece la versión más nueva; si una no responde, se usa la otra sin avisar, y la descarga prueba la otra si falla. Una dirección personalizada: la que escriba en el campo siguiente (por ejemplo, una copia en su red). Con cualquier origen se exige la firma de zCommander: una versión sin firma o firmada por otro nunca se instala. Se aplica en la siguiente búsqueda, sin reiniciar. Los componentes y los complementos tienen su propio origen. Página «Actualizaciones» de Preferencias.
+- `actualizaciones.url_personalizada`: str, por defecto `''`. Solo se usa con el origen «Una dirección personalizada», y solo está disponible al elegirlo; con ese origen es obligatoria. Escriba la dirección completa del archivo version.json, que tiene que empezar por https:// y no puede llevar usuario ni contraseña. El archivo tiene que estar firmado por zCommander; el paquete se descarga de la misma carpeta o de las direcciones que indique el archivo. Página «Actualizaciones» de Preferencias.
 
 ## Sección copia
 
@@ -276,6 +279,9 @@ Cada complemento guarda las suyas en `data/config/plugins/<id>.json`; su nombre 
 - `plugin.zc.nubes.formato_docs`: texto, por defecto `'docx,xlsx,pptx'`. Formatos con los que se bajan los Documentos, Hojas y Presentaciones de Google, separados por comas.
 - `plugin.zc.nubes.copia_entre_cuentas`: bool, por defecto `False`. Usa ServerSideAcrossConfigs de rclone; si falla, la copia pasa por zCommander.
 - `plugin.zc.nubes.servir_solo_local`: bool, por defecto `True`. Compartir en la red escucha solo en 127.0.0.1 si no se confirma expresamente abrirlo a la red local.
+- `plugin.zc.nubes.carpetas_programas`: bool, por defecto `True`. Las carpetas que ya crean OneDrive, Dropbox, Google Drive para escritorio, iCloud, Box, pCloud, Proton Drive o Synology Drive salen en Alt+F1 y Alt+F2 como un disco más, sin iniciar sesión. Desactívela para ocultarlas todas.
+- `plugin.zc.nubes.carpetas_ocultas`: lista, por defecto `[]`. Interna: rutas de las carpetas de los programas oficiales que la persona no quiere ver en el selector.
+- `plugin.zc.nubes.carpetas_vistas`: lista, por defecto `[]`. Interna: rutas que el asistente ya enseñó, para no volver a preguntar por ellas.
 - `plugin.zc.nubes.aviso_winfsp_mostrado`: bool, por defecto `False`. Interna: si ya se mostró el aviso de WinFsp de Acerca de.
 - `plugin.zc.ocr.idioma`: texto, por defecto `''`. Etiqueta del idioma de reconocimiento (es-ES); vacío es el de Windows.
 - `plugin.zc.ocr.escala_pdf`: decimal, por defecto `2.0`. Cuánto se amplía cada página antes de reconocerla, de 1 a 4. Más escala reconoce mejor la letra pequeña y tarda más.

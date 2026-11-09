@@ -21,8 +21,8 @@ import wx
 
 from app.plugins import api
 
-from .. import nextcloud
-from ..cuentas import Cuenta, Servicio, carpeta_drive_escritorio
+from .. import locales, nextcloud
+from ..cuentas import Cuenta, Servicio
 from ..operaciones import OperacionRclone, carril, resumen_informe
 from ..servicio import Nubes, Paso, texto_estado
 from . import comun, oauth
@@ -35,6 +35,8 @@ _ = api.traduccion("zc_nubes")[0]
 log = logging.getLogger("zcplugins.zc.nubes")
 
 URL_WINFSP = "https://winfsp.dev/rel/"
+#: Resultados del paso «Carpetas de este equipo» del asistente.
+CARPETAS_SEGUIR, CARPETAS_FIN, CARPETAS_NINGUNA, CARPETAS_CANCELAR = "seguir", "fin", "ninguna", "cancelar"
 
 
 def padre_por_defecto() -> wx.Window | None:
@@ -166,10 +168,18 @@ class Ordenes:
 		self.asistente(padre_por_defecto())
 
 	def asistente(self, padre: wx.Window | None, servicio: Servicio | None = None, existente: Cuenta | None = None) -> Cuenta | None:
-		"""El asistente completo; devuelve la cuenta añadida o ``None``."""
+		"""El asistente completo; devuelve la cuenta añadida o ``None``.
+
+		Primero, si este equipo tiene carpetas de programas oficiales de nube que la
+		persona aún no ha visto, se ofrecen (sin iniciar sesión). Después, la lista
+		de servicios agrupada por cómo se conectan, los datos y la autorización.
+		"""
 		from .asistente import DialogoDatos, DialogoServicio
 
-		if servicio is None:
+		if servicio is None and existente is None:
+			if self._ofrecer_carpetas(padre, solo_nuevas=True) != CARPETAS_SEGUIR:
+				return None
+		while servicio is None:
 			dialogo = DialogoServicio(self.zc, padre, self.nubes.catalogo, bool(self.nubes.opcion("mostrar_experimentales", False)))
 			try:
 				if comun.mostrar_modal(self.zc, dialogo) != wx.ID_OK:
@@ -179,9 +189,15 @@ class Ordenes:
 				dialogo.Destroy()
 			if servicio is None:
 				return None
+			if servicio.es_carpeta_local:
+				# Sin carpetas, o si la persona quiere añadir además una cuenta: de vuelta a la lista.
+				if self._ofrecer_carpetas(padre, solo_nuevas=False) not in (CARPETAS_SEGUIR, CARPETAS_NINGUNA):
+					return None
+				servicio = None
 		if servicio.id == "nextcloud":
 			return self.conectar_nextcloud(padre)
-		datos = DialogoDatos(self.zc, padre, servicio, existente.nombre if existente else "", guia=lambda: self.mostrar_guia())
+		datos = DialogoDatos(self.zc, padre, servicio, existente.nombre if existente else "", guia=lambda: self.mostrar_guia(),
+			abrir_enlace=comun.abrir_navegador)
 		try:
 			if comun.mostrar_modal(self.zc, datos) != wx.ID_OK:
 				return None
@@ -190,37 +206,128 @@ class Ordenes:
 			datos.Destroy()
 		if servicio.motor == "webdav":
 			return self._alta_webdav(padre, servicio, nombre, valores, existente)
-		if servicio.tipo == "drive" and not valores.get("client_id") and not self._drive_sin_identificador(padre):
+		if servicio.tipo == "drive" and not valores.get("client_id"):
+			eleccion = self._drive_sin_identificador(padre, servicio, valores)
+			if eleccion is None:
+				return None
+			valores = eleccion
+		try:
+			cuenta, parametros = self.nubes.nueva_cuenta(servicio, nombre, valores, id=existente.id if existente else "")
+		except api.ErrorArchivos as error:
+			self._error(error)
 			return None
-		cuenta, parametros = self.nubes.nueva_cuenta(servicio, nombre, valores, id=existente.id if existente else "")
 		secretos = {"client_secret": valores.get("client_secret", "")}
 		alta = self.nubes.alta(cuenta, parametros)
 		if self._correr_alta(padre, alta, servicio.nombre, cuenta, secretos, nuevo=existente is None):
 			return cuenta
 		return None
 
-	def _drive_sin_identificador(self, padre: wx.Window | None) -> bool:
-		"""Drive sin identificador propio (nubes.md 4.1): guía, carpeta de Drive para escritorio o seguir con el de rclone."""
-		carpeta = carpeta_drive_escritorio()
-		opciones = [_("Crear mi &identificador (guía)")]
-		if carpeta:
-			opciones.append(_("Usar la carpeta de Google Drive para &escritorio"))
-		opciones.append(_("&Seguir con el identificador de rclone mientras funcione"))
-		texto = _("No ha escrito un identificador de cliente propio. El identificador compartido de rclone para Google se retira "
-			"en 2026 y dejará de funcionar sin previo aviso.")
-		if carpeta:
-			texto += " " + _("Google Drive para escritorio está instalado en {c}.").format(c=carpeta)
-		eleccion = comun.opcion(self.zc, texto, _("Google Drive sin identificador propio"), opciones)
-		if eleccion is None:
-			return False
-		elegido = opciones[eleccion]
-		if "identificador (gu" in elegido.replace("&", ""):
-			self.mostrar_guia()
-			return False
-		if carpeta and "escritorio" in elegido:
-			self.zc.abrir_ruta(carpeta)
-			return False
-		return True
+	def _carpetas_detectadas(self, padre: wx.Window | None) -> list[locales.CarpetaNube] | None:
+		"""Las carpetas de los programas oficiales, buscadas en un hilo; ``None`` si la persona cancela la espera.
+
+		Si se buscaron hace poco (el selector o un paso anterior), se usan sin esperar.
+		Si no, la búsqueda va en un hilo con un diálogo de espera: una carpeta de red
+		sin conexión nunca congela la ventana.
+		"""
+		vigentes = self.nubes.carpetas_en_cache()
+		if vigentes is not None:
+			return vigentes
+		return self._esperar(padre, _("Añadir una cuenta de nube"), _("Buscando en este equipo las carpetas de los programas oficiales "
+			"de nube..."), lambda _tarea: self.nubes.carpetas_locales())
+
+	def _ofrecer_carpetas(self, padre: wx.Window | None, *, solo_nuevas: bool) -> str:
+		"""Paso «Carpetas de este equipo». Devuelve una de las constantes ``CARPETAS_*``.
+
+		- ``CARPETAS_SEGUIR``: seguir con la lista de servicios.
+		- ``CARPETAS_FIN``: la persona eligió sus carpetas y el asistente termina.
+		- ``CARPETAS_NINGUNA``: no hay ninguna carpeta (ya se ha explicado).
+		- ``CARPETAS_CANCELAR``: canceló.
+
+		Con ``solo_nuevas`` solo aparece si hay carpetas que la persona no ha visto
+		todavía (y la opción del selector está activada); si no, sigue sin preguntar.
+		"""
+		from .asistente import CARPETAS_SEGUIR as SEGUIR_DIALOGO
+		from .asistente import DialogoCarpetas
+
+		if solo_nuevas and not bool(self.nubes.opcion("carpetas_programas", True)):
+			return CARPETAS_SEGUIR
+		detectadas = self._carpetas_detectadas(padre)
+		if detectadas is None:
+			return CARPETAS_CANCELAR
+		if solo_nuevas and (not detectadas or not self.nubes.carpetas_por_revisar(detectadas)):
+			return CARPETAS_SEGUIR
+		if not detectadas:
+			comun.avisar(self.zc, _("No se ha encontrado en este equipo la carpeta de ningún programa oficial de nube (OneDrive, "
+				"Dropbox, Google Drive para escritorio, iCloud para Windows, Box Drive, pCloud Drive, Proton Drive o Synology Drive). "
+				"Instale el programa oficial del servicio e inicie sesión en él; después su carpeta saldrá en el selector de unidades. "
+				"Ahora vuelve a la lista de servicios."), _("Carpetas de los programas oficiales"))
+			return CARPETAS_NINGUNA
+		ocultas = {str(r) for r in (self.nubes.opcion("carpetas_ocultas", []) or [])}
+		marcadas = [c.clave not in ocultas for c in detectadas]
+		dialogo = DialogoCarpetas(self.zc, padre, detectadas, marcadas)
+		try:
+			codigo = comun.mostrar_modal(self.zc, dialogo)
+			elegidas = dialogo.elegidas()
+		finally:
+			dialogo.Destroy()
+		if codigo not in (wx.ID_OK, SEGUIR_DIALOGO):
+			return CARPETAS_CANCELAR
+		self.nubes.guardar_carpetas(detectadas, elegidas)
+		if codigo == SEGUIR_DIALOGO:
+			return CARPETAS_SEGUIR
+		if elegidas:
+			self.zc.anunciar(_("Listo: {n} en el selector de unidades (Alt+F1 o Alt+F2)").format(
+				n=locales.nombres_para_frase(elegidas)), api.RESULTADO)
+		else:
+			self.zc.anunciar(_("No se mostrará ninguna carpeta de programas en el selector de unidades"), api.RESULTADO)
+		return CARPETAS_FIN
+
+	def _drive_sin_identificador(self, padre: wx.Window | None, servicio: Servicio, valores: dict[str, str]) -> dict[str, str] | None:
+		"""Google Drive sin identificador propio: carpeta de escritorio, identificador de rclone o uno propio.
+
+		Devuelve los valores con los que seguir el alta, o ``None`` si no se sigue
+		(se canceló o se eligió la carpeta de Google Drive para escritorio). La
+		pregunta de las unidades compartidas la hace rclone después (traducida).
+		"""
+		from .asistente import DialogoAvanzadas
+
+		detectadas = self._carpetas_detectadas(padre)
+		if detectadas is None:
+			return None
+		carpeta = next((c for c in detectadas if c.proveedor == "Google Drive"), None)
+		opciones: list[tuple[str, str]] = []
+		if carpeta is not None:
+			opciones.append(("carpeta", _("Usar la carpeta de Google Drive para &escritorio ({r})").format(r=carpeta.ruta)))
+		opciones.append(("rclone", _("Iniciar sesión con el identificador de &rclone (puede dejar de funcionar en 2026)")))
+		opciones.append(("propio", _("Usar mi &propio identificador (avanzado)")))
+		texto = _("¿Cómo quiere conectar Google Drive? rclone retira durante 2026 su identificador compartido para Google: mientras "
+			"funcione, basta con iniciar sesión en el navegador; cuando deje de funcionar, habrá que volver a autorizar la cuenta con "
+			"un identificador propio.")
+		if carpeta is not None:
+			texto = _("Este equipo tiene Google Drive para escritorio, en {r}: se puede usar sin iniciar sesión.").format(
+				r=carpeta.ruta) + " " + texto
+		while True:
+			eleccion = comun.opcion(self.zc, texto, _("Conectar Google Drive"), [t for _c, t in opciones])
+			if eleccion is None or not 0 <= eleccion < len(opciones):
+				return None
+			elegida = opciones[eleccion][0]
+			if elegida == "carpeta" and carpeta is not None:
+				self.nubes.mostrar_carpeta(carpeta, detectadas)
+				self.zc.anunciar(_("Google Drive para escritorio queda en el selector de unidades"), api.RESULTADO)
+				self.zc.abrir_ruta(carpeta.ruta)
+				return None
+			if elegida == "rclone":
+				return {**valores, "config_shared_client_id": "true"}
+			dialogo = DialogoAvanzadas(self.zc, padre, servicio, valores, guia=lambda: self.mostrar_guia())
+			try:
+				aceptado = comun.mostrar_modal(self.zc, dialogo) == wx.ID_OK
+				propios = dialogo.valores()
+			finally:
+				dialogo.Destroy()
+			if aceptado and propios.get("client_id"):
+				return {**valores, **propios}
+			if aceptado:
+				comun.error(self.zc, _("Escriba el identificador de cliente o elija otra forma de conectar."))
 
 	def _correr_alta(self, padre: wx.Window | None, alta: Alta, nombre_servicio: str, cuenta: Cuenta, secretos: dict[str, str], *,
 			nuevo: bool = True, reconexion: bool = False) -> bool:
@@ -240,8 +347,9 @@ class Ordenes:
 			if paso.tipo == "oauth":
 				explicacion = _("Se abrirá el navegador para que inicie sesión en {s} y autorice a zCommander (rclone). Cuando termine, "
 					"vuelva aquí: zCommander lo detectará solo.").format(s=nombre_servicio)
+				# «Autorizar desde otro equipo» está en «Opciones avanzadas...» de los datos: aquí, solo la espera.
 				dialogo = oauth.DialogoEspera(self.zc, padre, _("Autorizar {s}").format(s=nombre_servicio), explicacion, url=paso.url,
-					otro_equipo=not reconexion, estado=_("Pulse Abrir el navegador o copie el enlace."))
+					estado=_("Pulse Abrir el navegador o copie el enlace."))
 				try:
 					codigo = dialogo.lanzar(lambda tarea: alta.esperar(tarea), sonido_inicio="oauth_espera", sonido_fin="oauth_ok")
 					siguiente = dialogo.resultado
@@ -251,16 +359,6 @@ class Ordenes:
 					return False
 				finally:
 					dialogo.Destroy()
-				if codigo == oauth.OTRO_EQUIPO:
-					alta.cancelar()
-					alta.parametros["config_is_local"] = "false"
-					alta.parametros.pop("config_auth_no_browser", None)
-					paso = self._esperar(padre, _("Autorizar desde otro equipo"), _("Preparando la autorización..."),
-						lambda tarea: alta.empezar(tarea))
-					if paso is None:
-						deshacer()
-						return False
-					continue
 				if codigo != wx.ID_OK or siguiente is None:
 					self.zc.anunciar(_("Autorización cancelada"), api.RESULTADO)
 					deshacer()

@@ -35,7 +35,8 @@ def _choques(esquema: str) -> list[str]:
 def test_todos_los_complementos_de_serie_registrados():
 	assert len(registro.complementos()) == 27
 	assert len([o for o in ordenes.CATALOGO if o.manejador == "complementos_pl.ejecutar"]) == 123
-	assert len(ordenes.CATALOGO_NUCLEO) == 181 + 44  # complemento_recargar solo en modo desarrollo
+	# complemento_recargar solo en modo desarrollo; 2.0.1 añade decir_marcados (Alt+Mayús+M).
+	assert len(ordenes.CATALOGO_NUCLEO) == 181 + 45
 
 
 @pytest.mark.parametrize("esquema", sorted(esquemas_teclas.ESQUEMAS))

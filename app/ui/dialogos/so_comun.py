@@ -20,6 +20,7 @@ import wx
 
 from app.services.sonidos import paquetes
 from app.ui.accesibilidad import dialogos
+from app.ui.accesibilidad.dialogos import devolver_foco
 
 log = logging.getLogger(__name__)
 
@@ -86,8 +87,7 @@ def mostrar_modal(dialogo: wx.Dialog) -> int:
 	finally:
 		sonar("dialogo.cerrar")
 		dialogo.Destroy()
-		if foco_previo:
-			foco_previo.SetFocus()
+		devolver_foco(foco_previo)
 
 
 def nombre_evento(evento: Any, variante: str = "") -> str:

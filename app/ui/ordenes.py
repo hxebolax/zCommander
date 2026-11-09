@@ -180,6 +180,7 @@ _ORDENES: list[Orden] = [
 	_o("restaurar_marcas", N_("&Restaurar las marcas"), N_("Vuelve a marcar lo que estaba marcado antes de la última operación."), ["Ctrl+Shift+R"], PANEL, "marcas.restaurar"),
 	_o("guardar_marcas", N_("&Guardar las marcas en un archivo..."), N_("Guarda los nombres marcados en un archivo de texto."), [], PANEL, "marcas.guardar"),
 	_o("cargar_marcas", N_("&Cargar las marcas desde un archivo..."), N_("Marca los nombres que aparecen en un archivo de texto."), [], PANEL, "marcas.cargar"),
+	_o("decir_marcados", N_("Decir &los elementos marcados"), N_("Dice cuántos elementos hay marcados, su tamaño y sus nombres."), ["Alt+Shift+M"], GLOBAL, "consulta.decir_marcados"),
 
 	# ── Portapapeles ─────────────────────────────────────────────────────────
 	_o("portapapeles_copiar", N_("&Copiar al portapapeles"), N_("Copia los elementos de trabajo al portapapeles (compatible con el Explorador)."), ["Ctrl+C"], PANEL, "windows_g.portapapeles_copiar", "G"),
@@ -331,7 +332,7 @@ _AVANZADAS = frozenset({"crear_enlace", "atributos", "sumas_crear", "sumas_verif
 # Órdenes de consulta (1.x §6.4): no se graban en las macros (10.1).
 _CONSULTA = frozenset({
 	"decir_ruta", "decir_ruta_otro", "decir_resumen", "decir_info", "decir_espacio", "decir_operaciones", "repetir_anuncio",
-	"historial_anuncios", "columna_anterior", "columna_siguiente", *(f"leer_columna_{n}" for n in range(1, 11)),
+	"decir_marcados", "historial_anuncios", "columna_anterior", "columna_siguiente", *(f"leer_columna_{n}" for n in range(1, 11)),
 })
 # Órdenes de la 1.x que se pueden usar como tecla global (10.15).
 _TECLA_GLOBAL_1X = frozenset({"ir_a_carpeta", "decir_operaciones"})
@@ -573,6 +574,7 @@ MENUS: tuple = (
 		None, (N_("&Marcas"), [
 			"marcar_patron", "desmarcar_patron", "invertir_marcas", "marcar_todo", "desmarcar_todo",
 			"marcar_extension", "desmarcar_extension", "restaurar_marcas", None, "guardar_marcas", "cargar_marcas",
+			None, "decir_marcados",
 		]),
 		(N_("Por&tapapeles"), [
 			"portapapeles_copiar", "portapapeles_cortar", "portapapeles_pegar", None,

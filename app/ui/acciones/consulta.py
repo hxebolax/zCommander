@@ -25,6 +25,39 @@ def decir_resumen(ctx) -> None:
 	anuncios.anunciar(ctx.activo.texto_resumen(), anuncios.RESULTADO)
 
 
+#: Cuántos nombres dice «Decir los elementos marcados» antes de «y N más».
+MAX_NOMBRES_MARCADOS = 20
+
+
+def texto_marcados(panel) -> str:
+	"""«3 marcados, 25 MB: informe.pdf, notas.txt, fotos» o, sin marcas, el elemento de trabajo.
+
+	Con carpetas sin calcular: «3 marcados (1 carpeta), 25 MB en archivos: …» o, si solo
+	hay carpetas, «2 marcados (2 carpetas): …».
+
+	Sale del modelo (``panel.marcadas()``): es igual con las marcas como selección o en la
+	columna Marca, y no cuenta lo que un filtro esconde.
+	"""
+	marcadas = panel.marcadas()
+	if not marcadas:
+		entrada = panel.cursor()
+		if entrada is None or entrada.es_superior:
+			return _("No hay nada marcado")
+		return _("No hay nada marcado; el elemento de trabajo es {n}").format(n=entrada.nombre)
+	# 2.0.1: las carpetas sin calcular no suman «0 bytes» (``formato.tamano_marcadas``).
+	cabeza = formato.plural(len(marcadas), _("{n} marcado"), _("{n} marcados")) + formato.tamano_marcadas(marcadas)
+	nombres = [e.nombre for e in marcadas[:MAX_NOMBRES_MARCADOS]]
+	resto = len(marcadas) - len(nombres)
+	lista = ", ".join(nombres)
+	if resto > 0:
+		lista += _(" y {n} más").format(n=resto)
+	return f"{cabeza}: {lista}"
+
+
+def decir_marcados(ctx) -> None:
+	anuncios.anunciar(texto_marcados(ctx.activo), anuncios.RESULTADO)
+
+
 def decir_info(ctx) -> None:
 	entrada = ctx.activo.cursor()
 	if entrada is None:

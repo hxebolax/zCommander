@@ -2,7 +2,7 @@
 
 zCommander es un gestor de archivos de doble panel para Windows, clon accesible de Norton Commander. Está pensado sobre todo para personas ciegas que usan NVDA, JAWS o Narrador, desde las que empiezan hasta las avanzadas, y también para personas con baja visión y para quien prefiere el teclado.
 
-Versión 2.0.0, del 9 de noviembre de 2026. Está escrito en Python 3.15 con wxPython y es portable: todo lo que guarda va en la carpeta data, junto al programa.
+Versión 2.0.1, del 9 de noviembre de 2026. Está escrito en Python 3.15 con wxPython y es portable: todo lo que guarda va en la carpeta data, junto al programa.
 
 La 2.0 añade complementos (con 27 de serie), un sistema de sonidos, actualizaciones de la aplicación y de sus componentes, copias de seguridad de la configuración, RAR y muchos más comprimidos, la raíz «Red», macros y personalización avanzada, y un complemento para NVDA.
 
@@ -25,7 +25,7 @@ Los componentes de terceros tienen sus licencias en data\docs\licencias, una car
 
 ## Usar la versión portable
 
-1. Extraiga zCommander_v2.0.0.zip en una carpeta donde tenga permiso de escritura (Documentos, una memoria USB). No en Archivos de programa.
+1. Extraiga zCommander_v2.0.1.zip en una carpeta donde tenga permiso de escritura (Documentos, una memoria USB). No en Archivos de programa.
 2. Entre en la carpeta zCommander que hay dentro y ejecute ZCommander.exe.
 3. La primera vez se abre el asistente de primer arranque, que le ayuda a elegir perfil (Novato, Intermedio o Avanzado).
 
@@ -54,13 +54,15 @@ Todo se hace con entorno.bat, en la raíz del proyecto. Sin argumentos muestra u
 | servidor | Prepara una versión y la copia al servidor (opción 15) |
 | limpiar | Borra build y las cachés de pytest y ruff; no toca .venv ni data (opción 16) |
 | datos | Abre la carpeta data en el Explorador (opción 17) |
+| descargar | Descarga a data\bin los componentes de terceros con sus sumas comprobadas (opción 18) |
 
 La versión de Python se fija en la variable VERSION_PY al principio de entorno.bat (3.15). Si el lanzador py no la encuentra, compruebe con py -0p qué versiones tiene instaladas.
 
 Primeros pasos con el código:
 
 1. entorno.bat crear
-2. entorno.bat ejecutar
+2. entorno.bat descargar (los ejecutables y las DLL de data\bin no están en git: los trae tools\descargar_componentes.py)
+3. entorno.bat ejecutar
 
 Argumentos de main.py (los desconocidos se anotan en el registro y se ignoran):
 
@@ -99,6 +101,7 @@ Regla de capas: app\ui usa app\services, app\plugins y app\core; app\services y 
 - notas_version.py: notas de una versión del registro de cambios.
 - generar_sonidos.py: genera los 5 paquetes de sonidos de serie por síntesis, siempre con los mismos bytes (--comprobar lo verifica).
 - preparar_componentes.py: escribe data\bin\linea_base.json desde data\bin; con --comprobar, falla si no coinciden.
+- descargar_componentes.py: descarga a data\bin los ejecutables y las DLL de terceros y comprueba cada suma con linea_base.json. Sin opciones los baja del recurso zCommander_v<versión>_componentes.zip de la release de GitHub; con --origen, de cada proyecto original; con --crear-paquete crea ese ZIP para publicarlo.
 - construir_complemento.py: genera data\bin\nvda\zCommander-<versión>.nvda-addon.
 - generar_licencias.py y comprobar_licencias.py: generan data\docs\licencias y comprueban cabeceras, licencias de terceros y que no viaje ninguna DLL no libre.
 - fuentes_terceros.py: reúne las fuentes de los componentes LGPL y GPL para la oferta de fuentes.
@@ -157,5 +160,6 @@ El manifiesto de tools\zcommander.manifest declara la versión, las rutas largas
 1. Cambie APP_VERSION en app\core\version.py (y la versión de pyproject.toml) y escriba su entrada en data\docs\changelog.md: sus líneas son las novedades que ve la persona al actualizar.
 2. Ejecute .venv\Scripts\python tools\publicar.py. Comprueba la entrada del registro de cambios, compila, prueba el arranque con un complemento de ejemplo, comprueba las licencias, crea dist\zCommander_v<versión>.zip, el ZIP de fuentes y dist\version.json firmado con la clave de tools\claves (que nunca sale de esa carpeta).
 3. Cuando todo esté bien, ejecute .venv\Scripts\python tools\publicar.py --servidor. Copia primero los paquetes y después version.json a la carpeta sincronizada con el servidor, y comprueba los tamaños.
+4. En GitHub (hxebolax/zCommander), cree una publicación (release) con la etiqueta v<versión>, por ejemplo v2.0.1, y suba como recursos, con estos nombres exactos, zCommander_v<versión>.zip, zCommander_v<versión>_fuentes.zip, zCommander_v<versión>_componentes.zip (lo crea publicar.py en dist con los binarios de data\bin; es lo que descarga tools\descargar_componentes.py a quien clona el repositorio) y el mismo dist\version.json firmado. Ese version.json lleva el campo firmado espejos.github con la dirección del ZIP en esa publicación (salvo con --sin-github). Márquela como la última publicación (no como borrador ni como versión preliminar): las instalaciones leen https://github.com/hxebolax/zCommander/releases/latest/download/version.json.
 
-El actualizador de la aplicación lee https://xebolax.synology.me/zCommander/version.json, comprueba su firma Ed25519 con la clave pública incrustada y descarga el paquete. Con --firmar-complementos y unos ids, publicar.py publica además actualizaciones firmadas de complementos de serie sueltos. Otras opciones: --sin-fuentes, --sin-compilar, --sin-comprobar, --destino y --clave (publicar.py --help).
+El actualizador de la aplicación lee, según el «Origen de las actualizaciones» de Preferencias, https://xebolax.synology.me/zCommander/version.json, el version.json de la última publicación de GitHub, los dos (gana la versión más nueva) o una dirección personalizada; con cualquiera comprueba su firma Ed25519 con la clave pública incrustada y descarga el paquete. Con --firmar-complementos y unos ids, publicar.py publica además actualizaciones firmadas de complementos de serie sueltos. Otras opciones: --sin-fuentes, --sin-github, --sin-compilar, --sin-comprobar, --destino y --clave (publicar.py --help).

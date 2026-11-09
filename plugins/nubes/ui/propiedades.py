@@ -118,8 +118,8 @@ class DialogoPropiedades(comun.DialogoNubes):
 		pagina_servicio = _Pagina(self.libro, _("Servicio"))
 		self.avanzadas: dict[str, wx.Window] = {}
 		for campo in (servicio.avanzadas if servicio is not None else ()):
-			if campo["clave"] == "chunk_size":
-				continue
+			if campo["clave"] in ("chunk_size", "client_id", "client_secret") or campo.get("alta"):
+				continue   # el fragmento y el identificador propio tienen su sitio en «Fragmentos» y «Avanzado»
 			valor = cuenta.opciones.get(campo["clave"], str(campo.get("defecto", "")))
 			etiqueta = pagina_servicio.letra(str(campo.get("etiqueta", campo["clave"])))
 			ayuda = str(campo.get("ayuda", ""))

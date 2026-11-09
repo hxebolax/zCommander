@@ -6,6 +6,7 @@
   El orden de la lista es el orden de las columnas; Subir y Bajar lo cambian.
 - La columna Nombre no se puede quitar: sin ella la lista no tendría con qué
   nombrar cada fila. Al intentarlo se vuelve a marcar y se dice por qué.
+  2.0.1: lo mismo con «Marca» mientras ``paneles.marcas_como`` es ``"columna"``.
 - El ancho (en píxeles DIP, como los guarda el panel) se edita en un campo
   numérico nativo para la columna elegida.
 - La columna Ruta (la carpeta de cada archivo) se ofrece siempre. Es la que
@@ -38,12 +39,20 @@ from app.ui.dialogos import f_comun
 log = logging.getLogger(__name__)
 
 ANCHO_MINIMO, ANCHO_MAXIMO = 20, 2000
-ANCHOS_FABRICA = {"nombre": 320, "ruta": 160, "tipo": 160}
+ANCHOS_FABRICA = {"nombre": 320, "ruta": 160, "tipo": 160, "marca": 90}
 
 
 def _(texto: str) -> str:
 	traducir = getattr(builtins, "_", None)
 	return traducir(texto) if callable(traducir) else texto
+
+
+def aviso_marca() -> str:
+	"""2.0.1: lo que se dice al intentar quitar «Marca» con las marcas en esa columna."""
+	return _(
+		"La columna Marca no se puede quitar mientras las marcas se muestran en ella: sin ella no se oiría qué está marcado. "
+		"Puede moverla con Subir y Bajar, o volver a las marcas como selección en Preferencias, página Accesibilidad."
+	)
 
 
 def titulo_columna(columna: str) -> str:
@@ -56,9 +65,30 @@ def ancho_fabrica(columna: str) -> int:
 	return ANCHOS_FABRICA.get(columna, 110)
 
 
+def marcas_en_columna(padre: wx.Window | None = None) -> bool:
+	"""``paneles.marcas_como == "columna"`` (``False`` si no se puede leer).
+
+	Se lee de la configuración de la ventana principal (la primera ventana de la cadena de
+	padres con ``config``), que es la que la persona cambia; sin ella, de la de la sesión.
+	"""
+	try:
+		ventana = padre
+		while ventana is not None:
+			config = getattr(ventana, "config", None)
+			if config is not None and callable(getattr(config, "obtener", None)):
+				return config.obtener("paneles.marcas_como") == "columna"
+			ventana = ventana.GetParent()
+		from app.core.configuracion import obtener_configuracion
+
+		return obtener_configuracion().obtener("paneles.marcas_como") == "columna"
+	except Exception:  # noqa: BLE001 - sin configuración el diálogo se comporta como en la 2.0
+		log.debug("No se pudo leer paneles.marcas_como", exc_info=True)
+		return False
+
+
 def disponibles() -> list[str]:
-	"""Columnas que se pueden elegir: las de la 1.x, «Regla» y las de los complementos registrados."""
-	resultado = [*COLUMNAS_DISPONIBLES, "regla"]
+	"""Columnas que se pueden elegir: las de la 1.x, «Regla», «Marca» (2.0.1) y las de los complementos registrados."""
+	resultado = [*COLUMNAS_DISPONIBLES, "regla", "marca"]
 	try:
 		from app.plugins import registro
 
@@ -85,9 +115,12 @@ class DialogoColumnas(f_comun.DialogoF):
 	"""
 
 	def __init__(self, padre: wx.Window | None, titulo: str, visibles: Sequence[str], anchos: dict[str, int],
-			fabrica: Sequence[str], lectura: Sequence[str] | None = None) -> None:
+			fabrica: Sequence[str], lectura: Sequence[str] | None = None, marca_obligatoria: bool | None = None) -> None:
 		super().__init__(padre, titulo)
 		self.lectura: list[str] | None = list(lectura) if lectura is not None else None
+		#: 2.0.1: con ``paneles.marcas_como = "columna"`` la columna «Marca» se ve siempre; quitarla aquí
+		#: no tendría efecto, así que se impide y se dice por qué (como con Nombre).
+		self.marca_obligatoria = marcas_en_columna(padre) if marca_obligatoria is None else bool(marca_obligatoria)
 		self._orden = orden_inicial(visibles)
 		self._fabrica = list(fabrica)
 		self.anchos = {c: int(anchos.get(c) or ancho_fabrica(c)) for c in self._orden}
@@ -145,6 +178,9 @@ class DialogoColumnas(f_comun.DialogoF):
 		if self._orden[indice] == "nombre" and not self.lista.IsChecked(indice):
 			self.lista.Check(indice, True)
 			anuncios.anunciar(_("La columna Nombre no se puede quitar"), anuncios.RESULTADO)
+		elif self._orden[indice] == "marca" and self.marca_obligatoria and not self.lista.IsChecked(indice):
+			self.lista.Check(indice, True)
+			anuncios.anunciar(aviso_marca(), anuncios.RESULTADO)
 		evento.Skip()
 
 	# ── Acciones ─────────────────────────────────────────────────────────────

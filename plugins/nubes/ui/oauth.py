@@ -5,8 +5,9 @@
 ``DialogoEspera`` explica lo que va a pasar, tiene un texto de estado de solo
 lectura que el lector puede releer, una barra con nombre y un anuncio prudente
 cada 30 s. En modo OAuth ofrece «Abrir el &navegador» (predeterminado),
-«&Copiar el enlace», «A&utorizar desde otro equipo...» y «&Cancelar» (que para
-la autorización con ``config/oauthstop``). El trabajo corre en un hilo
+«&Copiar el enlace» y «Cance&lar» (que para la autorización con
+``config/oauthstop``). Autorizar desde otro equipo se elige antes, en
+«Opciones avanzadas...» de los datos de la cuenta. El trabajo corre en un hilo
 (``zc.tareas``); el diálogo nunca espera bloqueado a la red.
 
 ``DialogoToken`` es la alternativa de pegar el token: enseña la orden
@@ -32,14 +33,13 @@ _ = api.traduccion("zc_nubes")[0]
 log = logging.getLogger("zcplugins.zc.nubes")
 
 ANUNCIO_CADA_S = 30
-OTRO_EQUIPO = wx.NewIdRef()
 
 
 class DialogoEspera(comun.DialogoNubes):
 	"""Espera de un trabajo en un hilo; con ``url`` es la espera de una autorización en el navegador."""
 
 	def __init__(self, zc: Any, padre: wx.Window | None, titulo: str, explicacion: str, *, url: str = "",
-			otro_equipo: bool = False, estado: str = "") -> None:
+			estado: str = "") -> None:
 		super().__init__(zc, padre, titulo)
 		self.url = url
 		self.resultado: Any = None
@@ -55,15 +55,12 @@ class DialogoEspera(comun.DialogoNubes):
 		self.barra = wx.Gauge(self.panel, range=100, name=_("Progreso de la espera"))
 		self.sizer.Add(self.barra, 0, wx.EXPAND | wx.ALL, 5)
 		fila = wx.BoxSizer(wx.HORIZONTAL)
-		self.boton_navegador = self.boton_copiar = self.boton_otro = None
+		self.boton_navegador = self.boton_copiar = None
 		if url:
 			self.boton_navegador = comun.boton(self.panel, _("Abrir el &navegador"), _("Abre la página de autorización en el navegador predeterminado."),
 				self.abrir_navegador, sizer=fila)
 			self.boton_copiar = comun.boton(self.panel, _("&Copiar el enlace"),
 				_("Copia la dirección de autorización para abrirla en otro navegador."), self.copiar, sizer=fila)
-			if otro_equipo:
-				self.boton_otro = comun.boton(self.panel, _("A&utorizar desde otro equipo..."),
-					_("Para autorizar con rclone en otro equipo y pegar aquí el resultado."), self.otro_equipo, sizer=fila)
 		self.boton_cancelar = comun.boton(self.panel, _("Cance&lar") if url else _("&Cancelar"), _("Detiene la espera."), self.cancelar,
 			sizer=fila, identificador=wx.ID_CANCEL)
 		self.sizer.Add(fila, 0, wx.ALIGN_RIGHT | wx.ALL, 4)
@@ -101,9 +98,6 @@ class DialogoEspera(comun.DialogoNubes):
 		if comun.copiar_al_portapapeles(self.url):
 			self.zc.anunciar(_("Enlace copiado"), api.RESULTADO)
 
-	def otro_equipo(self) -> None:
-		self._parar(OTRO_EQUIPO)
-
 	def cancelar(self) -> None:
 		self.poner_estado(_("Cancelando..."))
 		self._parar(wx.ID_CANCEL)
@@ -117,7 +111,7 @@ class DialogoEspera(comun.DialogoNubes):
 			self.EndModal(codigo)
 
 	def lanzar(self, funcion: Callable[[Any], Any], *, sonido_inicio: str = "", sonido_fin: str = "") -> int:
-		"""Muestra el diálogo mientras ``funcion(tarea)`` corre en un hilo. Devuelve wx.ID_OK, wx.ID_CANCEL u ``OTRO_EQUIPO``."""
+		"""Muestra el diálogo mientras ``funcion(tarea)`` corre en un hilo. Devuelve wx.ID_OK o wx.ID_CANCEL."""
 		self._codigo = wx.ID_OK
 		self._terminada = False
 

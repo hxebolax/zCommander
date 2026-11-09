@@ -7,7 +7,7 @@ id = "zc.nubes"
 bloque = "NU"
 nombre = "Nubes"
 descripcion = "Convierte cada cuenta de nube y cada servidor WebDAV en una unidad más del panel, con copia, sincronización, enlaces, carpetas cifradas, uniones y montaje como letra mediante rclone."
-version = "1.0.0"
+version = "1.1.0"
 autor = "Proyecto zCommander"
 licencia = "GPL-3.0-or-later"
 api_minima = "1.0"
@@ -366,6 +366,30 @@ defecto = true
 etiqueta = "Compartir en la red solo en este e&quipo salvo confirmación"
 ayuda = "Compartir en la red escucha solo en 127.0.0.1 si no se confirma expresamente abrirlo a la red local."
 pagina = "cuentas"
+
+[[configuracion]]
+clave = "carpetas_programas"
+tipo = "bool"
+defecto = true
+etiqueta = "&Mostrar en el selector de unidades las carpetas de los programas oficiales de nube"
+ayuda = "Las carpetas que ya crean OneDrive, Dropbox, Google Drive para escritorio, iCloud, Box, pCloud, Proton Drive o Synology Drive salen en Alt+F1 y Alt+F2 como un disco más, sin iniciar sesión. Desactívela para ocultarlas todas."
+pagina = "cuentas"
+
+[[configuracion]]
+clave = "carpetas_ocultas"
+tipo = "lista"
+defecto = []
+interna = true
+etiqueta = "Carpetas de programas ocultas"
+ayuda = "Interna: rutas de las carpetas de los programas oficiales que la persona no quiere ver en el selector."
+
+[[configuracion]]
+clave = "carpetas_vistas"
+tipo = "lista"
+defecto = []
+interna = true
+etiqueta = "Carpetas de programas ya revisadas"
+ayuda = "Interna: rutas que el asistente ya enseñó, para no volver a preguntar por ellas."
 
 [[configuracion]]
 clave = "aviso_winfsp_mostrado"

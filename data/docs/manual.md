@@ -324,6 +324,7 @@ Estas teclas dicen información sin mover el foco. Lo que dicen queda en el hist
 - Ctrl+Mayús+P: la ruta del panel activo.
 - Ctrl+Mayús+O: la ruta del otro panel.
 - Ctrl+Mayús+S: el resumen de la carpeta (carpetas, archivos, tamaño, marcas y filtro).
+- Alt+Mayús+M: los elementos marcados del panel activo: cuántos son, su tamaño y sus nombres (capítulo «Marcar y elementos de trabajo»).
 - Ctrl+Mayús+I: la información del elemento del cursor (tipo, tamaño, fechas y atributos).
 - Ctrl+Mayús+E: el espacio libre y total de la unidad.
 - Ctrl+Mayús+T: el estado de las operaciones (porcentaje, velocidad, tiempo restante y decisiones pendientes).
@@ -340,19 +341,32 @@ Los elementos de trabajo de una orden son los marcados. Si no hay ninguno marcad
 
 ### Qué dice el lector al marcar
 
-Las marcas son la selección de Windows, así que el lector las anuncia como «seleccionado» o «no seleccionado».
+Hay dos formas de mostrar las marcas. Se elige en Preferencias, página «Accesibilidad», en «Cómo se muestran las marcas». Se aplica al momento al pulsar «Aplicar» o «Aceptar», sin reiniciar, y las marcas que ya tenga se conservan. Mientras no la cambie, zCommander funciona como siempre, con la primera.
+
+«Como selección de la lista (el lector dice "seleccionado")» es la forma de siempre y la de fábrica. Las marcas son la selección de Windows, así que el lector las anuncia como «seleccionado» o «no seleccionado».
 
 - Sin marcas, la lista funciona como cualquier lista de Windows: la fila del cursor aparece seleccionada y el lector no dice «no seleccionado» al moverse.
 - En cuanto marca el primer elemento, la lista pasa a selección múltiple. Al moverse con las flechas, el lector dice en cada fila si está seleccionada (marcada) o no. Moverse ya no cambia las marcas.
 - Al quitar la última marca, la lista vuelve a ser una lista normal.
 
-Para saber cuántos hay marcados, pulse Ctrl+Mayús+S. Al volver a un panel con marcas, zCommander dice cuántas hay.
+«En la columna Marca (el lector solo lo dice una vez)» muestra las marcas en una columna propia, «Marca», que dice «Marcado» en las filas marcadas y está vacía en las demás.
+
+- La lista no usa la selección para las marcas: siempre es una lista normal, con solo la fila del cursor seleccionada. Así ningún lector (NVDA, JAWS, Narrador u otro) dice «seleccionado» ni «no seleccionado» por las marcas, y nada se dice dos veces. No hace falta el complemento de NVDA.
+- Al moverse por las filas, los lectores se saltan las celdas vacías, así que una fila sin marcar no dice «Marcado». La columna sigue ahí: si la lee con Ctrl y su número, dice «Sin datos», y NVDA+Mayús+J del complemento de NVDA dice «Marca: vacío».
+- La columna Marca se coloca donde quiera, como las demás: en el menú del lado, «Columnas» (con «Subir» y «Bajar»), y en «Orden de lectura de las columnas» (capítulo «Personalización avanzada»). Si la pone la primera, se oye «Marcado» antes del nombre; si la pone la última, al final de la fila.
+- Con NVDA leyendo las cabeceras de tabla (opción «Cabeceras de tabla» de Formato de documento) y la Marca la primera, NVDA dice «Nombre:» delante de cada fila sin marcar: no dice la cabecera de la primera columna, pero sí la de la siguiente cuando la primera está vacía. El complemento de zCommander para NVDA lo evita. Sin él, ponga la Marca detrás del Nombre (con «Columnas» o con «Orden de lectura de las columnas») o desactive en NVDA la lectura de cabeceras de tabla.
+- Al elegir esta forma, la columna Marca se añade la primera en las pestañas que no la tienen (y la primera del orden de lectura, si eligió uno). Al volver a «Como selección de la lista», se quita de las pestañas en las que la añadió zCommander; si la había puesto usted, se queda.
+- Mientras esta forma esté elegida, la columna Marca se ve siempre: también en la vista breve, en las vistas por carpeta, en las columnas propias de «Red» o de un complemento y en las pestañas que restaura un espacio de trabajo, aunque no la tengan (sin cambiarlos). En «Columnas» no se puede quitar: se vuelve a marcar y se dice por qué; sí puede moverla.
+- Para quien ve la pantalla, las filas marcadas se muestran en negrita (y con el color de lo marcado del tema Norton clásico).
+- Todo lo demás funciona igual: las teclas de marcar, marcar por patrón, invertir, el resumen, la vista plana, la cesta y las órdenes que actúan sobre los marcados.
+
+Para saber qué hay marcado, pulse Alt+Mayús+M: dice cuántos hay, cuánto ocupan y sus nombres, por ejemplo «3 marcados, 25 MB: informe.pdf, notas.txt, fotos». Las carpetas cuyo tamaño no se ha calculado no tienen tamaño: si hay alguna, dice cuántas carpetas son y solo el tamaño de los archivos, por ejemplo «3 marcados (1 carpeta), 25 MB en archivos: informe.pdf, notas.txt, fotos», o, si todo son carpetas, «2 marcados (2 carpetas): fotos, música». El recuento al marcar en grupo y el resumen del panel lo dicen igual. Dice hasta 20 nombres y, si hay más, «y 5 más». Sin marcas dice «No hay nada marcado; el elemento de trabajo es» y el nombre del cursor. También está en el menú Archivos, submenú Marcas, «Decir los elementos marcados». Ctrl+Mayús+S dice el resumen de la carpeta, con cuántos hay marcados. Al volver a un panel con marcas, zCommander dice cuántas hay.
 
 ### Marcar uno a uno
 
 - Espacio o Insert marcan o desmarcan el elemento del cursor y bajan al siguiente. Se anuncia «Marcado: nombre» o «Desmarcado: nombre» (salvo con el detalle «Breve»), y después el lector lee la fila siguiente.
 - Ctrl+Espacio marca o desmarca sin moverse, como en el Explorador.
-- Para no bajar al marcar, desactive en Preferencias, página «Paneles», la casilla «Bajar al siguiente al marcar con Insert o Espacio».
+- Para no bajar al marcar, desactive en Preferencias, página «Paneles», la casilla «Bajar al siguiente al marcar con Insert o Espacio». Entonces el cursor se queda en el elemento y se anuncia «Marcado: nombre» o «Desmarcado: nombre».
 
 Insert es la tecla modificadora de NVDA, JAWS y Narrador. Si su lector no deja pasar Insert, use Espacio. Con NVDA, pulsar Insert dos veces seguidas la deja pasar a zCommander.
 
@@ -1344,20 +1358,54 @@ Añade las columnas Codificación y Fin de línea, y convierte textos a UTF-8 y 
 
 El complemento «Nubes» convierte cada cuenta de nube en una unidad más del panel. Se elige con el selector de unidades (Alt+F1 o Alt+F2), se entra en sus carpetas, se ven y editan sus archivos (F3 y F4), se copian (F5) y se mueven (F6) con la lista de conflictos de siempre, se renombran, se eliminan y se busca en ellas (Alt+F7). El motor es rclone, que viene con zCommander.
 
-### Servicios que admite
+### Cuatro formas de conectar
 
-Google Drive, OneDrive y SharePoint, Dropbox, Box, pCloud, Mega, Amazon S3 y compatibles, Backblaze B2, Yandex Disk, Koofr, kDrive, Jottacloud, Internxt, Filen, Mail.ru, HiDrive, OpenDrive, SFTP, Nextcloud y ownCloud, cualquier servidor WebDAV y, como experimentales, Proton Drive e iCloud Drive. «Otro servicio de rclone (avanzado)» admite cualquiera de los más de 70 tipos de rclone.
+Para casi todas las nubes no hace falta crear claves ni identificadores: basta con iniciar sesión. El asistente dice en la columna «Cómo se conecta» cuál de estas cuatro formas usa cada servicio, y la lista va en este orden:
 
-Google Drive necesita un identificador de cliente propio: la orden «Guía para conectar Google Drive» explica paso a paso cómo crearlo.
+1. Iniciar sesión en el navegador: Google Drive, OneDrive y SharePoint, Dropbox, Box, pCloud, Yandex Disk, kDrive, Jottacloud, HiDrive, y Nextcloud u ownCloud. Solo se escribe el nombre visible de la cuenta. En kDrive hay que copiar además el número de la unidad (solo cifras), que está en la dirección web de kDrive detrás de «drive/» (puede pegar la dirección entera). En Jottacloud se elige antes el servicio (Jottacloud o una de sus marcas blancas, como Telia, Elgiganten o MediaMarkt), y solo puede haber una sesión activa en el equipo: si conecta otra cuenta de Jottacloud o usa a la vez su programa oficial, las sesiones se invalidan y hay que volver a autorizar.
+2. Correo y contraseña: Mega (antes hay que haber entrado una vez en mega.nz con el navegador), Koofr y Mail.ru (con una contraseña de aplicación, no la normal; el asistente tiene un botón que abre la página donde se crea), Internxt, OpenDrive, cualquier servidor WebDAV y SFTP.
+3. Carpeta del programa oficial: OneDrive, Dropbox, Google Drive para escritorio, iCloud para Windows, Box Drive, pCloud Drive, Proton Drive y Synology Drive, si tiene instalado su programa con la sesión iniciada. Se explica en «Carpetas de los programas oficiales».
+4. Avanzado (claves propias): Amazon S3 y compatibles, Backblaze B2, Filen y «Otro servicio de rclone (avanzado)», que admite cualquiera de los más de 70 tipos de rclone.
+
+Proton Drive e iCloud Drive por rclone son experimentales y solo salen si activa «Mostrar los servicios experimentales» en las preferencias del complemento; para ellas es mejor la carpeta de su programa oficial.
 
 ### Añadir una cuenta
 
 1. En el menú Complementos, submenú «Nubes y NAS», submenú «Nubes», elija «Añadir una cuenta de nube...».
-2. Elija el servicio en la lista (puede escribir para buscarlo) y escriba un nombre para la cuenta y los datos que pida.
-3. Si el servicio se autoriza en el navegador, zCommander lo abre y espera. Mientras espera, el texto de estado dice qué pasa y se anuncia cada cierto tiempo. Autorice en el navegador y vuelva a zCommander.
-4. zCommander comprueba la cuenta y la añade.
+2. Si zCommander encuentra carpetas de programas oficiales que todavía no le ha enseñado, empieza por ellas (lo explica «Carpetas de los programas oficiales»). Pulse «Añadir además una cuenta de nube...» para seguir.
+3. Elija el servicio en la lista (puede escribir para buscarlo) y pulse «Siguiente».
+4. Escriba un nombre visible para la cuenta, por ejemplo «OneDrive de Ana». Si el servicio pide correo y contraseña u otros datos, escríbalos también. Pulse «Siguiente».
+5. Si el servicio se autoriza en el navegador, pulse «Abrir el navegador», inicie sesión y conceda el acceso. Mientras espera, el texto de estado dice qué pasa y se anuncia cada cierto tiempo. Al volver, zCommander lo detecta solo.
+6. zCommander comprueba la cuenta, dice su espacio y la añade.
+
+Si rclone necesita preguntar algo más (por ejemplo, en OneDrive, si es una cuenta personal o un sitio de SharePoint, o un código de verificación), la pregunta sale en español cuando es una de las habituales.
+
+En casi todos los servicios de navegador (no en Jottacloud, ni en Nextcloud u ownCloud), el botón «Opciones avanzadas...» tiene el identificador de cliente propio, por si su organización lo exige, y «Autorizar desde otro equipo», para cuando este equipo no tiene navegador. Normalmente no hace falta.
 
 Para Nextcloud u ownCloud, use «Conectar Nextcloud u ownCloud...»: escriba la dirección del servidor y autorice en el navegador. zCommander recibe una contraseña de aplicación; nunca escribe usted su contraseña real.
+
+### Google Drive
+
+rclone retira durante 2026 el identificador compartido con el que se conecta a Google. Al elegir Google Drive y pulsar «Siguiente», zCommander pregunta cómo conectar:
+
+1. Usar la carpeta de Google Drive para escritorio (solo si está instalado; normalmente la unidad G:). No pide nada y no caduca.
+2. Iniciar sesión con el identificador de rclone. Es lo más sencillo hoy: tras autorizar, se contesta si la cuenta será una unidad compartida (No, para Mi unidad). Puede dejar de funcionar en 2026: entonces la cuenta pedirá volver a autorizar y habrá que usar otra forma.
+3. Usar su propio identificador (avanzado). La orden «Guía para conectar Google Drive» explica paso a paso cómo crearlo en la consola de Google.
+
+zCommander no registra una aplicación propia en Google ni en Microsoft.
+
+### Carpetas de los programas oficiales
+
+Los programas oficiales de OneDrive, Dropbox, Google Drive para escritorio, iCloud para Windows, Box Drive, pCloud Drive, Proton Drive y Synology Drive dejan en el equipo una carpeta, o una letra de unidad, con los archivos de la cuenta. zCommander las busca en el registro de Windows y en las carpetas habituales. Solo busca dónde están: nunca lee ni usa las contraseñas o los datos de acceso de esos programas.
+
+- De fábrica, todas las carpetas encontradas salen ya en el selector de unidades (Alt+F1 y Alt+F2), sin hacer nada.
+- Al abrir «Añadir una cuenta de nube...» con carpetas nuevas, el asistente dice, por ejemplo, «Este equipo ya tiene OneDrive e iCloud Drive. ¿Usar sus carpetas sin iniciar sesión?». La lista tiene una casilla por carpeta: Espacio la marca o la desmarca. «Usar estas carpetas» guarda la elección y termina; «Añadir además una cuenta de nube...» la guarda y sigue con la lista de servicios.
+- Cada carpeta sale en el selector con su nombre, «carpeta del programa oficial» y su ruta, y se abre como un disco más. Las que desmarque en el asistente dejan de salir.
+- Para volver a elegir, elija en la lista de servicios del asistente «Carpeta de un programa oficial (OneDrive, Dropbox, Google Drive, iCloud...)». Para ocultarlas todas, desactive «Mostrar en el selector de unidades las carpetas de los programas oficiales de nube», en Preferencias, rama «Complementos», «Nubes», página «Cuentas».
+
+Qué se encuentra: OneDrive y Dropbox siempre que su programa tenga la sesión iniciada; Google Drive para escritorio, por su letra de unidad (en modo réplica, sin letra, no se encuentra: añada esa carpeta a favoritos); iCloud por su carpeta iCloudDrive; Box Drive por su carpeta Box, solo si el programa está instalado; pCloud Drive por la etiqueta de su unidad; y Proton Drive y Synology Drive solo si Windows los tiene en su registro de sincronización (Synology Drive, solo con la sincronización bajo demanda). Una carpeta de red que no responde se salta sin esperar.
+
+Limitaciones: hace falta el programa oficial instalado y con la sesión iniciada; desde la carpeta no hay enlaces para compartir, ni papelera de la nube, ni espacio de la cuenta; y abrir un archivo que solo está en la nube hace que el programa lo descargue primero, lo que puede tardar. Si necesita esas funciones, añada además la cuenta de nube.
 
 ### La ventana «Cuentas de nube»
 
@@ -1511,6 +1559,22 @@ zCommander puede buscar, descargar e instalar sus versiones nuevas. Cada versió
 
 - En el menú Ayuda, «Buscar actualizaciones» lo comprueba en el momento. Si no hay nada nuevo, dice «Sin novedades: zCommander está al día» y su versión, con un sonido.
 - Además, con «Buscar actualizaciones de zCommander» activa (Preferencias, página «Actualizaciones»), lo comprueba solo: la primera vez un minuto después de arrancar y después cada «Cada cuántas horas» (24 de fábrica).
+- Las dos usan el origen que elija en «Origen de las actualizaciones» (apartado siguiente).
+
+### De dónde se buscan las actualizaciones
+
+zCommander se publica en el servidor del proyecto y también en GitHub, en el repositorio hxebolax/zCommander, con una publicación por versión. En Preferencias, página «Actualizaciones», la opción «Origen de las actualizaciones» decide dónde se busca:
+
+- «Servidor de zCommander (xebolax.synology.me)»: el de siempre, de fábrica.
+- «GitHub (hxebolax/zCommander)»: la última versión publicada en GitHub. La descarga también llega de GitHub.
+- «Las dos: la que tenga la versión más nueva»: pregunta a los dos, uno detrás de otro, y le ofrece la versión más nueva. Si uno no responde, usa el otro sin avisarle; solo si fallan los dos le dice el error, con el nombre de cada uno. Si la descarga falla en uno, prueba en el otro antes de rendirse.
+- «Una dirección personalizada»: la dirección del archivo version.json que escriba en «Dirección personalizada del archivo version.json», por ejemplo una copia en la red de su empresa. Es obligatoria con esta opción, tiene que empezar por https:// y no puede llevar usuario ni contraseña; si no es así, al aplicar se le avisa y el foco va al campo. Ese campo solo está disponible con esta opción; con las demás, Tab lo salta. El paquete se descarga de la misma carpeta que el version.json y, si no está, de las otras direcciones que indique el archivo (por ejemplo, GitHub).
+
+Con cualquier origen, la seguridad es la misma: la información de la versión nueva tiene que llevar la firma de zCommander, y el paquete descargado tiene que coincidir con el tamaño y la huella SHA-256 firmados, venga de donde venga. Una versión sin firma o firmada por otro nunca se instala, ni siquiera desde una dirección personalizada. El cambio se aplica en la siguiente búsqueda, sin reiniciar.
+
+Si algo falla, el mensaje dice con quién: por ejemplo, «No se pudo conectar con GitHub. Compruebe la conexión a Internet.». El registro de zCommander apunta qué origen se consultó y de dónde se descargó cada versión.
+
+Los componentes externos y los complementos tienen su propio origen: esta opción no les afecta.
 
 Si hay una versión nueva, suena un aviso y se anuncia, por ejemplo, «Hay una versión nueva de zCommander: 2.1.0.». El diálogo de la actualización no le interrumpe: se abre en cuanto no hay ningún otro diálogo, menú ni decisión pendiente.
 
@@ -1538,7 +1602,7 @@ Mientras haga falta, la versión anterior se guarda en data\temp\version_anterio
 
 ### Qué se envía
 
-La comprobación solo envía al servidor del proyecto, xebolax.synology.me, el nombre y la versión del programa («zCommander/2.0.0»). Nada más.
+La comprobación solo envía al origen elegido (el servidor del proyecto, xebolax.synology.me, GitHub o su dirección personalizada) el nombre y la versión del programa («zCommander/2.0.1»). Nada más. GitHub redirige las descargas a sus servidores de archivos (githubusercontent.com); zCommander solo sigue redirecciones que sigan siendo https.
 
 ## Componentes externos
 
@@ -1601,7 +1665,7 @@ La contraseña de la copia no se puede recuperar: sin ella, las contraseñas gua
 1. En el menú Opciones, submenú «Copia de seguridad», elija «Restaurar una copia de seguridad», o pulse Intro sobre un archivo .zcbackup en un panel.
 2. Elija el «Archivo de la copia» y pulse «Leer la copia». El «Resumen» dice de qué versión es, su fecha, su descripción, sus partes y si trae contraseñas.
 3. En «Qué restaurar», marque las partes.
-4. Revise la lista «Órdenes que se podrán ejecutar». Sale sin marcar: tiene las entradas del menú de usuario, asociaciones, alias, macros, programas externos y reglas que ejecutan algo, cada una con su texto completo. Solo se restaura lo que marque. Revíselas una a una, sobre todo en copias que no haya hecho usted.
+4. Revise la lista «Órdenes que se podrán ejecutar». Sale sin marcar: tiene las entradas del menú de usuario, asociaciones, alias, macros, programas externos y reglas que ejecutan algo, además del origen y la dirección personalizada de las actualizaciones (deciden de dónde se descargan e instalan), cada una con su texto completo. Solo se restaura lo que marque. Revíselas una a una, sobre todo en copias que no haya hecho usted.
 5. Elija el «Modo»: «Combinar con lo actual» (el de fábrica) añade lo que falta y conserva lo que tiene; «Sustituir lo actual» deja cada parte como en la copia.
 6. Si la copia trae contraseñas, escriba la «Contraseña de la copia».
 7. Pulse «Restaurar».
@@ -1686,6 +1750,8 @@ En Preferencias, página «Personalización»: «Columnas y vista por carpeta» 
 
 Con el complemento de zCommander para NVDA, NVDA lee al moverse solo esas columnas, en ese orden. Sin él, NVDA lee todas en el orden de la lista.
 
+Si muestra las marcas en la columna Marca, póngala aquí la primera para oír «Marcado» antes del nombre, o donde prefiera.
+
 ### Reglas de anuncio, color y sonido
 
 Una regla da un aviso a los elementos que cumplen una condición: por ejemplo, decir «grande» en los archivos de más de 1 GB, o sonar al llegar a un archivo de solo lectura.
@@ -1758,14 +1824,14 @@ Las páginas y sus opciones, con el valor de fábrica entre paréntesis cuando n
 - General: «Confirmar antes de salir», «Confirmar al eliminar a la papelera», «Confirmar al eliminar definitivamente», «Confirmar antes de ejecutar programas con Intro», «Eliminar envía a la papelera», «Consola» (Símbolo del sistema (cmd), PowerShell o Windows Terminal), «Ejecutar las órdenes siempre en una consola nueva», «Restaurar carpetas y pestañas al arrancar», «Tiempo máximo de espera de una unidad (segundos)» (10), «Anunciar «Leyendo» tras (milisegundos)» (300), «Tamaño del historial de carpetas» (100), «Tamaño del historial de órdenes» (200), «Pegar una ruta del portapapeles lleva a ella», «Arrancar zCommander al iniciar sesión en Windows» (desactivada), «Carpeta de las copias de seguridad» (vacía: data\backups) y «Copias automáticas que se conservan» (5).
 - Paneles: «Al teclear en un panel, escribir en la línea de órdenes», «Mostrar archivos ocultos y de sistema», «Agrupar las carpetas al principio», «Orden natural de los números» («archivo2» antes que «archivo10»), «Mostrar la fila «..» para subir», «Intro entra en los comprimidos», «Formato de las fechas» (corta, larga con segundos o ISO), «Formato de los tamaños» (legible, en bytes o mixto), «Mostrar iconos», «Actualizar solo al cambiar los archivos», «Duración de la búsqueda rápida (milisegundos)» (1000), «Espera del árbol antes de cambiar el otro panel (milisegundos)» (400), «Disposición de los paneles» (lado a lado o uno encima de otro), «Al renombrar, seleccionar el nombre sin la extensión», «Marcar por patrón incluye las carpetas» y «Bajar al siguiente al marcar con Insert o Espacio».
 - Vista: «Mostrar la línea de órdenes», «Mostrar la barra de teclas F1 a F10», «Mostrar la barra de estado», «Tema» (Sistema), «Tipo de letra» (vacío: el de Windows), «Tamaño de la letra (puntos)» (de 8 a 40), «Límite de la vista rápida (kilobytes)» (256), «Mostrar la barra de botones» (desactivada) y «Mostrar las teclas en los menús» (activada).
-- Accesibilidad: «Anuncios por el lector de pantalla», «Detalle de los anuncios» (Normal), «Progreso de las operaciones por voz» (Al empezar y al terminar), «Consejos al llegar a sitios nuevos», las tres casillas de lectura de columnas («decir el número de fila», «decir el nombre de la columna» y «decir el contenido»), «Retardo de los anuncios (milisegundos)» (150), «Salida de los anuncios» (Automática), «Hablar con la voz de Windows si no hay lector», «Movimientos del foco silenciosos con el complemento de NVDA» (activada) y el botón «Instalar el complemento de zCommander para NVDA...». Se explican en el capítulo «Accesibilidad y lectores de pantalla».
+- Accesibilidad: «Anuncios por el lector de pantalla», «Detalle de los anuncios» (Normal), «Progreso de las operaciones por voz» (Al empezar y al terminar), «Consejos al llegar a sitios nuevos», las tres casillas de lectura de columnas («decir el número de fila», «decir el nombre de la columna» y «decir el contenido»), «Cómo se muestran las marcas» (Como selección de la lista; la otra forma es «En la columna Marca», capítulo «Marcar y elementos de trabajo»), «Retardo de los anuncios (milisegundos)» (150), «Salida de los anuncios» (Automática), «Hablar con la voz de Windows si no hay lector», «Movimientos del foco silenciosos con el complemento de NVDA» (activada) y el botón «Instalar el complemento de zCommander para NVDA...». Se explican en el capítulo «Accesibilidad y lectores de pantalla».
 - Sonidos: la página propia del capítulo «Sonidos».
 - Operaciones: «Si el archivo ya existe» (Preguntar), «Verificar después de copiar», «Conservar fechas y atributos», «Copiar los enlaces como enlaces», «Copiar también las carpetas vacías», «Operaciones a la vez» (3, de 1 a 8), «Tamaño de bloque para comprimidos y red (kilobytes)» (1024) y «Mostrar la lista de conflictos antes de copiar».
 - Visor y editor: «Programa externo de diferencias», «Visor externo», «Ajuste de línea en el visor», «Codificación del visor» (Automática; también UTF-8, UTF-16, Windows (ANSI, 1252), Latín 1 y OEM de MS-DOS), «Cargar enteros los archivos de hasta (MB)» (16), «Tamaño de letra del visor» (11), «Usar un editor externo con F4», «Editor externo», «Guardar una copia .bak al editar» y «Tamaño de letra del editor» (11).
 - Búsqueda: «Buscar en subcarpetas por defecto», «Incluir archivos ocultos por defecto» y «Máximo de resultados» (100000).
 - Red: «Tiempo de espera de FTP y SFTP (segundos)» (30), «Modo pasivo de FTP por defecto» y las de la raíz «Red» y las unidades de red (capítulo «Red y unidades de red»).
 - Comprimidos: las del capítulo «Comprimidos».
-- Actualizaciones: «Buscar actualizaciones de zCommander» (activada), «Cada cuántas horas» (24), «Buscar versiones nuevas de los componentes» (activada), «Cada cuántos días los componentes» (7) y «Buscar actualizaciones de los complementos» (activada).
+- Actualizaciones: «Buscar actualizaciones de zCommander» (activada), «Cada cuántas horas» (24), «Origen de las actualizaciones» (Servidor de zCommander; también GitHub, las dos o una dirección personalizada), «Dirección personalizada del archivo version.json» (vacía; solo con una dirección personalizada), «Buscar versiones nuevas de los componentes» (activada), «Cada cuántos días los componentes» (7) y «Buscar actualizaciones de los complementos» (activada).
 - Personalización: «Menús según el nivel del perfil», «Columnas y vista por carpeta», «Recordar el orden y la vista de cada carpeta», «Esquema de teclas», «Activar las teclas globales» con el botón «Teclas globales...», «Alias en la línea de órdenes», «Autocompletar en la línea de órdenes con Ctrl+Espacio», «Anunciar cada paso de las macros», «Pausa entre los pasos de las macros (milisegundos)» (0), «Detener la macro si un paso falla» y «Aplicar las reglas de anuncio, color y sonido». Se explican en el capítulo «Personalización avanzada».
 - Confirmaciones: la lista de preguntas que se pueden silenciar (capítulo «Personalización avanzada»).
 - Complementos: las preferencias generales de los complementos (capítulo «Complementos») y, debajo, una página por cada complemento con opciones.
@@ -1796,7 +1862,7 @@ El ámbito dice dónde funciona cada tecla: con el foco en un panel, en toda la 
 
 En el menú Izquierdo o Derecho, «Columnas» elige qué columnas ve ese lado, su orden y su ancho: la lista «Columnas (marcadas se ven, en este orden)», con casillas, los botones «Subir», «Bajar» y «Restablecer» (las columnas y anchos de fábrica) y el campo «Ancho de la columna elegida (píxeles)». Al mover una columna se anuncia su posición, por ejemplo «Tamaño, posición 3 de 7». Los cambios se aplican al pulsar «Aceptar». En el menú Opciones, «Columnas por defecto» hace lo mismo para los paneles nuevos.
 
-Las columnas disponibles son Nombre, Extensión, Tipo, Tamaño, Modificado, Creado, Atributos y Ruta, la columna Regla de las reglas de anuncio, color y sonido, y las que añaden los complementos, como Duración, Comentario o Codificación. La columna Nombre no se puede quitar. Mientras un complemento calcula el valor de una columna, la celda muestra «…».
+Las columnas disponibles son Nombre, Extensión, Tipo, Tamaño, Modificado, Creado, Atributos y Ruta, la columna Regla de las reglas de anuncio, color y sonido, la columna Marca (dice «Marcado» en las filas marcadas; capítulo «Marcar y elementos de trabajo»), y las que añaden los complementos, como Duración, Comentario o Codificación. La columna Nombre no se puede quitar. Mientras un complemento calcula el valor de una columna, la celda muestra «…».
 
 Para que cada carpeta tenga sus propias columnas, y para elegir qué columnas se leen al moverse, vea el capítulo «Personalización avanzada».
 
@@ -1954,6 +2020,7 @@ zCommander trae un complemento para NVDA que mejora la lectura de sus listas. zC
 - Texto completo en las listas: NVDA corta cada columna a 511 caracteres; con el complemento, en zCommander se leen enteras, por ejemplo una ruta muy larga en los resultados de una búsqueda.
 - Sin repeticiones: cuando zCommander recoloca el foco por su cuenta (al volver a leer la carpeta, al restaurar las marcas, al aplicar un filtro o al volver de un diálogo al mismo elemento), NVDA no vuelve a leer el elemento en el que ya estaba. Se desactiva en Preferencias, página «Accesibilidad», «Movimientos del foco silenciosos con el complemento de NVDA».
 - Orden de lectura: si eligió qué columnas se leen y en qué orden (capítulo «Personalización avanzada»), NVDA lee al moverse solo esas, en ese orden.
+- Las marcas no dependen del complemento: si no quiere oír «seleccionado» en las filas marcadas, elija en Preferencias, página «Accesibilidad», «Cómo se muestran las marcas», «En la columna Marca». Funciona igual con NVDA, JAWS y Narrador (capítulo «Marcar y elementos de trabajo»).
 - Leer la fila completa: el gesto de NVDA NVDA+Mayús+J lee todas las columnas de la fila con su cabecera. Pulsado dos veces seguidas, abre la fila en una ventana donde puede leerla con las flechas y copiarla. Es un gesto de NVDA, no una tecla de zCommander: se cambia en el menú de NVDA, Preferencias, «Gestos de entrada», categoría «zCommander».
 
 ### Instalarlo
@@ -2080,7 +2147,7 @@ Use Ctrl+Mayús+M para marcar por patrón, Ctrl+Mayús+Q para desmarcar y Ctrl+M
 
 ### ¿Cómo sé qué tengo marcado?
 
-Al moverse por la lista con marcas, el lector dice «seleccionado» en cada fila marcada. Ctrl+Mayús+S dice cuántos hay marcados y cuánto ocupan.
+Al moverse por la lista con marcas, el lector dice «seleccionado» en cada fila marcada, o «Marcado» si muestra las marcas en la columna Marca. Alt+Mayús+M dice cuántos hay marcados, cuánto ocupan y sus nombres; Ctrl+Mayús+S, el resumen de la carpeta con las marcas.
 
 ### Al teclear letras no se escribe en la línea de órdenes
 

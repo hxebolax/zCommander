@@ -181,11 +181,12 @@ def test_horario_de_franjas_ida_y_vuelta(app_wx, zc):
 
 def test_dialogo_de_espera_ofrece_navegador_copiar_y_cancelar(app_wx, zc, con_interfaz):
 	oauth = modulo("ui.oauth")
-	dialogo = oauth.DialogoEspera(zc, None, "Autorizar", "Se abrirá el navegador", url="http://127.0.0.1:53682/auth?state=x",
-		otro_equipo=True)
+	dialogo = oauth.DialogoEspera(zc, None, "Autorizar", "Se abrirá el navegador", url="http://127.0.0.1:53682/auth?state=x")
 	try:
 		etiquetas = {b.GetLabel() for b in dialogo.panel.GetChildren() if isinstance(b, wx.Button)}
-		assert {"Abrir el &navegador", "&Copiar el enlace", "A&utorizar desde otro equipo...", "Cance&lar"} <= etiquetas
+		assert {"Abrir el &navegador", "&Copiar el enlace", "Cance&lar"} <= etiquetas
+		# «Autorizar desde otro equipo» se elige antes, en «Opciones avanzadas...» de los datos.
+		assert not any("otro equipo" in e for e in etiquetas)
 		assert dialogo.boton_navegador.IsThisEnabled()
 		assert dialogo.barra.GetName() == "Progreso de la espera"
 		assert dialogo.estado.GetValue()

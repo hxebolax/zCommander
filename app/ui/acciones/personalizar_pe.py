@@ -438,6 +438,9 @@ def _aplicar_pestana(panel: Any, datos: dict) -> None:
 	panel.bloqueada = False
 	if datos.get("columnas"):
 		panel.aplicar_columnas(list(datos["columnas"]))
+	if hasattr(panel, "marca_anadida"):
+		# 2.0.1: quién puso la columna «Marca» viaja con la pestaña (se quita sola si la puso zCommander).
+		panel.marca_anadida = bool(datos.get("marca_anadida", False))
 	panel.lectura = [str(c) for c in datos.get("lectura", []) or []]
 	panel.aplicar_lectura(panel.lectura)
 	if datos.get("orden"):

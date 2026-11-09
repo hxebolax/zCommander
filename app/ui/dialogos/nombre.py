@@ -27,7 +27,7 @@ import wx
 
 from app.services.vfs import rutas
 from app.ui.accesibilidad import dialogos
-from app.ui.accesibilidad.dialogos import crear_botonera, preparar_dialogo
+from app.ui.accesibilidad.dialogos import crear_botonera, devolver_foco, preparar_dialogo
 from app.ui.accesibilidad.nombres import crear_campo
 
 log = logging.getLogger(__name__)
@@ -164,8 +164,7 @@ def pedir_nombre(padre: wx.Window | None, titulo: str, etiqueta: str, valor: str
 		return dialogo.valor()
 	finally:
 		dialogo.Destroy()
-		if foco_previo:
-			foco_previo.SetFocus()
+		devolver_foco(foco_previo)
 
 
 class DialogoPatron(wx.Dialog):
@@ -220,5 +219,4 @@ def pedir_patron(padre: wx.Window | None, titulo: str, etiqueta: str, historial:
 		return dialogo.valor() if dialogo.ShowModal() == wx.ID_OK else None
 	finally:
 		dialogo.Destroy()
-		if foco_previo:
-			foco_previo.SetFocus()
+		devolver_foco(foco_previo)

@@ -23,9 +23,9 @@ _historial_patrones: list[str] = ["*.*"]
 
 def _anunciar_total(panel) -> None:
 	marcadas = panel.marcadas()
-	bytes_ = sum(e.tamano for e in marcadas if e.tamano > 0)
 	if marcadas:
-		texto = _("Marcados {n}, {b}").format(n=len(marcadas), b=formato.tamano_legible(bytes_))
+		# 2.0.1: «Marcados 3 (1 carpeta), 25 MB en archivos»; sin «0 bytes» por las carpetas sin calcular.
+		texto = _("Marcados {n}").format(n=len(marcadas)) + formato.tamano_marcadas(marcadas)
 	else:
 		texto = _("Sin marcas")
 	anuncios.anunciar(texto, anuncios.RESULTADO)

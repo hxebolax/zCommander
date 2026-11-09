@@ -6,7 +6,7 @@ Este complemento mejora la lectura de zCommander, el gestor de archivos accesibl
 
 - **Texto completo en las listas.** NVDA corta cada columna de una lista a 511 caracteres. Con el complemento, en zCommander se lee entera: por ejemplo, la columna Ruta de las listas de resultados o un nombre de archivo muy largo.
 - **Sin repeticiones.** Cuando zCommander recoloca el foco por su cuenta (al volver a leer la carpeta, al restaurar las marcas, al aplicar un filtro o al volver de un diálogo al mismo elemento), NVDA no vuelve a leer el elemento en el que ya estabas. Se puede desactivar en zCommander: Preferencias, página Accesibilidad, casilla «Movimientos del foco silenciosos con el complemento de NVDA».
-- **Orden de lectura de las columnas.** Si en zCommander eliges qué columnas se leen al moverse por las filas y en qué orden, NVDA lee solo esas, en ese orden (como mucho 15). Sin esa elección, NVDA lee todas las columnas en el orden de la lista.
+- **Orden de lectura de las columnas.** Si en zCommander eliges qué columnas se leen al moverse por las filas y en qué orden, NVDA lee solo esas, en ese orden (como mucho 15). Sin esa elección, NVDA lee todas las columnas en el orden de la lista. Si la primera columna está vacía (por ejemplo, la columna Marca de una fila sin marcar), la segunda se lee sin su cabecera, como si fuera la primera: no oirás «Nombre:» delante de cada fila sin marcar aunque NVDA lea las cabeceras de tabla.
 - **Leer la fila completa.** NVDA+Mayúsculas+J lee todas las columnas de la fila enfocada con su cabecera. Si lo pulsas dos veces seguidas, la fila se abre en una ventana donde puedes leerla con las flechas y copiarla.
 
 ## Teclas

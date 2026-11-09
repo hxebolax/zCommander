@@ -115,6 +115,7 @@ Si elige otro esquema de teclas (Opciones, Personalización, «Esquema de teclas
 - Mayús+F6: Renombrar en el sitio. Cambia el nombre del elemento del cursor.
 - Alt+Intro: Propiedades. Abre las propiedades de Windows.
 - F10, Alt+X: Salir. Cierra zCommander.
+- Alt+Mayús+M: Decir los elementos marcados. Dice cuántos elementos hay marcados, su tamaño y sus nombres.
 - Alt+F8: Historial de órdenes. Lista de las órdenes ejecutadas, con búsqueda.
 - Alt+F7: Buscar archivos. Busca por nombre, contenido, tamaño, fecha y atributos.
 - Ctrl+B: Vista plana. Muestra en una lista todos los archivos de la carpeta y sus subcarpetas.

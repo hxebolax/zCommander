@@ -355,12 +355,20 @@ def columnas(ctx) -> None:
 	lista = panel.lista() if hasattr(panel, "lista") else None
 	if lista is not None and hasattr(lista, "anchos"):
 		anchos.update(lista.anchos())
+	visibles = list(panel.columnas)
+	marca_puesta = ctx.config.obtener("paneles.marcas_como") == "columna" and "marca" not in visibles
+	if marca_puesta:
+		# 2.0.1: la «Marca» se ve aunque la pestaña no la tenga (``PanelArchivos._con_marca``): el diálogo lo refleja.
+		visibles.insert(0, "marca")
 	resultado = f_columnas.elegir_columnas(ctx.ventana, _("Columnas del lado {l}").format(l=nombre_lado(panel.lado).lower()),
-		list(panel.columnas), anchos, ctx.config.obtener("paneles.columnas"))
+		visibles, anchos, ctx.config.obtener("paneles.columnas"))
 	if resultado is None:
 		return
 	elegidas, nuevos_anchos = resultado
 	panel.aplicar_columnas(elegidas, nuevos_anchos)
+	if marca_puesta and "marca" in elegidas and hasattr(panel, "marca_anadida"):
+		# La puso zCommander, no la persona: se quitará sola al volver a las marcas como selección.
+		panel.marca_anadida = True
 	anuncios.anunciar(_("Columnas: {c}").format(c=", ".join(f_columnas.titulo_columna(c) for c in elegidas)), anuncios.RESULTADO)
 
 

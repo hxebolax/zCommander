@@ -45,7 +45,7 @@ def cabecera(columna: str) -> str:
 	return {
 		"nombre": _("Nombre"), "extension": _("Extensión"), "tipo": _("Tipo"), "tamano": _("Tamaño"),
 		"modificado": _("Modificado"), "creado": _("Creado"), "atributos": _("Atributos"), "ruta": _("Ruta"),
-		"regla": _("Regla"),
+		"regla": _("Regla"), "marca": _("Marca"),
 	}.get(columna, columna)
 
 
@@ -116,6 +116,9 @@ class PanelArchivos(wx.Panel):
 		self.conjunto = None
 		#: Columnas elegidas estando en una lista de resultados; ``None``: las de carpeta con Ruta.
 		self._columnas_lista: list[str] | None = None
+		#: 2.0.1: la columna «Marca» la añadió zCommander al elegir ``paneles.marcas_como = "columna"``
+		#: (se quita sola al volver a «seleccion»). Se guarda en la sesión con la pestaña.
+		self._marca_anadida = bool(datos.get("marca_anadida", False))
 		self._anchos = dict(self.config.obtener("paneles.anchos") or {})
 		self._historial = HistorialCarpetas.desde_dict(datos.get("historial") or {}, int(self.config.obtener("general.tamano_historial")))
 		self._ultimas: dict[str, str] = {}
@@ -154,6 +157,7 @@ class PanelArchivos(wx.Panel):
 			al_cambiar_cursor=self._al_cambiar_cursor, al_cambiar_marcas=self._al_cambiar_marcas,
 		)
 		self.lista_archivos.al_teclear = self.teclear
+		self.lista_archivos.fijar_marcas_en_columna(self.config.obtener("paneles.marcas_como") == "columna")
 		self.lista_archivos.obtener_proveedor = lambda: self._proveedor
 		self.lista_archivos.SetHelpText(_(
 			"Lista de archivos. Flechas para moverse, Intro abre, Insert o Espacio marcan, Tab cambia de panel, "
@@ -183,18 +187,39 @@ class PanelArchivos(wx.Panel):
 		self.lista_archivos.poner_columnas(self._columnas_vista(), self._anchos)
 		self.lista_archivos.Bind(wx.EVT_LIST_ITEM_ACTIVATED, lambda _e: self.ventana.ejecutar_orden("abrir"))
 		self.lista_archivos.Bind(wx.EVT_SET_FOCUS, self._al_recibir_foco)
+		for evento_raton in (wx.EVT_LEFT_DOWN, wx.EVT_RIGHT_DOWN, wx.EVT_MIDDLE_DOWN):
+			self.lista_archivos.Bind(evento_raton, self._al_pulsar_raton)
 		self.lista_archivos.Bind(wx.EVT_LIST_COL_END_DRAG, self._al_cambiar_ancho)
 		self.lista_archivos.Bind(wx.EVT_CONTEXT_MENU, lambda _e: self.ventana.ejecutar_orden("menu_contextual"))
 
 	def _columnas_vista(self) -> list[str]:
+		# 2.0.1: con las marcas en la columna «Marca», la vista breve y las columnas propias de un
+		# proveedor la conservan: sin ella, el lector no tendría cómo decir qué está marcado.
+		con_marca = self.lista_archivos.marcas_en_columna if hasattr(self, "lista_archivos") else False
 		if self._vista_lista == "breve":
 			self._titulos_propios = {}
+			if con_marca:
+				pestana = self._columnas_carpeta
+				antes = "marca" in pestana and "nombre" in pestana and pestana.index("marca") < pestana.index("nombre")
+				return ["marca", "nombre"] if antes or "marca" not in pestana else ["nombre", "marca"]
 			return ["nombre"]
 		propias = None if self.es_lista() else columnas_del_proveedor(self._proveedor, self._ruta)
 		self._titulos_propios = dict(propias or [])
 		if propias:
-			return [c for c, _t in propias]
-		return self.columnas or ["nombre"]
+			return (["marca"] if con_marca else []) + [c for c, _t in propias]
+		return self._con_marca(self.columnas or ["nombre"])
+
+	def _con_marca(self, columnas: list[str]) -> list[str]:
+		"""2.0.1: con las marcas en la columna «Marca», esa columna se ve siempre (la primera si faltaba).
+
+		Sin ella el lector no tendría cómo decir qué está marcado. Solo cambia lo que se ve: las
+		columnas que guardan la pestaña, la sesión, un espacio de trabajo o un conjunto de vista
+		siguen como estaban, así que al volver a «seleccion» desaparece sola.
+		"""
+		lista = getattr(self, "lista_archivos", None)
+		if lista is not None and lista.marcas_en_columna and "marca" not in columnas:
+			return ["marca", *columnas]
+		return list(columnas)
 
 	def _cabecera(self, columna: str) -> str:
 		return self._titulos_propios.get(columna) or cabecera(columna)
@@ -213,6 +238,27 @@ class PanelArchivos(wx.Panel):
 
 	def columnas_carpeta(self) -> list[str]:
 		return list(self._columnas_carpeta)
+
+	def sigue_columnas(self, previas: list[str]) -> bool:
+		"""¿Usa la pestaña estas columnas por defecto? (para saber si debe seguir a las nuevas).
+
+		2.0.1: la «Marca» que añadió zCommander al pasar a modo columna no cuenta como una
+		elección propia: sin ella, la pestaña sigue a las columnas por defecto y a los perfiles.
+		"""
+		if self._columnas_carpeta == list(previas):
+			return True
+		if self._marca_anadida:
+			return [c for c in self._columnas_carpeta if c != "marca"] == [c for c in previas if c != "marca"]
+		return False
+
+	@property
+	def marca_anadida(self) -> bool:
+		"""La columna «Marca» de la pestaña la puso zCommander (modo columna), no la persona."""
+		return self._marca_anadida
+
+	@marca_anadida.setter
+	def marca_anadida(self, valor: bool) -> None:
+		self._marca_anadida = bool(valor)
 
 	def _sincronizar_columnas(self) -> None:
 		"""Pone las columnas que tocan si cambiaron (al entrar o salir de una lista de resultados)."""
@@ -583,8 +629,8 @@ class PanelArchivos(wx.Panel):
 		partes = [self._recuento_texto()]
 		marcadas = self.marcadas()
 		if marcadas:
-			bytes_ = sum(e.tamano for e in marcadas if e.tamano > 0)
-			partes.append(_("Marcados: {m}, {b}").format(m=len(marcadas), b=formato.tamano_legible(bytes_)))
+			# 2.0.1: sin «0 bytes» por las carpetas sin calcular (``formato.tamano_marcadas``).
+			partes.append(_("Marcados: {m}").format(m=len(marcadas)) + formato.tamano_marcadas(marcadas))
 		if self.filtro:
 			partes.append(_("Filtro: {f}").format(f=self.filtro))
 		if self.filtro_rapido:
@@ -629,6 +675,16 @@ class PanelArchivos(wx.Panel):
 		evento.Skip()
 		self.ventana.panel_enfocado(self)
 
+	def _al_pulsar_raton(self, evento: wx.MouseEvent) -> None:
+		"""Un clic en la lista elige el lado a propósito: la ventana no lo corrige al reactivarse."""
+		evento.Skip()
+		self._anotar_enfoque(clic=True)
+
+	def _anotar_enfoque(self, clic: bool = False) -> None:
+		anotar = getattr(self.ventana, "anotar_enfoque", None)
+		if callable(anotar):
+			anotar(self.lado, clic)
+
 	def _al_cambiar_ancho(self, evento: wx.ListEvent) -> None:
 		evento.Skip()
 		wx.CallAfter(self._guardar_anchos)
@@ -650,6 +706,7 @@ class PanelArchivos(wx.Panel):
 			log.debug("La lista ya no existe", exc_info=True)
 
 	def enfocar(self) -> None:
+		self._anotar_enfoque()
 		destino = self.lista_archivos if self.vista in VISTA_LISTA else self._vistas.get(self.vista)
 		if destino is not None and hasattr(destino, "control_enfocable"):
 			destino = destino.control_enfocable()
@@ -864,7 +921,7 @@ class PanelArchivos(wx.Panel):
 		if conjunto.columnas:
 			anchos = dict(self._anchos)
 			anchos.update(conjunto.anchos or {})
-			self.lista_archivos.poner_columnas(list(conjunto.columnas), anchos)
+			self.lista_archivos.poner_columnas(self._con_marca(list(conjunto.columnas)), anchos)
 		if conjunto.orden:
 			self.criterio_orden, self.orden_inverso = conjunto.orden, bool(conjunto.inverso)
 		if conjunto.filtro:
@@ -882,9 +939,16 @@ class PanelArchivos(wx.Panel):
 		"""
 		from app.ui import senales_nvda
 
-		lectura = [c for c in (lectura or self.config.obtener("paneles.lectura") or []) if c][:senales_nvda.MAX_COLUMNAS]
+		lectura = [c for c in (lectura or self.config.obtener("paneles.lectura") or []) if c]
 		lista = self.lista_archivos
 		actuales = list(getattr(lista, "columnas", []) or [])
+		if lectura and lista.marcas_en_columna and "marca" in actuales and "marca" not in lectura:
+			# 2.0.1: un orden de lectura sin «Marca» dejaría muda la columna que dice qué está
+			# marcado. Entra donde está entre las columnas (antes o justo después de Nombre),
+			# solo en lo que se lee ahora: el orden guardado no cambia.
+			detras = "nombre" in actuales and actuales.index("nombre") < actuales.index("marca") and "nombre" in lectura
+			lectura.insert(lectura.index("nombre") + 1 if detras else 0, "marca")
+		lectura = lectura[:senales_nvda.MAX_COLUMNAS]
 		if lectura and actuales:
 			primeras = [c for c in lectura if c in actuales]
 			nuevas = primeras + [c for c in actuales if c not in primeras]
@@ -899,9 +963,58 @@ class PanelArchivos(wx.Panel):
 		except (RuntimeError, ValueError):
 			log.debug("No se pudo publicar el orden de lectura", exc_info=True)
 
+	def aplicar_modo_marcas(self, modo: str) -> None:
+		"""``paneles.marcas_como`` en caliente: conserva las marcas y pone o quita la columna «Marca».
+
+		Al pasar a «columna», si la pestaña no tiene la columna se añade la primera (y la primera del
+		orden de lectura, si hay uno), para que el cambio se note. Al volver a «seleccion» se quita solo
+		si la añadió zCommander: si la persona la puso a propósito, se queda.
+		"""
+		en_columna = modo == "columna"
+		self.lista_archivos.fijar_marcas_en_columna(en_columna)
+		if en_columna and "marca" not in self._columnas_carpeta:
+			self._columnas_carpeta.insert(0, "marca")
+			if self._columnas_lista is not None and "marca" not in self._columnas_lista:
+				self._columnas_lista.insert(0, "marca")
+			efectiva = [c for c in (self.lectura or self.config.obtener("paneles.lectura") or []) if c]
+			if efectiva and "marca" not in efectiva:
+				self.lectura = ["marca", *efectiva]
+			self._marca_anadida = True
+		elif not en_columna and self._marca_anadida:
+			self._columnas_carpeta = [c for c in self._columnas_carpeta if c != "marca"] or ["nombre"]
+			if self._columnas_lista is not None:
+				self._columnas_lista = [c for c in self._columnas_lista if c != "marca"] or ["nombre"]
+			if "marca" in self.lectura:
+				self.lectura = [c for c in self.lectura if c != "marca"]
+				if self.lectura == [c for c in (self.config.obtener("paneles.lectura") or []) if c]:
+					self.lectura = []
+			self._marca_anadida = False
+		# Aunque la pestaña no cambie, lo que se ve sí puede: la «Marca» garantizada (``_con_marca``)
+		# de un conjunto, de la vista breve o de las columnas de un proveedor entra o sale.
+		if self.vista in VISTA_LISTA:
+			if self.conjunto is not None:
+				# Una vista por carpeta manda en las columnas de lo que se ve (10.4).
+				self.aplicar_conjunto(self.conjunto)
+				return
+			self.lista_archivos.poner_columnas(self._columnas_vista(), self._anchos)
+			self.aplicar_lectura(self.lectura)
+			self._mostrar()
+
 	def aplicar_columnas_carpeta(self, columnas: list[str]) -> None:
-		"""Nuevas columnas por defecto (Opciones o un perfil) para las carpetas de esta pestaña."""
-		self._columnas_carpeta = [c for c in columnas if c] or ["nombre"]
+		"""Nuevas columnas por defecto (Opciones o un perfil) para las carpetas de esta pestaña.
+
+		2.0.1: si zCommander había añadido «Marca» (modo columna) y las nuevas no la traen, se
+		vuelve a poner la primera y sigue siendo «añadida»; si la traen, ya es de la persona.
+		"""
+		nuevas = [c for c in columnas if c] or ["nombre"]
+		if self._marca_anadida:
+			if "marca" in nuevas:
+				self._marca_anadida = False
+			elif self.lista_archivos.marcas_en_columna:
+				nuevas.insert(0, "marca")
+			else:
+				self._marca_anadida = False
+		self._columnas_carpeta = nuevas
 		if self.vista in VISTA_LISTA:
 			self._sincronizar_columnas()
 			self._mostrar()
@@ -1059,7 +1172,7 @@ class PanelArchivos(wx.Panel):
 		return sesion.pestana(
 			ruta=texto, vista=self.vista, orden=self.criterio_orden, inverso=self.orden_inverso, filtro=self.filtro,
 			bloqueada=self.bloqueada, columnas=list(self._columnas_carpeta), historial=self._historial.como_dict(),
-			lectura=list(self.lectura),
+			lectura=list(self.lectura), marca_anadida=self._marca_anadida,
 		)
 
 	def Destroy(self) -> bool:  # noqa: N802 - API de wx

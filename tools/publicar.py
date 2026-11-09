@@ -7,6 +7,7 @@ Uso (desde la raíz del proyecto, con el entorno activo)::
 	python tools/publicar.py                       # solo prepara dist/
 	python tools/publicar.py --servidor            # y lo copia al servidor
 	python tools/publicar.py --sin-fuentes         # sin el ZIP de fuentes
+	python tools/publicar.py --sin-github          # sin «espejos.github» en version.json
 	python tools/publicar.py --firmar-complementos zc.reproductor zc.git
 
 Pasos:
@@ -21,6 +22,11 @@ Pasos:
    comprobar que la compilación no lleva datos personales.
 5. Crea ``dist/version.json`` y lo FIRMA con ``tools/claves/firma_ed25519.key``;
    comprueba que la firma la acepta la clave pública incrustada en la aplicación.
+   Salvo con ``--sin-github``, lleva el campo firmado ``espejos.github`` con la
+   dirección del ZIP en la release de GitHub de esta versión
+   (``https://github.com/hxebolax/zCommander/releases/download/v<versión>/zCommander_v<versión>.zip``).
+   La release (etiqueta ``v<versión>``) se crea a mano y lleva como recursos el ZIP,
+   el ZIP de fuentes y ESTE MISMO ``version.json``.
 6. Crea ``dist/zCommander_v<versión>_fuentes.zip`` (2.4), salvo con ``--sin-fuentes``.
 7. Solo con ``--firmar-complementos``: ``<id>-<versión>.zcplugin`` firmado con la
    clave del proyecto (``app.plugins.firma``) y su JSON de actualización (3.10).
@@ -56,6 +62,7 @@ NOMBRE = "zCommander"
 EJECUTABLE = "ZCommander.exe"
 SERVIDOR = Path.home() / "SynologyDrive" / "web" / "zCommander"
 URL_BASE = "https://xebolax.synology.me/zCommander/"
+REPOSITORIO_GITHUB = "hxebolax/zCommander"
 CLAVE = RAIZ / "tools" / "claves" / "firma_ed25519.key"
 COMPLEMENTO_PRUEBA = Path("tests") / "datos" / "plugins" / "ejemplo"
 # Carpetas de data que son de la persona: nunca en un paquete (las mismas que setup_cx.DATA_PROHIBIDO).
@@ -187,8 +194,19 @@ def _sha256(ruta: Path) -> str:
 	return resumen.hexdigest()
 
 
-def crear_manifiesto(zip_: Path, numero: str, novedades: str, clave: Path, claves_publicas: Sequence[str]) -> Path:
-	"""``version.json`` junto al ZIP, firmado entero; la firma se comprueba con las claves de la aplicación."""
+def url_release_github(numero: str, archivo: str | None = None) -> str:
+	"""Dirección de un recurso de la release ``v<numero>`` de GitHub (por defecto, el ZIP de la aplicación)."""
+	archivo = archivo or f"{NOMBRE}_v{numero}.zip"
+	return f"https://github.com/{REPOSITORIO_GITHUB}/releases/download/v{numero}/{archivo}"
+
+
+def crear_manifiesto(zip_: Path, numero: str, novedades: str, clave: Path, claves_publicas: Sequence[str], *,
+		espejo_github: bool = True) -> Path:
+	"""``version.json`` junto al ZIP, firmado entero; la firma se comprueba con las claves de la aplicación.
+
+	:param espejo_github: añade ``espejos.github`` (firmado como todo lo demás) con el ZIP de la release
+		de GitHub. Los clientes 2.0.0 ignoran el campo y siguen descargando del servidor.
+	"""
 	if not clave.is_file():
 		raise ErrorPublicar(f"Falta la clave privada {clave}: sin ella las instalaciones rechazarán la versión.")
 	datos = {
@@ -200,6 +218,8 @@ def crear_manifiesto(zip_: Path, numero: str, novedades: str, clave: Path, clave
 		"date": datetime.date.today().isoformat(),
 		"novedades": novedades,
 	}
+	if espejo_github:
+		datos["espejos"] = {"github": url_release_github(numero, zip_.name)}
 	ruta = zip_.with_name("version.json")
 	ruta.write_text(json.dumps(datos, ensure_ascii=False, indent=4) + "\n", encoding="utf-8")
 	firmador = _firmador()
@@ -208,7 +228,7 @@ def crear_manifiesto(zip_: Path, numero: str, novedades: str, clave: Path, clave
 	if problemas:
 		raise ErrorPublicar("El manifiesto no lo aceptaría la aplicación: " + " ".join(problemas)
 			+ " ¿Es la clave de CLAVES_PUBLICAS_ED25519 de app/services/actualizador.py?")
-	_ok(f"version.json firmado ({URL_BASE}version.json)")
+	_ok(f"version.json firmado ({URL_BASE}version.json)" + (" con el espejo de GitHub" if espejo_github else ""))
 	return ruta
 
 
@@ -219,7 +239,9 @@ def _excluida_de_fuentes(relativa: Path) -> bool:
 	partes = relativa.parts
 	if any(parte in FUENTES_EXCLUIDAS or parte.endswith(".egg-info") for parte in partes):
 		return True
-	if partes[:2] == ("tools", "claves"):
+	if partes[:2] in (("tools", "claves"), ("docs", "investigacion"), ("docs", "revision")):
+		# docs/investigacion y docs/revision son material de trabajo interno con datos del equipo y
+		# del NAS de quien desarrolla: tampoco van a git (.gitignore).
 		return True
 	if partes[0] == "data" and len(partes) > 1 and (partes[1] in PERSONALES or partes[1] == "bin" and len(partes) > 2
 			and partes[2] in ("respaldo", ".pendiente", ".entrante")):
@@ -349,9 +371,26 @@ def al_servidor(paquetes: Sequence[Path], manifiestos: Sequence[Path], destino: 
 # ── Todo junto ───────────────────────────────────────────────────────────────
 
 
+def crear_componentes(raiz: Path, dist: Path, numero: str) -> Path | None:
+	"""``dist/zCommander_v<versión>_componentes.zip`` con los binarios de ``data/bin`` para la release de GitHub.
+
+	Es lo que descarga ``tools/descargar_componentes.py`` a quien clona el repositorio (los binarios
+	no están en git). Sin ``linea_base.json`` (un proyecto de prueba) no se crea.
+	"""
+	from tools import descargar_componentes as dc
+
+	bin_ = raiz / "data" / "bin"
+	if not (bin_ / "linea_base.json").is_file():
+		return None
+	zip_ = dc.crear_paquete(dc.binarios_esperados(dc.leer_base(bin_)), dist, bin_=bin_, version=numero)
+	_ok(f"Paquete de componentes para GitHub: {zip_.name}")
+	return zip_
+
+
 def publicar(*, raiz: Path = RAIZ, build: Path | None = None, dist: Path | None = None, clave: Path = CLAVE,
 		servidor: bool = False, destino: Path = SERVIDOR, sin_fuentes: bool = False, compilar_antes: bool = True,
-		comprobar: bool = True, complementos: Sequence[str] = (), claves_publicas: Sequence[str] | None = None) -> list[str]:
+		comprobar: bool = True, complementos: Sequence[str] = (), claves_publicas: Sequence[str] | None = None,
+		espejo_github: bool = True) -> list[str]:
 	"""Los pasos 1 a 8. Devuelve los nombres de lo publicado (o preparado) en orden."""
 	build = build or raiz / "build" / "ZCommander"
 	dist = dist or raiz / "dist"
@@ -369,7 +408,7 @@ def publicar(*, raiz: Path = RAIZ, build: Path | None = None, dist: Path | None 
 		comprobar_licencias(raiz, build)
 	dist.mkdir(parents=True, exist_ok=True)
 	zip_ = empaquetar(build, dist, numero)
-	manifiesto = crear_manifiesto(zip_, numero, novedades, clave, claves_publicas)
+	manifiesto = crear_manifiesto(zip_, numero, novedades, clave, claves_publicas, espejo_github=espejo_github)
 	paquetes = [zip_]
 	if not sin_fuentes:
 		paquetes.append(crear_fuentes(raiz, dist, numero))
@@ -379,6 +418,13 @@ def publicar(*, raiz: Path = RAIZ, build: Path | None = None, dist: Path | None 
 			paquetes.append(paquete)
 			jsons.append(ruta_json)
 	jsons.append(manifiesto)  # version.json, el último de todos
+	if espejo_github:
+		# El version.json firmado apunta ya a la release: sin ella, quien elija GitHub no puede descargar.
+		# El ZIP de componentes no va al servidor: solo lo usa tools/descargar_componentes.py desde GitHub.
+		componentes = crear_componentes(raiz, dist, numero)
+		extra = f", {componentes.name}" if componentes else ""
+		print(f"En GitHub: release con etiqueta v{numero} en {REPOSITORIO_GITHUB} con {zip_.name}, "
+			f"{NOMBRE}_v{numero}_fuentes.zip{extra} y este mismo version.json como recursos.")
 	if servidor:
 		return al_servidor(paquetes, jsons, destino)
 	print("Para publicarla: python tools/publicar.py --servidor")
@@ -389,6 +435,8 @@ def main(argumentos: list[str] | None = None) -> int:
 	analizador = argparse.ArgumentParser(description="Prepara (y publica) una versión de zCommander.")
 	analizador.add_argument("--servidor", action="store_true", help="Copiar lo preparado a la carpeta del servidor.")
 	analizador.add_argument("--sin-fuentes", action="store_true", help="No crear el ZIP de fuentes.")
+	analizador.add_argument("--sin-github", action="store_true",
+		help="No añadir «espejos.github» (la release de GitHub) al version.json.")
 	analizador.add_argument("--firmar-complementos", nargs="+", default=[], metavar="ID",
 		help="Firmar y publicar estos complementos de serie.")
 	analizador.add_argument("--sin-compilar", action="store_true", help="Usar la compilación que ya hay en build/.")
@@ -402,7 +450,7 @@ def main(argumentos: list[str] | None = None) -> int:
 	try:
 		publicar(clave=opciones.clave, servidor=opciones.servidor, destino=opciones.destino, sin_fuentes=opciones.sin_fuentes,
 			compilar_antes=not opciones.sin_compilar, comprobar=not opciones.sin_comprobar,
-			complementos=opciones.firmar_complementos)
+			complementos=opciones.firmar_complementos, espejo_github=not opciones.sin_github)
 	except (ErrorPublicar, OSError, ValueError, subprocess.SubprocessError) as error:
 		print(f"[ERROR] {error}")
 		return 1

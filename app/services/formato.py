@@ -149,6 +149,25 @@ def recuento(carpetas: int, archivos: int) -> str:
 	return _(" y ").join(partes)
 
 
+def tamano_marcadas(entradas) -> str:
+	"""Lo que sigue al número de marcados: «, 25 MB», « (1 carpeta), 25 MB en archivos» o « (2 carpetas)».
+
+	2.0.1: una carpeta sin calcular no tiene tamaño (−1); sumarla como 0 hacía decir
+	«3 marcados, 0 bytes». Si todas las carpetas marcadas tienen su tamaño calculado,
+	el total es completo y se dice como siempre; si no, se dice cuántas carpetas hay y
+	solo el tamaño de los archivos (nada si no hay archivos).
+	"""
+	carpetas = [e for e in entradas if e.es_carpeta]
+	sin_tamano = [e for e in carpetas if e.tamano < 0]
+	if not sin_tamano:
+		return _(", {b}").format(b=tamano_legible(sum(e.tamano for e in entradas if e.tamano > 0)))
+	texto = _(" ({c})").format(c=plural(len(carpetas), _("{n} carpeta"), _("{n} carpetas")))
+	archivos = [e for e in entradas if not e.es_carpeta]
+	if archivos:
+		texto += _(", {b} en archivos").format(b=tamano_legible(sum(e.tamano for e in archivos if e.tamano > 0)))
+	return texto
+
+
 def ahora_corto() -> str:
 	"""Hora actual «14:05:33» para el historial de anuncios."""
 	return time.strftime("%H:%M:%S")

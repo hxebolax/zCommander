@@ -33,7 +33,7 @@ import wx
 from app.services import renombrado
 from app.ui.accesibilidad import dialogos
 from app.ui.accesibilidad.composicion import PreferenciasLectura
-from app.ui.accesibilidad.dialogos import preparar_dialogo
+from app.ui.accesibilidad.dialogos import devolver_foco, preparar_dialogo
 from app.ui.accesibilidad.lista import ListaAccesible
 from app.ui.accesibilidad.nombres import crear_campo
 
@@ -483,5 +483,4 @@ def pedir_renombrado(padre: wx.Window | None, elementos: Sequence[renombrado.Ele
 		return dialogo.pares() if dialogo.ShowModal() == wx.ID_OK else None
 	finally:
 		dialogo.Destroy()
-		if foco_previo:
-			foco_previo.SetFocus()
+		devolver_foco(foco_previo)

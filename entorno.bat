@@ -7,7 +7,7 @@ rem  Uso con menú:  entorno.bat
 rem  Uso sin menú:  entorno.bat <orden>
 rem  Órdenes: crear, instalar, ejecutar, depurar, pruebas, compilar,
 rem           comprobar, verificar, empaquetar, sonidos, componentes, nvda,
-rem           licencias, publicar, servidor, limpiar, datos
+rem           licencias, publicar, servidor, limpiar, datos, descargar
 rem  Guardar con finales de línea CRLF y UTF-8 SIN BOM.
 rem ============================================================================
 setlocal EnableExtensions EnableDelayedExpansion
@@ -46,6 +46,7 @@ echo  14. Publicar (sin servidor)
 echo  15. Publicar en el servidor
 echo  16. Limpiar compilaciones y cachés
 echo  17. Abrir la carpeta data
+echo  18. Descargar los componentes de data\bin (rclone, 7za, libarchive, FFmpeg)
 echo   0. Salir
 echo.
 set "OPCION="
@@ -67,6 +68,7 @@ if "%OPCION%"=="14" call :PUBLICAR & goto PAUSA
 if "%OPCION%"=="15" call :SERVIDOR & goto PAUSA
 if "%OPCION%"=="16" call :LIMPIAR & goto PAUSA
 if "%OPCION%"=="17" call :DATOS & goto PAUSA
+if "%OPCION%"=="18" call :DESCARGAR & goto PAUSA
 if "%OPCION%"=="0" goto FIN
 echo Opción no válida: %OPCION%
 goto MENU
@@ -94,9 +96,10 @@ if /i "%~1"=="publicar" call :PUBLICAR & goto SALIR
 if /i "%~1"=="servidor" call :SERVIDOR & goto SALIR
 if /i "%~1"=="limpiar" call :LIMPIAR & goto SALIR
 if /i "%~1"=="datos" call :DATOS & goto SALIR
+if /i "%~1"=="descargar" call :DESCARGAR & goto SALIR
 echo Orden desconocida: %~1
 echo Órdenes válidas: crear, instalar, ejecutar, depurar, pruebas, compilar, comprobar, verificar, empaquetar,
-echo sonidos, componentes, nvda, licencias, publicar, servidor, limpiar, datos
+echo sonidos, componentes, nvda, licencias, publicar, servidor, limpiar, datos, descargar
 exit /b 2
 
 :SALIR
@@ -199,6 +202,11 @@ exit /b %ERRORLEVEL%
 :SONIDOS
 call :COMPROBAR_VENV || exit /b 1
 "%PY%" tools\generar_sonidos.py --complementos
+exit /b %ERRORLEVEL%
+
+:DESCARGAR
+call :COMPROBAR_VENV || exit /b 1
+"%PY%" tools\descargar_componentes.py
 exit /b %ERRORLEVEL%
 
 :COMPONENTES

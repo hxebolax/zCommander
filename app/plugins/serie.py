@@ -24,7 +24,7 @@ SERIE: dict[str, str] = {
 	"zc.metadatos": "1.0.0",
 	"zc.monitor": "1.0.0",
 	"zc.notas": "1.0.0",
-	"zc.nubes": "1.0.0",
+	"zc.nubes": "1.1.0",
 	"zc.ocr": "1.0.0",
 	"zc.ocupacion": "1.0.0",
 	"zc.organizador": "1.0.0",

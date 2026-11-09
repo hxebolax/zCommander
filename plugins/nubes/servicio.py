@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 import threading
 import time
 import uuid
@@ -29,7 +30,7 @@ from typing import Any
 
 from app.plugins import api
 
-from . import errores
+from . import errores, locales
 from .cliente_rc import ClienteRC, ErrorTrabajo, esperar
 from .cuentas import AlmacenCuentas, Catalogo, Cuenta, Servicio, aportaciones_de_complementos
 from .motor import ConfiguracionCifrada, Motor, RutasMotor
@@ -143,12 +144,15 @@ class Alta:
 			else: paso = alta.responder(valor, cancelacion)
 	"""
 
-	def __init__(self, nubes: Nubes, id: str, tipo: str, parametros: dict[str, str], *, reconectar: bool = False) -> None:
+	def __init__(self, nubes: Nubes, id: str, tipo: str, parametros: dict[str, str], *, reconectar: bool = False,
+			preparar: Callable[[], dict[str, str]] | None = None) -> None:
 		self._nubes = nubes
 		self.id = id
 		self.tipo = tipo
 		self.parametros = dict(parametros)
 		self.reconectar = reconectar
+		#: Respuestas que hay que calcular hablando con rclone (en el hilo, al empezar).
+		self._preparar = preparar
 		self._jobid = 0
 		self._oauth_visto = False
 		self.preguntas: list[str] = []
@@ -160,6 +164,8 @@ class Alta:
 		return self.esperar(cancelacion, devolver_oauth=True)
 
 	def empezar(self, cancelacion: Any = None) -> Paso:
+		if self._preparar is not None:
+			self.parametros.update(self._preparar())
 		opt = {"nonInteractive": True, "obscure": True}
 		if self.reconectar:
 			return self._lanzar("config/update", {"name": self.id, "parameters": self.parametros, "opt": opt}, cancelacion)
@@ -167,9 +173,17 @@ class Alta:
 			cancelacion)
 
 	def responder(self, resultado: str, paso: Paso, cancelacion: Any = None) -> Paso:
+		"""Responde a una pregunta y sigue el alta.
+
+		Las respuestas ``config_*`` de rclone son efímeras (no se guardan en
+		``rclone.conf``): si no se reenvían en cada ``continue``, rclone vuelve a
+		preguntar si hay navegador (``config_is_local``) e incluso intenta abrirlo él
+		mismo (``config_auth_no_browser``). Por eso cada continuación lleva todos los
+		parámetros del alta.
+		"""
 		self.preguntas.append(paso.nombre)
 		opt = {"nonInteractive": True, "obscure": True, "continue": True, "state": paso.estado, "result": resultado}
-		return self._lanzar("config/update", {"name": self.id, "parameters": {}, "opt": opt}, cancelacion)
+		return self._lanzar("config/update", {"name": self.id, "parameters": dict(self.parametros), "opt": opt}, cancelacion)
 
 	def esperar(self, cancelacion: Any = None, *, devolver_oauth: bool = False, tiempo_max_s: float = TIEMPO_OAUTH_S) -> Paso:
 		"""Sigue el trabajo en curso hasta una pregunta, la URL de OAuth (si ``devolver_oauth``) o el final."""
@@ -239,8 +253,10 @@ class Nubes:
 			lanzar=lanzar or self._lanzar, terminar=terminar or self._terminar, soltar=soltar or self._soltar,
 			opciones=self.opciones_motor, al_detenerse=self._al_detenerse)
 		self._estados: dict[str, str] = {}
+		self._carpetas: tuple[float, list[locales.CarpetaNube]] | None = None
+		self._hilo_carpetas: threading.Thread | None = None
 		self._duplicados_avisados: set[tuple[str, str]] = set()
-		self._candado = threading.Lock()
+		self._candado = threading.RLock()
 		self.limites_pausados = False
 		self.reinicio_pendiente = False
 
@@ -439,7 +455,105 @@ class Nubes:
 				except (errores.ErrorRC, api.ErrorArchivos):
 					log.debug("Sin espacio de %s para el selector", cuenta.id, exc_info=True)
 			unidades.append(api.UnidadVirtual(cuenta.nombre, cuenta.direccion, descripcion))
+		for carpeta in self.carpetas_visibles():
+			# Una ruta local: el selector la abre como un disco más, sin rclone ni credenciales.
+			unidades.append(api.UnidadVirtual(carpeta.nombre, carpeta.ruta, _("carpeta del programa oficial, {r}").format(
+				r=carpeta.ruta)))
 		return unidades
+
+	# Carpetas de los programas oficiales -------------------------------------------
+
+	def _detectar_carpetas(self) -> None:
+		try:
+			carpetas = locales.carpetas_de_nube()
+		except Exception:  # noqa: BLE001 - la detección nunca rompe el selector ni el asistente
+			log.warning("No se pudieron buscar las carpetas de los programas de nube", exc_info=True)
+			carpetas = []
+		with self._candado:
+			self._carpetas = (time.monotonic(), list(carpetas))
+
+	def asegurar_deteccion(self) -> threading.Thread:
+		"""Empieza (si no está en marcha) la búsqueda de carpetas en un hilo propio; una sola a la vez."""
+		with self._candado:
+			if self._hilo_carpetas is None or not self._hilo_carpetas.is_alive():
+				self._hilo_carpetas = threading.Thread(target=self._detectar_carpetas, daemon=True, name="zc-nubes-carpetas")
+				self._hilo_carpetas.start()
+			return self._hilo_carpetas
+
+	def carpetas_en_cache(self) -> list[locales.CarpetaNube] | None:
+		"""Las carpetas detectadas hace menos de ``VIGENCIA_CARPETAS_S``; ``None`` si hay que volver a buscarlas."""
+		with self._candado:
+			if self._carpetas is not None and time.monotonic() - self._carpetas[0] < VIGENCIA_CARPETAS_S:
+				return list(self._carpetas[1])
+		return None
+
+	def olvidar_carpetas(self) -> None:
+		with self._candado:
+			self._carpetas = None
+
+	def carpetas_locales(self, espera_s: float | None = None) -> list[locales.CarpetaNube]:
+		"""Las carpetas de los programas oficiales de este equipo (nunca lanza). BLOQUEA: llamar desde un hilo.
+
+		Se recuerdan ``VIGENCIA_CARPETAS_S`` segundos para no repetir la búsqueda entre
+		el asistente, Google Drive y el selector. Con ``espera_s`` se espera como mucho
+		ese tiempo; si la búsqueda no ha terminado, se devuelve la última conocida (o
+		ninguna) y la búsqueda sigue en su hilo para la próxima vez.
+		"""
+		vigentes = self.carpetas_en_cache()
+		if vigentes is not None:
+			return vigentes
+		self.asegurar_deteccion().join(espera_s)
+		with self._candado:
+			return list(self._carpetas[1]) if self._carpetas is not None else []
+
+	def carpetas_visibles(self) -> list[locales.CarpetaNube]:
+		"""Las que salen en el selector de unidades: con la opción activada y sin las que la persona ocultó.
+
+		Espera como mucho ``ESPERA_SELECTOR_S``: las fuentes del selector van una tras
+		otra y una ruta de red lenta no debe retrasar las demás.
+		"""
+		if not bool(self.opcion("carpetas_programas", True)):
+			return []
+		ocultas = {str(r) for r in (self.opcion("carpetas_ocultas", []) or [])}
+		return [c for c in self.carpetas_locales(ESPERA_SELECTOR_S) if c.clave not in ocultas]
+
+	def carpetas_por_revisar(self, carpetas: list[locales.CarpetaNube]) -> list[locales.CarpetaNube]:
+		"""Las detectadas que el asistente todavía no ha enseñado a la persona."""
+		vistas = {str(r) for r in (self.opcion("carpetas_vistas", []) or [])}
+		return [c for c in carpetas if c.clave not in vistas]
+
+	def guardar_carpetas(self, detectadas: list[locales.CarpetaNube], marcadas: list[locales.CarpetaNube]) -> None:
+		"""Guarda qué carpetas se muestran: las no marcadas se ocultan y todas quedan como ya revisadas."""
+		elegidas = {c.clave for c in marcadas}
+		ocultas = {str(r) for r in (self.opcion("carpetas_ocultas", []) or [])}
+		ocultas = (ocultas - elegidas) | {c.clave for c in detectadas if c.clave not in elegidas}
+		vistas = {str(r) for r in (self.opcion("carpetas_vistas", []) or [])} | {c.clave for c in detectadas}
+		cambios: dict[str, Any] = {"carpetas_ocultas": sorted(ocultas), "carpetas_vistas": sorted(vistas)}
+		if elegidas:
+			cambios["carpetas_programas"] = True
+		self._guardar_config(cambios)
+
+	def mostrar_carpeta(self, carpeta: locales.CarpetaNube, detectadas: list[locales.CarpetaNube]) -> None:
+		"""Muestra una carpeta en el selector sin cambiar las demás.
+
+		Si la persona había desactivado las carpetas de los programas, se activan
+		pero se ocultan todas las otras: solo sale la que acaba de elegir.
+		"""
+		ocultas = {str(r) for r in (self.opcion("carpetas_ocultas", []) or [])} - {carpeta.clave}
+		vistas = {str(r) for r in (self.opcion("carpetas_vistas", []) or [])} | {carpeta.clave}
+		cambios: dict[str, Any] = {}
+		if not bool(self.opcion("carpetas_programas", True)):
+			ocultas |= {c.clave for c in detectadas if c.clave != carpeta.clave}
+			vistas |= {c.clave for c in detectadas}
+			cambios["carpetas_programas"] = True
+		cambios.update({"carpetas_ocultas": sorted(ocultas), "carpetas_vistas": sorted(vistas)})
+		self._guardar_config(cambios)
+
+	def _guardar_config(self, cambios: dict[str, Any]) -> None:
+		try:
+			self.zc.config.establecer_varias(cambios)
+		except Exception:  # noqa: BLE001 - sin configuración (pruebas sueltas) no se recuerda la elección
+			log.warning("No se pudo guardar la elección de carpetas de nube", exc_info=True)
 
 	def _nombre_servicio(self, cuenta: Cuenta) -> str:
 		if cuenta.cifrada_sobre:
@@ -502,6 +616,12 @@ class Nubes:
 		id = id or self.cuentas.id_libre(nombre)
 		parametros = dict(servicio.opciones)
 		tipo = servicio.tipo
+		valores = dict(valores)
+		otro_equipo = valores.pop(OTRO_EQUIPO, "") == "true"
+		if servicio.tipo == "kdrive" and valores.get("drive_id"):
+			valores["drive_id"] = numero_unidad_kdrive(valores["drive_id"])
+			if not valores["drive_id"].isdigit():
+				raise api.ErrorArchivos(_("El número de la unidad kDrive tiene que ser solo cifras"))
 		for clave, valor in valores.items():
 			if clave == "tipo" and servicio.id == "otro":
 				tipo = valor.strip()
@@ -509,8 +629,13 @@ class Nubes:
 			if valor not in ("", None):
 				parametros[clave] = str(valor)
 		if servicio.es_oauth:
-			parametros.setdefault("config_is_local", "true")
-			parametros["config_auth_no_browser"] = "true"
+			if otro_equipo:
+				# Sin navegador en este equipo: rclone pide pegar lo que da «rclone authorize» en otro.
+				parametros["config_is_local"] = "false"
+				parametros.pop("config_auth_no_browser", None)
+			else:
+				parametros.setdefault("config_is_local", "true")
+				parametros["config_auth_no_browser"] = "true"
 		if servicio.tipo == "drive" and self.opcion("formato_docs", ""):
 			parametros["export_formats"] = valores.get("export_formats") or str(self.opcion("formato_docs"))
 		papelera = bool(self.opcion("papelera_por_defecto", True)) and servicio.papelera
@@ -549,9 +674,45 @@ class Nubes:
 			log.debug("No se pudo borrar el remoto %s", id, exc_info=True)
 
 	def reconectar(self, cuenta: Cuenta) -> Alta:
-		"""Volver a autorizar (rclone.md 5.4): ``config/update`` con ``config_refresh_token`` y el flujo OAuth."""
+		"""Volver a autorizar (rclone.md 5.4): ``config/update`` con ``config_refresh_token`` y el flujo OAuth.
+
+		Lleva también las respuestas que no cambian lo que ya hay: en Google Drive sin
+		identificador propio, seguir con el compartido y no cambiar la unidad
+		compartida; en Jottacloud, la autenticación tradicional (el servicio de marca
+		blanca lo vuelve a preguntar rclone) y el dispositivo y el punto de montaje que
+		ya tiene la cuenta, leídos de su configuración: si no, rclone los dejaría en
+		blanco y una cuenta de Sync o Backup pasaría a ver el Archivo.
+		"""
 		parametros = {"config_refresh_token": "true", "config_is_local": "true", "config_auth_no_browser": "true"}
-		return Alta(self, cuenta.id, "", parametros, reconectar=True)
+		servicio = self.catalogo.servicio(cuenta.servicio)
+		preparar = None
+		if servicio is not None:
+			parametros.update({k: v for k, v in servicio.opciones.items() if k in RESPUESTAS_RECONEXION})
+			if servicio.tipo == "drive":
+				parametros["config_change_team_drive"] = "false"
+				if not cuenta.client_id_propio:
+					parametros["config_shared_client_id"] = "true"
+			if servicio.tipo == "jottacloud":
+				preparar = lambda: self._dispositivo_jottacloud(cuenta.id)  # noqa: E731
+		return Alta(self, cuenta.id, "", parametros, reconectar=True, preparar=preparar)
+
+	def _dispositivo_jottacloud(self, id: str) -> dict[str, str]:
+		"""Respuestas que conservan el dispositivo y el punto de montaje de una cuenta Jottacloud."""
+		try:
+			datos = self.llamar("config/get", name=id)
+		except api.ErrorArchivos:
+			log.debug("Sin configuración de %s; rclone preguntará el dispositivo", id, exc_info=True)
+			return {}
+		dispositivo = str(datos.get("device", "") or "")
+		punto = str(datos.get("mountpoint", "") or "")
+		if not dispositivo and not punto:
+			return {"config_non_standard": "false"}
+		respuestas = {"config_non_standard": "true"}
+		if dispositivo:
+			respuestas["config_device"] = dispositivo
+		if punto:
+			respuestas["config_mountpoint"] = punto
+		return respuestas
 
 	def limpiar_cache(self) -> None:
 		try:
@@ -783,6 +944,30 @@ class Nubes:
 		if "://" in direccion:
 			raise api.NoAdmitido(_("Esta función solo admite carpetas locales y cuentas de nube"))
 		return ruta_local_rclone(os.path.abspath(direccion))
+
+
+#: Clave de los valores del asistente: autorizar desde otro equipo (no va a rclone).
+OTRO_EQUIPO = "_otro_equipo"
+#: Segundos que se recuerdan las carpetas de los programas oficiales detectadas.
+VIGENCIA_CARPETAS_S = 30.0
+#: Lo que el selector de unidades espera como mucho a la búsqueda de carpetas.
+ESPERA_SELECTOR_S = 1.5
+#: Respuestas fijas de una ficha que también valen al volver a autorizar (no las que cambian la cuenta).
+RESPUESTAS_RECONEXION = frozenset({"config_type"})
+
+
+def unidad_kdrive_valida(texto: str) -> bool:
+	"""Si el número (o la dirección) de una unidad kDrive da solo cifras."""
+	return numero_unidad_kdrive(texto).isdigit()
+
+
+def numero_unidad_kdrive(texto: str) -> str:
+	"""El número de una unidad kDrive a partir del número o de la dirección web («.../kdrive/app/drive/456789/files»)."""
+	texto = str(texto).strip()
+	encontrado = re.search(r"/drive/(\d+)", texto)
+	if encontrado:
+		return encontrado.group(1)
+	return texto
 
 
 _CLAVES_SECRETAS = frozenset({"client_secret", "pass", "password", "password2", "secret_access_key", "key", "api_key", "2fa",

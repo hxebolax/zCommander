@@ -24,7 +24,7 @@ import logging
 
 import wx
 
-from app.ui.accesibilidad.dialogos import crear_botonera, preparar_dialogo
+from app.ui.accesibilidad.dialogos import crear_botonera, devolver_foco, preparar_dialogo
 from app.ui.accesibilidad.nombres import crear_campo
 
 log = logging.getLogger(__name__)
@@ -92,8 +92,4 @@ def pedir(padre: wx.Window | None, titulo: str, texto: str, usuario: str) -> tup
 		return dialogo.valores() if dialogo.ShowModal() == wx.ID_OK else None
 	finally:
 		dialogo.Destroy()
-		if foco:
-			try:
-				foco.SetFocus()
-			except RuntimeError:
-				log.debug("El control que tenía el foco ya no existe", exc_info=True)
+		devolver_foco(foco)

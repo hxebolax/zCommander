@@ -21,9 +21,16 @@ sus diez reglas de oro. Lo propio de zCommander:
   respaldo y el siguiente arranque ofrece volver a la versión anterior.
 - ``registrar_comprobacion`` (5.4): CO y PL se suman a la comprobación periódica.
 
+Fuentes (preferencia ``actualizaciones.fuente``): el servidor de siempre, GitHub
+(``REPOSITORIO_GITHUB``), las dos (gana la versión más nueva; si una falla se usa la
+otra) o una dirección personalizada. Con cualquiera, el manifiesto tiene que venir
+firmado con una de ``CLAVES_PUBLICAS_ED25519``: la fuente solo decide de dónde se
+lee, nunca en quién se confía. El campo firmado ``espejos`` da otras direcciones
+del mismo ZIP (``espejos.github``, la release de GitHub).
+
 Flujo: :func:`comprobar` (firma Ed25519 ANTES de mirar ningún campo, versiones,
-anti-retroceso) → :func:`descargar` (reanudable) → :func:`verificar_paquete`
-(tamaño y SHA-256) → :func:`extraer_seguro` → :func:`preparar_sustitucion` (el
+anti-retroceso) → :func:`descargar` (reanudable, con direcciones de respaldo) →
+:func:`verificar_paquete` (tamaño y SHA-256) → :func:`extraer_seguro` → :func:`preparar_sustitucion` (el
 ``.bat``) → :func:`lanzar_sustitucion` y la interfaz cierra la aplicación.
 
 Por qué un ``.bat``: la versión compilada no trae un ``python.exe`` utilizable
@@ -79,6 +86,23 @@ NOMBRE_APP = "zCommander"
 EJECUTABLE = "ZCommander.exe"
 # Siempre https (http solo se admite en localhost para las pruebas).
 URL_MANIFIESTO = "https://xebolax.synology.me/zCommander/version.json"
+# Repositorio público de GitHub: una release por versión (etiqueta «v<versión>») con
+# zCommander_v<versión>.zip, zCommander_v<versión>_fuentes.zip y el MISMO version.json
+# firmado. «latest/download» redirige (https) al recurso de la última release.
+REPOSITORIO_GITHUB = "hxebolax/zCommander"
+URL_MANIFIESTO_GITHUB = f"https://github.com/{REPOSITORIO_GITHUB}/releases/latest/download/version.json"
+# De dónde se buscan las actualizaciones (preferencia «actualizaciones.fuente»). La raíz
+# de confianza es SIEMPRE la firma: con cualquier fuente, el version.json tiene que
+# venir firmado con una de CLAVES_PUBLICAS_ED25519.
+FUENTE_SERVIDOR = "servidor"
+FUENTE_GITHUB = "github"
+FUENTE_AMBAS = "ambas"
+FUENTE_PERSONALIZADA = "personalizada"
+FUENTES: tuple[str, ...] = (FUENTE_SERVIDOR, FUENTE_GITHUB, FUENTE_AMBAS, FUENTE_PERSONALIZADA)
+# Campo firmado del manifiesto con otras direcciones del mismo ZIP: {"github": "https://..."}.
+# Los clientes 2.0.0 lo ignoran (solo leen los campos que conocen) y la firma lo cubre.
+CAMPO_ESPEJOS = "espejos"
+ESPEJO_GITHUB = "github"
 # Claves PÚBLICAS Ed25519 en hexadecimal. Se acepta la firma de CUALQUIERA: así se
 # puede rotar la clave publicando una versión que ya conozca la nueva antes de
 # retirar la antigua. La privada vive en tools/claves/ y nunca se publica.
@@ -138,6 +162,10 @@ class ErrorVerificacion(ErrorActualizacion):
 	"""El paquete descargado no coincide con el manifiesto (tamaño o SHA-256)."""
 
 
+class ErrorSinDireccion(ErrorActualizacion):
+	"""2.0.1: la fuente es «personalizada» y no hay dirección (la comprobación no puede hacerse)."""
+
+
 class ErrorPaquete(ErrorActualizacion):
 	"""El ZIP es peligroso, inválido o no parece de esta aplicación."""
 
@@ -173,6 +201,15 @@ class Configuracion:
 	nombre_app: str = NOMBRE_APP
 	ejecutable: str = EJECUTABLE
 	url_manifiesto: str = URL_MANIFIESTO
+	"""Manifiesto de la fuente «servidor» (el de siempre)."""
+	url_github: str = URL_MANIFIESTO_GITHUB
+	"""Manifiesto de la fuente «github»."""
+	fuente: str = FUENTE_SERVIDOR
+	url_personalizada: str = ""
+	"""Solo con la fuente «personalizada»."""
+	preferencias: Callable[[], tuple[str, str]] | None = None
+	"""Si existe, devuelve ``(fuente, url_personalizada)`` al comprobar: así un cambio en
+	Preferencias se aplica sin reiniciar (la comprobación periódica guarda esta configuración)."""
 	claves_publicas: tuple[str, ...] = CLAVES_PUBLICAS_ED25519
 	comando: list[str] | None = None
 	data_actualizable: tuple[str, ...] = DATA_ACTUALIZABLE
@@ -250,7 +287,17 @@ def configuracion_por_defecto(version_actual: str | None = None) -> Configuracio
 		from app.core.version import APP_VERSION
 
 		version_actual = APP_VERSION
-	return Configuracion(version_actual=version_actual, carpeta_app=paths.ruta_base(), carpeta_datos=paths.ruta_datos())
+	return Configuracion(version_actual=version_actual, carpeta_app=paths.ruta_base(), carpeta_datos=paths.ruta_datos(),
+		preferencias=preferencias_de_la_aplicacion)
+
+
+def preferencias_de_la_aplicacion() -> tuple[str, str]:
+	"""``(actualizaciones.fuente, actualizaciones.url_personalizada)`` de la configuración de la aplicación."""
+	from app.core.configuracion import obtener_configuracion
+
+	ajustes = obtener_configuracion()
+	return (str(ajustes.obtener("actualizaciones.fuente", FUENTE_SERVIDOR) or FUENTE_SERVIDOR),
+		str(ajustes.obtener("actualizaciones.url_personalizada", "") or ""))
 
 
 @dataclass(frozen=True)
@@ -264,6 +311,15 @@ class InfoActualizacion:
 	tamano: int
 	fecha: str = ""
 	novedades: str = ""
+	fuente: str = ""
+	"""Fuente que dio el manifiesto elegido (``servidor``, ``github``, ``personalizada``...)."""
+	urls_respaldo: tuple[str, ...] = ()
+	"""Otras direcciones del MISMO ZIP (firmadas en el manifiesto) si falla ``url_zip``."""
+
+	@property
+	def urls(self) -> tuple[str, ...]:
+		"""``url_zip`` y después los respaldos, sin repetir."""
+		return tuple(dict.fromkeys((self.url_zip, *self.urls_respaldo)))
 
 
 def puede_instalar(config: Configuracion) -> bool:
@@ -482,36 +538,129 @@ def _comprobar_url(url: str) -> None:
 		raise ErrorRed(_("Dirección de actualización no segura: solo se admite https.")) from error
 
 
-def _leer_manifiesto(config: Configuracion, url: str) -> dict:
+def _host(url: str) -> str:
+	try:
+		return (urllib.parse.urlsplit(url).hostname or "").lower()
+	except ValueError:
+		return ""
+
+
+def _es_de_github(url: str) -> bool:
+	"""github.com y los hosts a los que redirigen sus descargas (objects/release-assets.githubusercontent.com)."""
+	host = _host(url)
+	return host == "github.com" or host.endswith(".github.com") or host.endswith(".githubusercontent.com")
+
+
+def nombre_fuente(fuente: str, url: str = "") -> str:
+	"""Cómo se nombra una fuente en los mensajes («No se pudo conectar con GitHub...»)."""
+	host = _host(url)
+	if fuente == FUENTE_GITHUB:
+		return "GitHub"
+	if fuente == FUENTE_SERVIDOR:
+		return _("el servidor de zCommander ({host})").format(host=host or _host(URL_MANIFIESTO))
+	if fuente == FUENTE_PERSONALIZADA:
+		return _("la dirección personalizada ({host})").format(host=host) if host else _("la dirección personalizada")
+	return _("el servidor de actualizaciones ({host})").format(host=host) if host else _("el servidor de actualizaciones")
+
+
+def _nombre_origen_descarga(url: str) -> str:
+	"""Nombre del sitio del que se descarga el ZIP, para los mensajes de la descarga."""
+	if _es_de_github(url):
+		return "GitHub"
+	if _host(url) == _host(URL_MANIFIESTO):
+		return nombre_fuente(FUENTE_SERVIDOR, url)
+	return _host(url) or _("el servidor de actualizaciones")
+
+
+def _mayuscula(texto: str) -> str:
+	return texto[:1].upper() + texto[1:]
+
+
+def _leer_manifiesto(config: Configuracion, url: str, nombre: str | None = None) -> dict:
+	"""Descarga y decodifica el ``version.json`` (sin mirar todavía la firma).
+
+	:param nombre: la fuente, tal como se nombra en los mensajes.
+	"""
+	nombre = nombre or nombre_fuente("", url)
 	_comprobar_url(url)
 	try:
 		with red.abrir(_config_red(config, url, TIEMPO_MANIFIESTO), url, cabeceras={"Cache-Control": "no-cache"},
 				tiempo_s=TIEMPO_MANIFIESTO) as respuesta:
 			datos = respuesta.read(MAX_MANIFIESTO + 1)
 	except urllib.error.HTTPError as error:
-		log.warning("El servidor de actualizaciones respondió %s a %s", error.code, red.redactar_url(url))
-		raise ErrorRed(_("El servidor de actualizaciones respondió con el error %s.") % error.code) from error
+		log.warning("La fuente de actualizaciones respondió %s a %s", error.code, red.redactar_url(url))
+		raise ErrorRed(_("Al consultar {fuente}, el servidor respondió con el error {codigo}.").format(
+			fuente=nombre, codigo=error.code)) from error
 	except red.ErrorHTTP as error:
 		if error.categoria == red.TIEMPO:
-			raise ErrorRed(_("El servidor de actualizaciones no respondió a tiempo.")) from error
+			raise ErrorRed(_("{fuente} no respondió a tiempo.").format(fuente=_mayuscula(nombre))) from error
 		raise ErrorRed(
-			_("No se pudo conectar con el servidor de actualizaciones. Compruebe la conexión a Internet.")
+			_("No se pudo conectar con {fuente}. Compruebe la conexión a Internet.").format(fuente=nombre)
 		) from error
 	except (http.client.HTTPException, TimeoutError, OSError) as error:
 		log.warning("Fallo al leer el manifiesto de %s", red.redactar_url(url), exc_info=True)
-		raise ErrorRed(_("El servidor de actualizaciones no respondió a tiempo.")) from error
+		raise ErrorRed(_("{fuente} no respondió a tiempo.").format(fuente=_mayuscula(nombre))) from error
 	if len(datos) > MAX_MANIFIESTO:
-		raise ErrorFirma(_("La información de versión del servidor es demasiado grande; se ignora."))
+		raise ErrorFirma(_("La información de versión de {fuente} es demasiado grande; se ignora.").format(fuente=nombre))
 	try:
 		manifiesto = json.loads(datos.decode("utf-8"))
 	except (UnicodeDecodeError, ValueError) as error:
-		raise ErrorFirma(_("La información de versión del servidor está dañada.")) from error
+		raise ErrorFirma(_("La información de versión de {fuente} está dañada.").format(fuente=nombre)) from error
 	if not isinstance(manifiesto, dict):
-		raise ErrorFirma(_("La información de versión del servidor está dañada."))
+		raise ErrorFirma(_("La información de versión de {fuente} está dañada.").format(fuente=nombre))
 	return manifiesto
 
 
-def _info_desde_manifiesto(config: Configuracion, manifiesto: dict, url_manifiesto: str) -> InfoActualizacion:
+def _espejos(manifiesto: dict) -> dict[str, str]:
+	"""``espejos`` del manifiesto (ya con la firma comprobada): solo nombres y direcciones https válidos."""
+	espejos = manifiesto.get(CAMPO_ESPEJOS)
+	if espejos is None:
+		return {}
+	if not isinstance(espejos, dict):
+		log.warning("El campo «%s» del manifiesto no es un diccionario; se ignora", CAMPO_ESPEJOS)
+		return {}
+	validos: dict[str, str] = {}
+	for nombre, url in espejos.items():
+		if not isinstance(nombre, str) or not isinstance(url, str):
+			log.warning("Espejo no válido en el manifiesto: %r; se ignora", nombre)
+			continue
+		try:
+			red.comprobar_url(url)
+		except red.ErrorHTTP:
+			log.warning("El espejo «%s» del manifiesto no es https; se ignora", nombre)
+			continue
+		validos[nombre] = url
+	return validos
+
+
+def _urls_del_zip(config: Configuracion, manifiesto: dict, url_manifiesto: str, archivo: str, fuente: str,
+		ambas: bool) -> list[str]:
+	"""Direcciones del ZIP en orden de preferencia según la fuente que dio el manifiesto.
+
+	- servidor: ``url`` (o el ZIP junto al manifiesto); con «ambas», después ``espejos.github``.
+	- github: ``espejos.github`` (o ``url``); con «ambas», después el ZIP del servidor.
+	- personalizada (o una dirección explícita): ``url`` y después todos los ``espejos``.
+
+	El SHA-256 y el tamaño del manifiesto se comprueban siempre, sea cual sea el host.
+	"""
+	base = str(manifiesto.get("url") or urllib.parse.urljoin(url_manifiesto, archivo))
+	espejos = _espejos(manifiesto)
+	github = espejos.get(ESPEJO_GITHUB)
+	if fuente == FUENTE_SERVIDOR:
+		urls = [base]
+		if ambas and github:
+			urls.append(github)
+	elif fuente == FUENTE_GITHUB:
+		urls = [github or base]
+		if ambas:
+			urls.append(str(manifiesto.get("url") or urllib.parse.urljoin(config.url_manifiesto, archivo)))
+	else:
+		urls = [base, *espejos.values()]
+	return list(dict.fromkeys(urls))
+
+
+def _info_desde_manifiesto(config: Configuracion, manifiesto: dict, url_manifiesto: str, fuente: str = FUENTE_SERVIDOR,
+		ambas: bool = False) -> InfoActualizacion:
 	"""Valida los campos (ya con la firma comprobada) y construye la información."""
 	version = manifiesto.get("version")
 	archivo = manifiesto.get("file")
@@ -530,35 +679,123 @@ def _info_desde_manifiesto(config: Configuracion, manifiesto: dict, url_manifies
 		raise ErrorFirma(_("El paquete publicado no trae una huella SHA-256 válida."))
 	if not isinstance(tamano, int) or isinstance(tamano, bool) or not 0 < tamano <= MAX_DESCARGA:
 		raise ErrorFirma(_("El tamaño del paquete publicado no es válido."))
-	url_zip = manifiesto.get("url") or urllib.parse.urljoin(url_manifiesto, archivo)
-	_comprobar_url(str(url_zip))
+	urls = _urls_del_zip(config, manifiesto, url_manifiesto, archivo, fuente, ambas)
+	_comprobar_url(urls[0])
+	respaldo = []
+	for url in urls[1:]:
+		try:
+			red.comprobar_url(url)
+		except red.ErrorHTTP:
+			log.warning("Dirección de respaldo no https; se ignora: %s", red.redactar_url(url))
+			continue
+		respaldo.append(url)
 	return InfoActualizacion(
 		version=str(version),
 		archivo=archivo,
-		url_zip=str(url_zip),
+		url_zip=urls[0],
 		sha256=sha,
 		tamano=tamano,
 		fecha=str(manifiesto.get("date") or ""),
 		novedades=str(manifiesto.get("novedades") or "").strip(),
+		fuente=fuente,
+		urls_respaldo=tuple(respaldo),
 	)
 
 
-def comprobar(config: Configuracion, url_manifiesto: str | None = None, *, respetar_omitida: bool = False) -> InfoActualizacion | None:
-	"""Consulta el servidor y devuelve la versión nueva, o ``None`` si no la hay.
+def fuente_elegida(config: Configuracion) -> tuple[str, str]:
+	"""``(fuente, url_personalizada)`` vigentes: las de Preferencias si la configuración sabe leerlas."""
+	fuente, personalizada = config.fuente, config.url_personalizada
+	if config.preferencias is not None:
+		try:
+			fuente, personalizada = config.preferencias()
+		except Exception:  # noqa: BLE001 - sin preferencias legibles se usa la fuente de la configuración
+			log.warning("No se pudo leer la fuente de actualizaciones de las preferencias", exc_info=True)
+	if fuente not in FUENTES:
+		log.warning("Fuente de actualizaciones desconocida (%r); se usa el servidor", fuente)
+		fuente = FUENTE_SERVIDOR
+	return fuente, str(personalizada or "").strip()
 
+
+def _fuentes_a_consultar(config: Configuracion, url_explicita: str | None) -> list[tuple[str, str]]:
+	"""``[(fuente, url del manifiesto)]`` en el orden en que se consultan."""
+	if url_explicita:
+		return [("", url_explicita)]
+	fuente, personalizada = fuente_elegida(config)
+	if fuente == FUENTE_GITHUB:
+		return [(FUENTE_GITHUB, config.url_github)]
+	if fuente == FUENTE_AMBAS:
+		return [(FUENTE_SERVIDOR, config.url_manifiesto), (FUENTE_GITHUB, config.url_github)]
+	if fuente == FUENTE_PERSONALIZADA:
+		if not personalizada:
+			raise ErrorSinDireccion(_(
+				"Ha elegido buscar las actualizaciones en una dirección personalizada, pero no la ha escrito. "
+				"Escríbala en Preferencias, página Actualizaciones, o elija otra fuente."))
+		return [(FUENTE_PERSONALIZADA, personalizada)]
+	return [(FUENTE_SERVIDOR, config.url_manifiesto)]
+
+
+def _consultar(config: Configuracion, fuente: str, url: str, ambas: bool) -> InfoActualizacion:
+	"""Lee el manifiesto de UNA fuente, verifica su firma y valida sus campos.
+
+	Los errores de firma o de formato dicen de qué fuente vienen.
+	"""
+	nombre = nombre_fuente(fuente, url)
+	log.info("Consultando la fuente de actualizaciones «%s»: %s", fuente or "dirección explícita", red.redactar_url(url))
+	manifiesto = _leer_manifiesto(config, url, nombre)
+	try:
+		verificar_firma(manifiesto, config.claves_publicas)
+		return _info_desde_manifiesto(config, manifiesto, url, fuente, ambas)
+	except ErrorActualizacion as error:
+		log.warning("Manifiesto rechazado de %s: %s", red.redactar_url(url), error)
+		raise type(error)(_("{fuente}: {mensaje}").format(fuente=_mayuscula(nombre), mensaje=error)) from error
+
+
+def _error_de_todas(errores: list[ErrorActualizacion]) -> ErrorActualizacion:
+	"""Un solo error cuando fallan todas las fuentes: del tipo del más grave (la firma antes que la red)."""
+	principal = next((error for error in errores if not isinstance(error, ErrorRed)), errores[0])
+	mensaje = " ".join([_("No se pudo comprobar en ninguna de las dos fuentes."), *(str(error) for error in errores)])
+	nuevo = type(principal)(mensaje)
+	nuevo.__cause__ = principal
+	return nuevo
+
+
+def comprobar(config: Configuracion, url_manifiesto: str | None = None, *, respetar_omitida: bool = False) -> InfoActualizacion | None:
+	"""Consulta la fuente elegida y devuelve la versión nueva, o ``None`` si no la hay.
+
+	Con la fuente «ambas» consulta el servidor y GitHub (en serie): si una falla se usa
+	la otra sin molestar y, si responden las dos, gana la versión más nueva.
+
+	:param url_manifiesto: una dirección concreta (pruebas); sin ella, la fuente de Preferencias.
 	:param respetar_omitida: ``True`` en la comprobación periódica (no molesta con la
 		versión que la persona pidió omitir); ``False`` en la manual.
 	:raises ErrorActualizacion: red, firma, formato o anti-retroceso. La firma se
-		verifica ANTES de mirar ningún otro campo.
+		verifica ANTES de mirar ningún otro campo, con cualquier fuente.
 	"""
-	url = url_manifiesto or config.url_manifiesto
-	log.info("Comprobando actualizaciones en %s (versión instalada %s)", red.redactar_url(url), config.version_actual)
-	manifiesto = _leer_manifiesto(config, url)
-	verificar_firma(manifiesto, config.claves_publicas)
-	info = _info_desde_manifiesto(config, manifiesto, url)
+	fuentes = _fuentes_a_consultar(config, url_manifiesto)
+	ambas = len(fuentes) > 1
+	log.info("Comprobando actualizaciones en %s (versión instalada %s)",
+		", ".join(f"{fuente or 'dirección explícita'} ({red.redactar_url(url)})" for fuente, url in fuentes), config.version_actual)
+	encontradas: list[InfoActualizacion] = []
+	errores: list[ErrorActualizacion] = []
+	for fuente, url in fuentes:
+		try:
+			encontradas.append(_consultar(config, fuente, url, ambas))
+		except ErrorActualizacion as error:
+			if not ambas:
+				raise
+			log.warning("La fuente «%s» falló (%s); se usa la otra", fuente, error)
+			errores.append(error)
+	if not encontradas:
+		raise _error_de_todas(errores)
+	info = encontradas[0]
+	for otra in encontradas[1:]:
+		if es_mas_nueva(otra.version, info.version):
+			info = otra
+	log.info("Manifiesto elegido: versión %s de la fuente «%s» (descarga de %s)", info.version,
+		info.fuente or "dirección explícita", red.redactar_url(info.url_zip))
 	_actualizar_estado(config, ultima_comprobacion=datetime.now(timezone.utc).isoformat(timespec="seconds"))
 	if not es_mas_nueva(info.version, config.version_actual):
-		log.info("No hay versión nueva: el servidor ofrece %s", info.version)
+		log.info("No hay versión nueva: la fuente «%s» ofrece %s", info.fuente or "dirección explícita", info.version)
 		return None
 	estado = leer_estado(config)
 	confirmada = str(estado.get("version_confirmada") or "")
@@ -567,10 +804,10 @@ def comprobar(config: Configuracion, url_manifiesto: str | None = None, *, respe
 			log.warning("Anti-rollback: el servidor ofrece %s, inferior a la confirmada %s", info.version, confirmada)
 			raise ErrorRollback(
 				_(
-					"El servidor ofrece la versión %(nueva)s, anterior a la %(confirmada)s que ya se instaló en este equipo. "
+					"%(fuente)s ofrece la versión %(nueva)s, anterior a la %(confirmada)s que ya se instaló en este equipo. "
 					"Por seguridad se rechaza."
 				)
-				% {"nueva": info.version, "confirmada": confirmada}
+				% {"fuente": _mayuscula(nombre_fuente(info.fuente)), "nueva": info.version, "confirmada": confirmada}
 			)
 	except VersionInvalida:
 		log.warning("Versión confirmada no válida en el estado (%r); se ignora", confirmada)
@@ -610,22 +847,62 @@ def descargar(
 
 	Usa ``descargas.descargar`` de N2: la parte ya descargada se guarda como
 	``.parcial`` y, si el servidor admite ``Range``, se reanuda desde ahí. Nunca
-	se escriben más bytes de los anunciados en el manifiesto firmado.
+	se escriben más bytes de los anunciados en el manifiesto firmado. Si la
+	descarga desde ``info.url_zip`` falla, prueba las direcciones de respaldo del
+	manifiesto (el mismo ZIP en otro sitio) antes de rendirse.
 
 	:param cancelado: función sin argumentos o ``TokenCancelacion``.
 	"""
+	return _descargar_con_respaldo(config, info, progreso, cancelado, verificar=False)
+
+
+def _descargar_con_respaldo(config: Configuracion, info: InfoActualizacion, progreso: Progreso | None,
+		cancelado: Callable[[], bool] | Any, *, verificar: bool) -> Path:
+	"""Prueba cada dirección del ZIP; con ``verificar``, un paquete que no supera el SHA-256 también pasa a la siguiente.
+
+	2.0.1: la parte ya descargada solo se reanuda desde la misma dirección (``_descargar_de``):
+	al cambiar de dirección se empieza de cero, para no pegar bytes de dos servidores
+	(el SHA-256 del manifiesto firmado lo comprobaría al final, pero se perdería la descarga).
+	Cancelar nunca prueba otra dirección.
+	"""
+	urls = info.urls
+	ultimo: ErrorActualizacion | None = None
+	for indice, url in enumerate(urls):
+		if indice:
+			log.warning("Se prueba a descargar la actualización desde %s", red.redactar_url(url))
+		try:
+			ruta = _descargar_de(config, info, url, progreso, cancelado)
+			if verificar:
+				_avisar(progreso, "verificacion", 0, 1)
+				verificar_paquete(ruta, info)
+				_avisar(progreso, "verificacion", 1, 1)
+		except (ErrorRed, ErrorVerificacion) as error:
+			log.warning("Falló la descarga desde %s: %s", red.redactar_url(url), error)
+			ultimo = error
+			continue
+		log.info("Actualización %s descargada de %s (fuente «%s»)", info.version, red.redactar_url(url), info.fuente or "explícita")
+		return ruta
+	raise ultimo or ErrorRed(_("El paquete publicado no tiene ninguna dirección de descarga."))
+
+
+def _descargar_de(config: Configuracion, info: InfoActualizacion, url: str, progreso: Progreso | None,
+		cancelado: Callable[[], bool] | Any) -> Path:
 	carpeta = config.carpeta_trabajo / "descarga"
 	carpeta.mkdir(parents=True, exist_ok=True)
 	final = carpeta / info.archivo
 	final.unlink(missing_ok=True)
-	_comprobar_url(info.url_zip)
+	_comprobar_url(url)
+	origen = _nombre_origen_descarga(url)
+	_preparar_parcial(final, url)
 
 	def al_progresar(hecho: int, total: int) -> None:
 		_avisar(progreso, "descarga", hecho, info.tamano if total < 0 else total)
 
 	try:
-		return descargas.descargar(_config_red(config, info.url_zip, TIEMPO_DESCARGA), info.url_zip, final,
+		ruta = descargas.descargar(_config_red(config, url, TIEMPO_DESCARGA), url, final,
 			tamano=info.tamano, cancelacion=cancelado, al_progresar=al_progresar)
+		_origen_parcial(final).unlink(missing_ok=True)
+		return ruta
 	except red.ErrorHTTP as error:
 		if error.categoria == red.CANCELADO:
 			raise ErrorCancelado(_("Descarga cancelada. Podrá continuarla más tarde.")) from error
@@ -633,8 +910,40 @@ def descargar(
 			# descargas.py la lanza sin código HTTP cuando llega más de lo anunciado.
 			raise ErrorVerificacion(_("El paquete descargado es mayor de lo anunciado; se descarta por seguridad.")) from error
 		if error.categoria == red.HTTP:
-			raise ErrorRed(_("El servidor respondió con el error %s al descargar la actualización.") % error.estado) from error
-		raise ErrorRed(_("La descarga se interrumpió. Vuelva a intentarlo: continuará donde se quedó.")) from error
+			raise ErrorRed(_("Al descargar la actualización de {origen}, el servidor respondió con el error {codigo}.").format(
+				origen=origen, codigo=error.estado)) from error
+		raise ErrorRed(_("La descarga desde {origen} se interrumpió. Vuelva a intentarlo: continuará donde se quedó.").format(
+			origen=origen)) from error
+
+
+def _origen_parcial(final: Path) -> Path:
+	"""Archivo junto al ``.parcial`` con la dirección de la que vienen sus bytes."""
+	return final.with_name(final.name + ".parcial.origen")
+
+
+def _preparar_parcial(final: Path, url: str) -> None:
+	"""2.0.1: reanudar solo desde la misma dirección; si el ``.parcial`` es de otra (o no se sabe), se borra.
+
+	``descargas.descargar`` reanuda con ``Range`` sobre lo que haya en el ``.parcial``: tras
+	fallar una dirección y pasar a la siguiente, pediría a otro servidor el resto de un
+	archivo empezado en el anterior.
+	"""
+	parcial = final.with_name(final.name + ".parcial")
+	origen = _origen_parcial(final)
+	try:
+		anterior = origen.read_text(encoding="utf-8").strip() if origen.is_file() else ""
+	except OSError:
+		log.debug("No se pudo leer %s", origen, exc_info=True)
+		anterior = ""
+	if parcial.is_file() and anterior != url:
+		log.info("La descarga a medias venía de otra dirección (%s); se empieza de cero desde %s",
+			red.redactar_url(anterior) if anterior else "desconocida", red.redactar_url(url))
+		parcial.unlink(missing_ok=True)
+	try:
+		origen.write_text(url, encoding="utf-8")
+	except OSError:
+		# Sin el archivo de origen la próxima vez se empieza de cero: más lento, pero seguro.
+		log.warning("No se pudo anotar el origen de la descarga en %s", origen, exc_info=True)
 
 
 def verificar_paquete(ruta: Path, info: InfoActualizacion) -> None:
@@ -1264,10 +1573,7 @@ def descargar_y_preparar(
 	libre = shutil.disk_usage(config.carpeta_trabajo).free
 	if libre < info.tamano * 4:
 		raise ErrorActualizacion(_("No hay espacio libre suficiente en el disco para actualizar."))
-	ruta_zip = descargar(config, info, progreso, cancelado)
-	_avisar(progreso, "verificacion", 0, 1)
-	verificar_paquete(ruta_zip, info)
-	_avisar(progreso, "verificacion", 1, 1)
+	ruta_zip = _descargar_con_respaldo(config, info, progreso, cancelado, verificar=True)
 	extraer_seguro(ruta_zip, config.carpeta_trabajo / "nueva", config, progreso)
 	ruta_zip.unlink(missing_ok=True)
 	_avisar(progreso, "preparacion", 0, 1)
@@ -1633,6 +1939,10 @@ def _cancelada(token: Any) -> bool:
 	return bool(valor() if callable(valor) else valor)
 
 
+#: 2.0.1: ya se avisó en esta sesión de la fuente personalizada sin dirección (``pasada``).
+_avisado_sin_direccion = [False]
+
+
 def pasada(config: Configuracion, token: Any = None, *, comprobar_app: bool = True) -> ResultadoPasada:
 	"""Una pasada de la comprobación periódica, en un hilo de trabajo.
 
@@ -1644,6 +1954,14 @@ def pasada(config: Configuracion, token: Any = None, *, comprobar_app: bool = Tr
 	if comprobar_app:
 		try:
 			info = comprobar(config, respetar_omitida=True)
+		except ErrorSinDireccion as error:
+			# 2.0.1: no es un corte de red pasajero: fallaría siempre. Se avisa en el registro una
+			# vez por sesión (las demás pasadas, como información) para que se pueda encontrar.
+			if not _avisado_sin_direccion[0]:
+				_avisado_sin_direccion[0] = True
+				log.warning("La comprobación periódica de actualizaciones no puede hacerse: %s", error)
+			else:
+				log.info("Comprobación periódica de la aplicación sin éxito: %s", error)
 		except ErrorActualizacion as error:
 			log.info("Comprobación periódica de la aplicación sin éxito: %s", error)
 		except Exception:  # noqa: BLE001 - una pasada nunca rompe la aplicación

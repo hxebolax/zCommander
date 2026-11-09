@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import builtins
 import ctypes
+import logging
 from collections.abc import Sequence
 
 import wx
@@ -36,6 +37,8 @@ def _(texto: str) -> str:
 	traducir = getattr(builtins, "_", None)
 	return traducir(texto) if callable(traducir) else texto
 
+
+log = logging.getLogger(__name__)
 
 _CB_GETDROPPEDSTATE = 0x0157
 
@@ -260,6 +263,29 @@ def _sonar(evento: str) -> None:
 		logging.getLogger(__name__).debug("No se pudo pedir el sonido %s", evento, exc_info=True)
 
 
+def devolver_foco(foco_previo: wx.Window | None) -> None:
+	"""Devuelve el foco tras cerrar un diálogo modal al control que lo tenía al abrirlo.
+
+	Si no había ninguno, o desapareció mientras el diálogo estaba abierto (una pestaña
+	cerrada), la ventana principal lo pone en la lista del panel que estaba activo
+	(``devolver_foco_panel``), en lugar de dejar que Windows elija otro control.
+	"""
+	try:
+		if foco_previo:
+			foco_previo.SetFocus()
+			return
+	except RuntimeError:
+		log.debug("El control que tenía el foco ya no existe", exc_info=True)
+	aplicacion = wx.GetApp()
+	ventana = aplicacion.GetTopWindow() if aplicacion else None
+	devolver = getattr(ventana, "devolver_foco_panel", None) if ventana else None
+	if callable(devolver):
+		try:
+			devolver()
+		except RuntimeError:
+			log.debug("No se pudo devolver el foco a la ventana principal", exc_info=True)
+
+
 def _mostrar(dialogo: wx.Dialog) -> int:
 	"""Muestra un diálogo modal, lo destruye y devuelve el foco a donde estaba."""
 	foco_previo = wx.Window.FindFocus()
@@ -269,8 +295,7 @@ def _mostrar(dialogo: wx.Dialog) -> int:
 	finally:
 		_sonar("dialogo.cerrar")
 		dialogo.Destroy()
-		if foco_previo:
-			foco_previo.SetFocus()
+		devolver_foco(foco_previo)
 
 
 def mostrar_mensaje(padre: wx.Window | None, mensaje: str, titulo: str = "", icono: int = wx.ICON_INFORMATION) -> None:
@@ -380,8 +405,7 @@ def pedir_texto(padre: wx.Window | None, etiqueta: str, titulo: str, valor: str 
 		return dialogo.GetValue() if dialogo.ShowModal() == wx.ID_OK else None
 	finally:
 		dialogo.Destroy()
-		if foco_previo:
-			foco_previo.SetFocus()
+		devolver_foco(foco_previo)
 
 
 def dialogo_nativo(padre: wx.Window | None, mensaje: str, titulo: str, estilo: int = wx.OK | wx.ICON_INFORMATION) -> int:

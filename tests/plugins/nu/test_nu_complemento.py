@@ -27,7 +27,7 @@ def test_manifiesto_completo_valida():
 	claves = {c["clave"] for c in datos.tabla("configuracion")}
 	assert claves == {"arrancar", "transferencias", "limite_subida_kib", "limite_bajada_kib", "horario_limites", "cache_listados_s",
 		"reintentos", "mostrar_experimentales", "registro_detallado", "papelera_por_defecto", "formato_docs", "copia_entre_cuentas",
-		"servir_solo_local", "aviso_winfsp_mostrado"}
+		"servir_solo_local", "aviso_winfsp_mostrado", "carpetas_programas", "carpetas_ocultas", "carpetas_vistas"}
 	assert {s["id"] for s in datos.sonidos} == {"conectar", "desconectar", "oauth_espera", "oauth_ok", "sincronizacion_fin", "montada",
 		"motor_detenido"}
 	assert (CARPETA / "LICENSE").is_file() and (CARPETA / "doc" / "es" / "leeme.md").is_file()
@@ -96,7 +96,8 @@ def test_catalogo_de_servicios(zc):
 		"internxt", "filen", "protondrive", "iclouddrive", "nextcloud", "webdav_nativo", "otro"} <= ids
 	visibles = {s.id for s in catalogo.lista(False)}
 	assert "protondrive" not in visibles and "iclouddrive" not in visibles, "los experimentales se ocultan"
-	assert [s.id for s in catalogo.buscar("google")] == ["drive"]
+	# Google Drive (iniciar sesión) va antes que la carpeta de Google Drive para escritorio (programa oficial).
+	assert [s.id for s in catalogo.buscar("google")] == ["drive", "carpeta_local"]
 	assert "s3" in {s.id for s in catalogo.buscar("wasabi")}
 	for servicio in catalogo.lista(True):
 		assert servicio.autenticacion in cuentas.AUTENTICACIONES

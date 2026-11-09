@@ -66,5 +66,5 @@ Generado con `python tools/generar_anexos.py` a partir de `data/bin/linea_base.j
 
 ## Complemento de zCommander para NVDA (`nvda`)
 
-- Versión de la línea base: 2.0.0. Licencia: GPL-3.0-or-later. Lo usa: nucleo.
+- Versión de la línea base: 2.0.1. Licencia: GPL-3.0-or-later. Lo usa: nucleo.
 - Carpeta: `data/bin/nvda`. Actualizable: no.

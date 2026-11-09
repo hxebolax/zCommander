@@ -163,3 +163,12 @@ def test_por_defecto_publica_en_la_carpeta_sincronizada():
 	assert publicar.SERVIDOR == Path.home() / "SynologyDrive" / "web" / "zCommander"
 	assert publicar.URL_BASE + "version.json" == actualizador.URL_MANIFIESTO
 	assert publicar.CLAVE == RAIZ / "tools" / "claves" / "firma_ed25519.key"
+
+
+def test_fuentes_sin_material_interno():
+	from pathlib import Path
+
+	assert publicar._excluida_de_fuentes(Path("docs/investigacion/synology.md"))  # noqa: SLF001
+	assert publicar._excluida_de_fuentes(Path("docs/revision/ronda-1.md"))  # noqa: SLF001
+	assert publicar._excluida_de_fuentes(Path("tools/claves/firma_ed25519.key"))  # noqa: SLF001
+	assert not publicar._excluida_de_fuentes(Path("docs/diseno-2.md"))  # noqa: SLF001
