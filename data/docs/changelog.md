@@ -2,6 +2,15 @@
 
 Cada versión tiene su apartado, de la más reciente a la más antigua. Tras actualizar, zCommander muestra una vez las novedades de la versión nueva. También puede verlas en el menú Ayuda, «Novedades de la versión».
 
+## Versión 2.0.2 - 2026-11-10
+
+Corrige un fallo grave de la compilación: en un equipo sin Python instalado, zCommander no podía verificar firmas digitales.
+
+### Correcciones
+
+- «Buscar actualizaciones» fallaba con «Falta el paquete cryptography» en los equipos que no tienen Python instalado, y tampoco se podían comprobar las firmas de los complementos ni abrir las copias de seguridad cifradas. La versión portable llevaba una pieza de Python equivocada. Ahora lleva la correcta, y antes de cada publicación se comprueba en un entorno sin Python que las firmas funcionan y que no falta ninguna DLL.
+- Si tiene la 2.0.0 o la 2.0.1 en un equipo sin Python, esta vez no podrá actualizar desde el programa: descargue zCommander_v2.0.2.zip de https://github.com/hxebolax/zCommander/releases/latest y extráigalo encima de su carpeta de zCommander. Su configuración, en data\config, se conserva. Desde la 2.0.2, las actualizaciones vuelven a funcionar desde el menú Ayuda.
+
 ## Versión 2.0.1 - 2026-11-09
 
 Corrige el foco al volver de los diálogos, añade dos ayudas para las marcas, le deja elegir de dónde se buscan las actualizaciones y permite conectar las nubes sin crear claves. Todo lo demás sigue igual que en la 2.0.0.

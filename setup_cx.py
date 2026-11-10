@@ -41,6 +41,7 @@ import re
 import shutil
 import subprocess
 import sys
+import sysconfig
 from pathlib import Path
 
 from cx_Freeze import Executable, setup
@@ -99,7 +100,9 @@ DLL_NO_LIBRES = ("SAAPI32.dll", "dolapi.dll", "PCTKUSR.dll", "PCTKUSR64.dll", "Z
 	"nvdaControllerClient32.dll")
 SUMAS_SERIE = RAIZ / "app" / "plugins" / "serie_sumas.py"
 # Lo que el gancho de pywin32 de cx_Freeze copia aunque no se use (Pythonwin con Scintilla, isapi): se borra al terminar.
-NO_DISTRIBUIR = ("lib/pythonwin", "lib/isapi", "lib/PyISAPI_loader.dll", "lib/scintilla.dll")
+# lib/win32com/axdebug: depurador de Active Scripting de pywin32; no se usa y su axdebug.pyd necesita una
+# axscript.pyd de otra carpeta (2.0.2, tools/dependencias_pe.py).
+NO_DISTRIBUIR = ("lib/pythonwin", "lib/isapi", "lib/PyISAPI_loader.dll", "lib/scintilla.dll", "lib/win32com/axdebug")
 
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -195,6 +198,31 @@ def biblioteca_estandar() -> list[str]:
 		except (ImportError, ValueError):
 			continue
 	return resultado
+
+
+def python3t_compatible(base: Path | None = None) -> Path | None:
+	"""La ``python3t.dll`` que sirve a este intérprete, o ``None`` si cx_Freeze ya copia la buena.
+
+	Las extensiones «abi3t» (``cryptography`` 50) importan ``python3t.dll``. La de la raíz de
+	Python reenvía a ``python315t.dll`` (el intérprete sin GIL), que no va en la compilación:
+	en un equipo sin Python, ``cryptography`` no carga y no se pueden verificar las firmas de
+	las actualizaciones (fallo de la 2.0.0 y la 2.0.1). Un Python con GIL trae en
+	``abi3t-compat`` otra que reenvía a ``python315.dll``: esa es la que debe ir.
+	"""
+	if sysconfig.get_config_var("Py_GIL_DISABLED"):
+		return None
+	compatible = Path(base or sys.base_prefix) / "abi3t-compat" / "python3t.dll"
+	return compatible if compatible.is_file() else None
+
+
+def poner_python3t_compatible(destino: Path, base: Path | None = None) -> bool:
+	"""Sustituye ``destino/python3t.dll`` por la compatible con este intérprete; ``True`` si la cambió."""
+	compatible = python3t_compatible(base)
+	actual = destino / "python3t.dll"
+	if compatible is None or not actual.is_file():
+		return False
+	shutil.copy2(compatible, actual)
+	return True
 
 
 def borrar_dll_no_libres(destino: Path) -> list[str]:
@@ -350,7 +378,14 @@ if __name__ == "__main__":
 				print(f"Quitado {borrado} (no se usa ni se distribuye)")
 			for borrada in borrar_dll_no_libres(DESTINO):
 				print(f"Quitada la DLL no libre {borrada}")
-			problemas_finales = comprobar_licencias_compilacion(DESTINO)
+			if poner_python3t_compatible(DESTINO):
+				print("python3t.dll sustituida por la compatible (abi3t-compat): reenvía a python315.dll")
+			from tools import dependencias_pe
+
+			sin_resolver = dependencias_pe.problemas(DESTINO)
+			for linea in sin_resolver:
+				print(f"ERROR: {linea}")
+			problemas_finales = comprobar_licencias_compilacion(DESTINO) or bool(sin_resolver)
 	finally:
 		SUMAS_SERIE.unlink(missing_ok=True)
 	if problemas_finales:

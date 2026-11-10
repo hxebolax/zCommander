@@ -197,6 +197,28 @@ def _probar_componente(opciones: argparse.Namespace) -> int:
 	return int(codigo)
 
 
+#: Código de salida de ``--comprobar-arranque`` cuando ``cryptography`` no funciona.
+CODIGO_SIN_FIRMAS = 5
+
+
+def _comprobar_firmas() -> bool:
+	"""``cryptography`` carga y firma y verifica con Ed25519 (actualizaciones, complementos y copias cifradas).
+
+	En la 2.0.0 y la 2.0.1 compiladas, ``cryptography`` no cargaba en un equipo sin Python
+	(faltaba la ``python3t.dll`` compatible) y no se podía verificar ninguna actualización.
+	"""
+	try:
+		from cryptography.hazmat.primitives.asymmetric import ed25519
+
+		clave = ed25519.Ed25519PrivateKey.generate()
+		clave.public_key().verify(clave.sign(b"zCommander"), b"zCommander")
+	except Exception:  # noqa: BLE001 - cualquier fallo (DLL que falta, versión rota) invalida las firmas
+		log.exception("cryptography no funciona: no se podrían verificar las firmas de las actualizaciones")
+		return False
+	log.info("Firmas Ed25519 disponibles (cryptography carga y verifica).")
+	return True
+
+
 def _comprobar_arranque(opciones: argparse.Namespace) -> int:
 	"""``--comprobar-arranque`` con su secuencia propia (precisión 8 de la ronda 4).
 
@@ -244,6 +266,8 @@ def _comprobar_arranque(opciones: argparse.Namespace) -> int:
 			from app.plugins import prueba
 
 			codigo = int(prueba.comprobar_complemento(Path(opciones.complemento_prueba)))
+		if not _comprobar_firmas() and codigo == 0:
+			codigo = CODIGO_SIN_FIRMAS
 		log.info("Arranque completado (comprobación).")
 		wx.CallAfter(ventana.Close, True)
 		aplicacion.MainLoop()

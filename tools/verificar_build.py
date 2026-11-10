@@ -168,6 +168,13 @@ def comprobar_dll(carpeta: Path) -> list[str]:
 	return problemas
 
 
+def comprobar_dependencias(carpeta: Path) -> list[str]:
+	"""Cada DLL que importan o a la que reenvían los ``.exe``, ``.dll`` y ``.pyd`` va dentro o es de Windows (2.0.2)."""
+	from tools import dependencias_pe
+
+	return dependencias_pe.problemas(carpeta)
+
+
 def leer_sumas_congeladas(carpeta: Path) -> dict[str, dict[str, str]] | None:
 	"""``SUMAS`` de ``app/plugins/serie_sumas`` tal como quedó congelado en la compilación (``.pyc`` o ``library.zip``)."""
 	codigo = None
@@ -290,7 +297,10 @@ def comprobar_arranque(carpeta: Path) -> list[str]:
 	"""
 	datos = carpeta / "data"
 	previas = {p.name for p in datos.iterdir()} if datos.is_dir() else set()
-	entorno = {k: v for k, v in os.environ.items() if k != "APP_DATA_DIR"}
+	from tools.dependencias_pe import entorno_limpio
+
+	# PATH sin Python, como en el equipo de quien lo descarga: así se nota una DLL que falte.
+	entorno = {k: v for k, v in entorno_limpio().items() if k != "APP_DATA_DIR"}
 	problemas = []
 	try:
 		resultado = subprocess.run([str(carpeta / "ZCommander.exe"), "--comprobar-arranque"], env=entorno,  # noqa: S603
@@ -315,6 +325,7 @@ def verificar(carpeta: Path = COMPILACION, *, arranque: bool = False, biblioteca
 	problemas += comprobar_data(carpeta)
 	problemas += comprobar_nvda(carpeta)
 	problemas += comprobar_dll(carpeta)
+	problemas += comprobar_dependencias(carpeta)
 	problemas += comprobar_plugins(carpeta, setup)
 	if biblioteca:
 		problemas += comprobar_biblioteca_estandar(carpeta, setup)

@@ -2,7 +2,7 @@
 
 zCommander es un gestor de archivos de doble panel para Windows, clon accesible de Norton Commander. Está pensado sobre todo para personas ciegas que usan NVDA, JAWS o Narrador, desde las que empiezan hasta las avanzadas, y también para personas con baja visión y para quien prefiere el teclado.
 
-Versión 2.0.1, del 9 de noviembre de 2026. Está escrito en Python 3.15 con wxPython y es portable: todo lo que guarda va en la carpeta data, junto al programa.
+Versión 2.0.2, del 10 de noviembre de 2026. Está escrito en Python 3.15 con wxPython y es portable: todo lo que guarda va en la carpeta data, junto al programa.
 
 La 2.0 añade complementos (con 27 de serie), un sistema de sonidos, actualizaciones de la aplicación y de sus componentes, copias de seguridad de la configuración, RAR y muchos más comprimidos, la raíz «Red», macros y personalización avanzada, y un complemento para NVDA.
 
@@ -25,7 +25,7 @@ Los componentes de terceros tienen sus licencias en data\docs\licencias, una car
 
 ## Usar la versión portable
 
-1. Extraiga zCommander_v2.0.1.zip en una carpeta donde tenga permiso de escritura (Documentos, una memoria USB). No en Archivos de programa.
+1. Extraiga zCommander_v2.0.2.zip en una carpeta donde tenga permiso de escritura (Documentos, una memoria USB). No en Archivos de programa.
 2. Entre en la carpeta zCommander que hay dentro y ejecute ZCommander.exe.
 3. La primera vez se abre el asistente de primer arranque, que le ayuda a elegir perfil (Novato, Intermedio o Avanzado).
 

@@ -141,8 +141,11 @@ def comprobar_arranque(raiz: Path, build: Path) -> None:
 	exe = build / EJECUTABLE
 	if not exe.is_file():
 		raise ErrorPublicar(f"No existe {exe}. Compile primero: python setup_cx.py build")
+	from tools.dependencias_pe import entorno_limpio
+
 	orden = [str(exe), "--comprobar-arranque", "--complemento-prueba", str(raiz / COMPLEMENTO_PRUEBA)]
-	resultado = subprocess.run(orden, timeout=300, check=False)  # noqa: S603 - nuestro ejecutable
+	# Con un PATH sin Python, como en el equipo de quien lo descarga (fallo de cryptography de la 2.0.1).
+	resultado = subprocess.run(orden, timeout=300, check=False, env=entorno_limpio())  # noqa: S603 - nuestro ejecutable
 	# La comprobación deja registros: se borran para no publicarlos.
 	_quitar_personales(build)
 	if resultado.returncode != 0:
